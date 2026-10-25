@@ -15,7 +15,7 @@ Nhiệm vụ và tiến độ: tab **Issues** (lọc theo milestone `Sprint N` h
 
 | Module | Họ tên | MSSV | GitHub |
 |---|---|---|---|
-| A | | | |
+| A | Nguyễn Phúc Hậu | | |
 | B | | | |
 | C | | | |
 | D | | | |

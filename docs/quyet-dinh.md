@@ -4,13 +4,23 @@ Những chỗ đề chưa rõ. Cột "Đề xuất" là **chưa chốt** — c�
 
 | # | Câu hỏi | Đề xuất | Module bị ảnh hưởng | Chốt |
 |---|---|---|---|---|
-| 1 | Gói tập dùng được ở chi nhánh nào? | Mọi chi nhánh (đề: "bất kỳ chi nhánh nào") | C | |
-| 2 | Gói PT 1-1 chọn HLV thế nào? | Chọn HLV từng lần đặt lịch; mỗi buổi hoàn thành trừ 1 buổi còn lại của gói | B, C | |
-| 3 | Một hóa đơn gồm gì? | Cả gói và sản phẩm, qua `ChiTietHoaDon` | B, D | |
-| 4 | Hạng tính theo "năm" hay "12 tháng qua"? (đề tự mâu thuẫn) | 12 tháng gần nhất; ngưỡng nhóm tự đặt, ví dụ Gold ≥ 20 triệu, Platinum ≥ 50 triệu | B | |
-| 5 | Điểm Loyalty tích trên gì? | Tổng tiền sau giảm giá, 1 điểm / 100.000đ; chưa làm đổi điểm | B, D | |
-| 6 | Hoa hồng PT tính thế nào? | Mức cố định mỗi buổi hoàn thành, theo chi nhánh PT thuộc về **tại ngày buổi tập** | A, C | |
-| 7 | Điểm đánh giá HLV, sức chứa phòng tập (đề có nhắc ở truy vấn nhưng không mô tả) | Bổ sung `DanhGiaHLV` và cột sức chứa cho chi nhánh | A, C, D | |
+| 1 | Gói tập dùng được ở chi nhánh nào? | Mọi chi nhánh (đề: "bất kỳ chi nhánh nào") | C | Mọi chi nhánh |
+| 2 | Gói PT 1-1 chọn HLV thế nào? | Chọn HLV từng lần đặt lịch; mỗi buổi hoàn thành trừ 1 buổi còn lại của gói | B, C | Theo đề xuất |
+| 3 | Một hóa đơn gồm gì? | Cả gói và sản phẩm, qua `ChiTietHoaDon` | B, D | Theo đề xuất |
+| 4 | Hạng tính theo "năm" hay "12 tháng qua"? (đề tự mâu thuẫn) | 12 tháng gần nhất; ngưỡng nhóm tự đặt, ví dụ Gold ≥ 20 triệu, Platinum ≥ 50 triệu | B | 12 tháng gần nhất; Silver < 20tr ≤ Gold < 50tr ≤ Platinum (**cần hỏi cô xác nhận**) |
+| 5 | Điểm Loyalty tích trên gì? | Tổng tiền sau giảm giá, 1 điểm / 100.000đ; chưa làm đổi điểm | B, D | Theo đề xuất |
+| 6 | Hoa hồng PT tính thế nào? | Mức cố định mỗi buổi hoàn thành, theo chi nhánh PT thuộc về **tại ngày buổi tập** | A, C | Theo đề xuất; mức hoa hồng lưu theo chi nhánh (`ChiNhanh.HoaHongMoiBuoi`) |
+| 7 | Điểm đánh giá HLV, sức chứa phòng tập (đề có nhắc ở truy vấn nhưng không mô tả) | Bổ sung `DanhGiaHLV` và cột sức chứa cho chi nhánh | A, C, D | Thêm `DanhGiaHLV`, `ChiNhanh.SucChua` |
+| 8 | Gói nào được quét vào cổng? Vé Spa lẻ và gói PT có được không? | Gói Gym/Yoga và PT còn hiệu lực được vào; vé Spa dùng một lần | B, C | |
+| 9 | Gói bắt đầu tính khi nào? Có bảo lưu không? | Tính từ ngày mua; chưa làm bảo lưu | B, C | |
+| 10 | Khung giờ PT cố định hay tùy ý? | Cố định, mỗi buổi 1 tiếng | C | |
+| 11 | Hủy lịch PT trước bao lâu? Không đến thì sao? | Hủy trước 2 tiếng; hủy muộn hoặc không đến vẫn trừ buổi, không tính hoa hồng | A, B, C | |
+| 12 | PT có được dạy ở chi nhánh khác không? | Không, chỉ dạy tại chi nhánh đang công tác | A, C | |
+| 13 | Ngày công tác dùng kiểu gì? `ChucVu` lưu ở đâu? | `DATE`, khoảng `[NgayBatDau, NgayKetThuc)`; `ChucVu` lưu ở cả hai: `NhanVien` là chức vụ hiện tại, `LichSuCongTac` là chức vụ tại giai đoạn đó, đổi chức vụ thì cập nhật cả hai trong cùng giao dịch | A, C | `ChucVu`: lưu ở cả hai. Kiểu ngày: chưa chốt |
+| 14 | Sửa mức `HoaHongMoiBuoi` thì các tháng cũ có đổi không? | Không; lưu sẵn số tiền khi chốt kỳ | A | |
+| 15 | Tỷ lệ lấp đầy tính thế nào? Quên quét ra thì sao? | Số người đang trong phòng ÷ `SucChua` theo chi nhánh; quên quét ra thì tự đóng lượt lúc đóng cửa | C, D | |
+| 16 | Hủy/hoàn tiền hóa đơn thì điểm và hạng ra sao? Khi nào hạ hạng? | Hoàn tiền thì trừ lại điểm và chi tiêu; xét hạ hạng bằng job hằng đêm | B, D | |
+| 17 | Web hay WinForm, ngôn ngữ, phiên bản SQL Server, ai làm module nào? | Nhóm tự chọn | Cả nhóm | |
 
 # Bảng giả định số liệu chung
 

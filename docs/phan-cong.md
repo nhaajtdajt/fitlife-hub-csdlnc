@@ -73,7 +73,7 @@ Mỗi quan hệ: khóa – tập phụ thuộc hàm – dạng chuẩn (chuẩn 
 
 | Người | Ví dụ mẫu | Phụ thuộc |
 |---|---|---|
-| **A** | `LichSuCongTac(MaLS, MaNV, MaCN, NgayBatDau, NgayKetThuc, ChucVu)`. Khóa `MaLS`. PTH: `MaLS → MaNV, MaCN, NgayBatDau, NgayKetThuc, ChucVu`. BCNF. Chức vụ đổi theo lần điều chuyển nên nằm ở đây, không ở `NhanVien`. | **Không phụ thuộc ai** (cần ERD tổng đã ghép từ bước 1.2) |
+| **A** | `LichSuCongTac(MaLS, MaNV, MaCN, NgayBatDau, NgayKetThuc, ChucVu)`. Khóa `MaLS`. PTH: `MaLS → MaNV, MaCN, NgayBatDau, NgayKetThuc, ChucVu`. BCNF. `ChucVu` ở đây là chức vụ **tại giai đoạn đó**; `NhanVien.ChucVu` là chức vụ **hiện tại**. | **Không phụ thuộc ai** (cần ERD tổng đã ghép từ bước 1.2) |
 | **B** | `GoiHoiVien(MaGHV, MaHV, MaGoi, NgayBatDau, NgayHetHan, SoBuoiConLai)`. PTH: `MaGHV → …`. Nếu thêm cột `TenGoi` thì có `MaGoi → TenGoi` mà `MaGoi` không khóa → phải bỏ (nằm ở `GoiDichVu`). | **Không phụ thuộc ai** |
 | **C** | `CheckIn(MaCI, MaHV, MaCN, TGVao, TGRa, MaThietBi)`. PTH: `MaCI → …`. BCNF. Nếu thiết bị có thông tin riêng (vị trí cửa) thì tách bảng `ThietBi`. | **Không phụ thuộc ai** — `MaHV` là khóa ngoại sang bảng của B, chỉ cần tên cột đã chốt, **không chờ B xong lược đồ** |
 | **D** | `ChiTietHoaDon(MaHD, STT, LoaiDong, MaGoi, MaSP, SoLuong, DonGia, ThanhTien)`. `ThanhTien = SoLuong × DonGia` là thuộc tính dẫn xuất — nhóm quyết định giữ (nhanh) hay bỏ (không dư thừa) và ghi lý do. | **Không phụ thuộc ai** |
@@ -89,7 +89,7 @@ Ví dụ mẫu (C): bối cảnh `LichHenPT`; nội dung: không tồn tại 2 l
 
 | Người | Ràng buộc nên có (tối thiểu 3 cái mỗi người) | Phụ thuộc |
 |---|---|---|
-| **A** | Khoảng công tác không chồng; nhân viên điều chuyển phải có chi nhánh đến khác chi nhánh đi | **Không phụ thuộc ai** |
+| **A** | Khoảng công tác không chồng; nhân viên điều chuyển phải có chi nhánh đến khác chi nhánh đi; `NhanVien.ChucVu` bằng `ChucVu` của giai đoạn công tác hiện hành | **Không phụ thuộc ai** |
 | **B** | Ngày hết hạn đúng; số buổi còn lại ≥ 0; hạng phải khớp tổng chi tiêu | **Không phụ thuộc ai** |
 | **C** | Không trùng lịch PT; check-in chỉ hợp lệ khi hội viên có gói còn hạn (ràng buộc **liên module** — bảng `GoiHoiVien` của B cũng có trong bảng tầm ảnh hưởng) | Ràng buộc liên module: ghi thêm bảng của B bị ảnh hưởng, **báo B ở điểm ghép**, không cần chờ |
 | **D** | Tổng tiền đúng; tồn kho không âm; hóa đơn phải có ít nhất 1 dòng | **Không phụ thuộc ai** |

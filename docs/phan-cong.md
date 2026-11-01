@@ -25,7 +25,7 @@ Mỗi dòng: bảng của ai, những cột nào được **công bố** cho ng�
 | `NhanVien` (A) | `MaNV`, `ChucVu` | C (kiểm tra là PT), D (người lập hóa đơn) |
 | `LichSuCongTac` (A) | `MaNV`, `MaCN`, `NgayBatDau`, `NgayKetThuc` | C (PT thuộc chi nhánh nào tại ngày dạy) |
 | `HoiVien` (B) | `MaHV` | C, D |
-| `GoiDichVu` (B) | `MaGoi`, `LoaiGoi`, `Gia` | D (dòng hóa đơn là gói) |
+| `GoiDichVu` (B) | `MaGoi`, `LoaiGoi`, `Gia` | C (loại gói khi đặt PT), D (dòng hóa đơn là gói) |
 | `GoiHoiVien` (B) | `MaHV`, `MaGoi`, `NgayHetHan`, `SoBuoiConLai` | C (gói còn hạn / còn buổi) |
 | `LichHenPT` (C) | `MaNV`, `MaCN`, `NgayGio`, `TrangThai` | A (đếm buổi dạy tính hoa hồng) |
 | `CheckIn` (C) | `MaHV`, `MaCN`, `TGVao`, `TGRa` | D (tỷ lệ lấp đầy) |

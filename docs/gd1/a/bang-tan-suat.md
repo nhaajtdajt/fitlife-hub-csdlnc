@@ -24,7 +24,7 @@ Mức độ tần suất không đồng nghĩa với chi phí truy vấn. Một 
 | A-F06 | Điều chuyển nhân viên | Đóng giai đoạn công tác cũ và mở giai đoạn mới | Đọc + ghi | ~10 lần/tháng | Giờ hành chính | Thấp | Tuy ít xảy ra nhưng yêu cầu giao dịch nguyên tử và chống chồng khoảng thời gian |
 | A-F07 | Tra cứu lịch sử công tác | Xem toàn bộ lịch sử hoặc tìm chi nhánh của nhân viên tại một thời điểm | Đọc | ~100 lần/ngày | Giờ hành chính; tăng khi chốt lương | Trung bình | Điều kiện chính gồm `MaNV` và khoảng thời gian công tác |
 | A-F08 | Cập nhật lương cơ bản | Điều chỉnh lương theo quyết định nhân sự | Đọc + ghi | ~1 lần/tháng/nhân viên được điều chỉnh | Kỳ xét lương | Thấp | Nếu cần tính hồi cứu phải có lịch sử lương, không chỉ ghi đè lương hiện tại |
-| A-F09 | Xác định chi nhánh của PT tại ngày dạy | Đối chiếu từng buổi PT với lịch sử công tác | Đọc | Phụ thuộc số buổi PT hoàn thành | Khi xem buổi dạy hoặc tính hoa hồng | Chưa đủ dữ liệu để xếp hạng | Là truy vấn lõi của vấn đề số 5; số lần có thể tăng mạnh khi xử lý cả kỳ |
+| A-F09 | Xác định chi nhánh của PT tại ngày dạy | Đối chiếu từng buổi PT với lịch sử công tác | Đọc | ~2.600 lần/ngày | Khi xem buổi dạy; dồn khối lượng khi tính hoa hồng cuối tháng | Cao | Theo giả định chung: khoảng 9.000 hội viên dùng PT, trung bình 2 buổi/tuần, tương đương khoảng 2.600 buổi diễn ra mỗi ngày. Đây là truy vấn lõi của vấn đề số 5; khi xử lý cả kỳ, hệ thống phải đối chiếu khoảng 78.000 buổi/tháng |
 | A-F10 | Tính hoa hồng PT theo chi nhánh | Tổng hợp lịch hẹn hoàn thành, xác định nơi công tác tại ngày dạy và tính tiền | Đọc nặng | 1 lần/tháng/chi nhánh, tương đương 12 lần/tháng toàn hệ thống | Cuối tháng | Thấp về tần suất, nặng về chi phí | Phải trả kết quả đúng khi PT chuyển chi nhánh giữa tháng |
 | A-F11 | Xem/xuất bảng hoa hồng | Xem chi tiết số buổi, chi nhánh và thành tiền của từng PT | Đọc | ~2 lần/tháng/chi nhánh | Cuối và đầu tháng kế tiếp | Thấp | Nên cho phép truy vết từ dòng tổng hợp về các buổi dạy nguồn |
 
@@ -34,5 +34,5 @@ Mức độ tần suất không đồng nghĩa với chi phí truy vấn. Một 
 2. `LichSuCongTac` là dữ liệu quan trọng nhất của Module A. Các thao tác ghi không nhiều nhưng phải bảo đảm tuyệt đối không có khoảng công tác chồng lấn.
 3. Tra cứu theo nhân viên và thời điểm là mẫu truy vấn chính. Đây là cơ sở để phân tích chỉ mục ở giai đoạn vật lý, nhưng chưa chốt chỉ mục tại giai đoạn này.
 4. Tính hoa hồng có tần suất thấp nhưng phải đọc nhiều lịch hẹn và thực hiện đối chiếu thời gian cho từng buổi, vì vậy có khả năng trở thành truy vấn nặng.
-5. Tần suất A-F09 chưa thể định lượng từ đề. Nhóm cần bổ sung giả định về số PT, số buổi mỗi PT mỗi ngày và tỷ lệ lịch hoàn thành trước khi lập ma trận truy vấn ở giai đoạn 2.
+5. A-F09 được ước lượng khoảng 2.600 lần/ngày theo bộ giả định chung của nhóm: khoảng 9.000 hội viên có gói PT và trung bình 2 buổi/tuần. Khi tính hoa hồng cuối tháng, các lượt đối chiếu được xử lý tập trung với quy mô khoảng 78.000 buổi/tháng, nên đây là truy vấn có tần suất cao và có thể tạo tải đọc lớn dù A-F10 chỉ chạy 12 lần/tháng.
 6. Các con số ước lượng phải được cả nhóm rà soát để nhất quán với 8–10 kịch bản sử dụng chung của hệ thống.

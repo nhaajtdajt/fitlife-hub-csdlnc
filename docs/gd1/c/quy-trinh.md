@@ -36,7 +36,7 @@ Số lượng lấy từ [bảng giả định chung](../../quyet-dinh.md#bảng
 9. Trạng thái lịch chỉ gồm `Đã đặt`, `Đã hoàn thành`, `Hủy`. Chuyển trạng thái phải theo luồng cho phép; lịch hoàn thành hoặc đã hủy không được đưa lại về `Đã đặt`.
 10. Hủy trước ít nhất hai giờ không mất buổi. Hủy muộn hoặc không đến làm mất một buổi nhưng không được tính hoa hồng; `DaTruBuoi` ngăn trừ lặp. Quy tắc này đang chờ nhóm chốt.
 11. Chỉ lịch `Đã hoàn thành` mới được đánh giá và tính hoa hồng. Mỗi lịch có tối đa một đánh giá, điểm nguyên từ 1 đến 5.
-12. Lượt quên quét ra được tự đóng tại giờ đóng cửa của chi nhánh và đánh dấu `TuDong`; không được sửa làm mất dấu dữ liệu gốc. Quy tắc này đang chờ nhóm chốt.
+12. Lượt quên quét ra được tự đóng tại giờ đóng cửa của chi nhánh. Khi đó `TGRa` có giá trị nhưng `SoHieuCuaRa` rỗng, nhờ vậy phân biệt được với lượt quét ra tại cửa mà không cần thêm thuộc tính nguồn đóng. Quy tắc này đang chờ nhóm chốt.
 
 ## QT-C1. Quét vào và xác thực quyền vào cổng
 

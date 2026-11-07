@@ -1,2 +1,6 @@
 # Ghi chú ôn vấn đáp cá nhân, không đưa lên repository
 /docs/gd1/a/ON-TAP-VAN-DAP.md
+
+# Tài liệu giải thích và DDL ERD tổng hợp dùng cá nhân
+/docs/gd1/giai-thich-he-thong.md
+/docs/gd1/erd-import-postgresql.sql

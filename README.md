@@ -8,6 +8,7 @@ Thiết kế và cài đặt CSDL cho chuỗi phòng tập FitLife Hub (12 chi n
 | [required.md](required.md) | Yêu cầu chi tiết từng giai đoạn |
 | [docs/phan-cong.md](docs/phan-cong.md) | Phân công module, khóa chung, sprint, quy ước repo |
 | [docs/quyet-dinh.md](docs/quyet-dinh.md) | Các chỗ đề chưa rõ và quyết định của nhóm |
+| [docs/gd1/c/](docs/gd1/c/README.md) | Tài liệu giai đoạn 1 của Module C: check-in, lịch hẹn PT và đánh giá HLV |
 | [docs/gd1/d/](docs/gd1/d/README.md) | Tài liệu giai đoạn 1 của Module D: sản phẩm, hóa đơn và báo cáo |
 
 Nhiệm vụ và tiến độ: tab **Issues** (lọc theo milestone `Sprint N` hoặc label `module-X`).

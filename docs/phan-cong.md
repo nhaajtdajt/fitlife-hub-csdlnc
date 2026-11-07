@@ -12,7 +12,7 @@ Mẫu nội dung từng phần theo [required.md](../required.md).
 |---|---|---|---|
 | **A** | Chi nhánh & Nhân sự | `ChiNhanh`, dịch vụ/tiện ích, `NhanVien`, `LichSuCongTac`, hoa hồng PT | 5 — lịch sử điều chuyển & hoa hồng |
 | **B** | Hội viên, Gói & Thân thiết | `HoiVien`, `GoiDichVu`, `GoiHoiVien` (gói đã mua), hạng, lịch sử điểm | 4 — tính lại hạng quá tải |
-| **C** | Check-in & Lịch hẹn PT | `CheckIn`, cửa/thiết bị, `LichHenPT`, `DanhGiaHLV` | 1 — nghẽn check-in (< 50ms); 2 — overbooking PT |
+| **C** | Check-in & Lịch hẹn PT | `CheckIn`, `CuaKiemSoat`, `LichHenPT`, `DanhGiaHLV` | 1 — nghẽn check-in (< 50ms); 2 — overbooking PT |
 | **D** | Sản phẩm, Hóa đơn & Báo cáo | `SanPham`, tồn kho theo chi nhánh, `HoaDon`, `ChiTietHoaDon` | 3 — log lớn & báo cáo chậm |
 
 ## Hợp đồng giao diện (chốt ở bước 1.0)
@@ -75,7 +75,7 @@ Mỗi quan hệ: khóa – tập phụ thuộc hàm – dạng chuẩn (chuẩn 
 |---|---|---|
 | **A** | `LichSuCongTac(MaLS, MaNV, MaCN, NgayBatDau, NgayKetThuc, ChucVu)`. Khóa `MaLS`. PTH: `MaLS → MaNV, MaCN, NgayBatDau, NgayKetThuc, ChucVu`. BCNF. `ChucVu` ở đây là chức vụ **tại giai đoạn đó**; `NhanVien.ChucVu` là chức vụ **hiện tại**. | **Không phụ thuộc ai** (cần ERD tổng đã ghép từ bước 1.2) |
 | **B** | `GoiHoiVien(MaGHV, MaHV, MaGoi, NgayBatDau, NgayHetHan, SoBuoiConLai)`. PTH: `MaGHV → …`. Nếu thêm cột `TenGoi` thì có `MaGoi → TenGoi` mà `MaGoi` không khóa → phải bỏ (nằm ở `GoiDichVu`). | **Không phụ thuộc ai** |
-| **C** | `CheckIn(MaCI, MaHV, MaCN, TGVao, TGRa, MaThietBi)`. PTH: `MaCI → …`. BCNF. Nếu thiết bị có thông tin riêng (vị trí cửa) thì tách bảng `ThietBi`. | **Không phụ thuộc ai** — `MaHV` là khóa ngoại sang bảng của B, chỉ cần tên cột đã chốt, **không chờ B xong lược đồ** |
+| **C** | `CuaKiemSoat(MaCN, SoHieuCua, ChucNang, DangHoatDong)` có khóa ghép `(MaCN, SoHieuCua)`. `CheckIn(MaCheckIn, MaHV, MaCN, SoHieuCuaVao, SoHieuCuaRa, TGVao, TGRa)` tham chiếu cửa bằng khóa ghép. Mỗi quan hệ đạt BCNF. | **Không phụ thuộc ai** — `MaHV` là khóa ngoại sang bảng của B, `MaCN` lấy từ A; chỉ cần các cột đã chốt, **không chờ A/B xong lược đồ** |
 | **D** | `ChiTietHoaDon(MaHD, STT, LoaiDong, MaGoi, MaSP, SoLuong, DonGia, ThanhTien)`. `ThanhTien = SoLuong × DonGia` là thuộc tính dẫn xuất — nhóm quyết định giữ (nhanh) hay bỏ (không dư thừa) và ghi lý do. | **Không phụ thuộc ai** |
 
 ## Bước 1.4 — Ràng buộc mức logic

@@ -84,5 +84,5 @@ Ký hiệu `+`: thao tác có thể làm vi phạm; `−`: thao tác không th�
 
 - A xác nhận `ChiNhanh.MaCN`, `ChiNhanh.SucChua`, `NhanVien.MaNV` đúng kiểu/khóa; D dùng `MaCN` trên hóa đơn để xác định doanh thu và kho.
 - B xác nhận thủ tục `sp_CapNhatDiemHang(@MaHV, @MaHD, @TongTien, @NgayLap)` và giao dịch tạo `GoiHoiVien` cùng quy trình thanh toán gói. Chữ ký đã có trong hợp đồng; chi tiết rollback liên module cần thống nhất trước triển khai.
-- C xác nhận các cột nguồn check-in và cách đóng lượt quên quét ra để báo cáo lấp đầy nhất quán.
+- C xác nhận các cột nguồn check-in và quy tắc tự ghi `TGRa` cho lượt quên quét ra để báo cáo lấp đầy nhất quán.
 

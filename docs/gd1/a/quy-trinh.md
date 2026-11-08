@@ -25,21 +25,21 @@ Kết quả này được dùng để tổng hợp số buổi dạy và tính h
 | `ChiNhanh` | Mã, tên, địa chỉ, số điện thoại, giờ mở/đóng cửa, sức chứa |
 | Dịch vụ/tiện ích chi nhánh | Các dịch vụ hoặc tiện ích hiện có tại mỗi chi nhánh |
 | `NhanVien` | Mã, họ tên, số điện thoại, chức vụ, lương cơ bản và trạng thái làm việc |
-| `LichSuCongTac` | Nhân viên, chi nhánh, thời điểm bắt đầu và thời điểm kết thúc |
+| `LichSuCongTac` | Nhân viên, chi nhánh, chức vụ tại giai đoạn, ngày bắt đầu và ngày kết thúc (tính cả hai ngày) |
 | `LichHenPT` | PT, chi nhánh dạy, ngày giờ và trạng thái buổi hẹn; dữ liệu do Module C quản lý |
 
 ## 3. Quy tắc nghiệp vụ chung
 
 1. Mỗi nhân viên có một mã duy nhất.
-2. Mỗi bản ghi lịch sử công tác phải có thời điểm bắt đầu; thời điểm kết thúc có thể để trống khi giai đoạn công tác còn hiệu lực.
-3. Thời điểm kết thúc phải lớn hơn thời điểm bắt đầu.
+2. Mỗi bản ghi lịch sử công tác lưu NgayBatDau, NgayKetThuc kiểu DATE và ChucVu tại giai đoạn đó. NgayKetThuc rỗng nghĩa là chưa xác định ngày kết thúc, không đồng nghĩa bản ghi đang có hiệu lực hôm nay.
+3. NgayKetThuc nếu có phải >= NgayBatDau; cho phép giai đoạn kéo dài một ngày. Khi đổi vị trí, NgayBatDau mới = NgayKetThuc cũ + 1 ngày.
 4. Các khoảng công tác của cùng một nhân viên không được chồng lấn.
 5. Tại một thời điểm, một nhân viên chỉ thuộc tối đa một chi nhánh.
 6. Không được điều chuyển nhân viên sang chính chi nhánh đang công tác.
 7. Không xóa vật lý lịch sử công tác đã được dùng để đối chiếu lịch dạy hoặc tính hoa hồng.
 8. Chỉ lịch hẹn PT có trạng thái `Đã hoàn thành` mới được tính hoa hồng.
 9. Mỗi buổi dạy được tính vào chi nhánh mà PT thuộc về tại thời điểm buổi dạy diễn ra. Nếu không tìm thấy hoặc tìm thấy nhiều hơn một giai đoạn công tác phù hợp, hệ thống phải báo dữ liệu bất thường thay vì tự tính.
-10. **Đề xuất:** biểu diễn giai đoạn công tác theo khoảng nửa mở `[NgayBatDau, NgayKetThuc)`. Bản ghi hiện tại có `NgayKetThuc` rỗng. Cách biểu diễn này giúp thời điểm kết thúc công tác cũ đồng thời là thời điểm bắt đầu công tác mới mà không bị chồng lấn.
+10. **Đã chốt:** khoảng công tác bao gồm cả hai ngày `[NgayBatDau, NgayKetThuc]`. Bấm đổi chức vụ/chi nhánh trong ngày D thì giai đoạn cũ kết thúc hết D, giai đoạn mới bắt đầu D+1 theo múi giờ Asia/Saigon. Không áp dụng giữa ngày hoặc hồi tố trong luồng này. Tìm giai đoạn hiện hành bằng ngày hôm nay nằm trong khoảng, không chỉ bằng NgayKetThuc rỗng.
 11. **Đề xuất:** hoa hồng là mức cố định cho mỗi buổi PT hoàn thành và được phân bổ theo chi nhánh tại ngày dạy. Công thức và mức tiền cụ thể phải được nhóm chốt trước khi thiết kế logic.
 
 ## 4. QT-A01 — Quản lý thông tin chi nhánh
@@ -58,13 +58,13 @@ Tạo mới và duy trì thông tin của 12 chi nhánh, bao gồm dịch vụ v
 1. Quản trị viên chọn tạo mới hoặc chỉnh sửa chi nhánh.
 2. Hệ thống yêu cầu nhập tên, địa chỉ, số điện thoại, giờ mở cửa, giờ đóng cửa và sức chứa.
 3. Người dùng chọn danh sách dịch vụ/tiện ích có tại chi nhánh.
-4. Hệ thống kiểm tra dữ liệu bắt buộc, định dạng và tính hợp lệ của giờ hoạt động.
+4. Hệ thống kiểm tra dữ liệu bắt buộc, SucChua là số nguyên dương và giờ mở < giờ đóng trong cùng ngày Asia/Saigon theo quy ước mô phỏng #15. SucChua chỉ phục vụ báo cáo, không giới hạn lượt vào. Giờ hoạt động/sức chứa cố định trong kỳ dữ liệu mô phỏng; thay đổi cấu hình không được dùng để diễn giải lại lịch sử đã báo cáo.
 5. Hệ thống lưu thay đổi và ghi nhận kết quả.
 
 ### Ngoại lệ
 
 - Trùng mã chi nhánh: từ chối tạo mới.
-- Giờ đóng cửa không hợp lệ so với giờ mở cửa: yêu cầu nhập lại.
+- Giờ đóng cửa không hợp lệ so với giờ mở cửa, hoặc sức chứa không phải số nguyên dương: yêu cầu nhập lại.
 - Chi nhánh đã có dữ liệu nhân viên, check-in, tồn kho hoặc hóa đơn: không cho xóa vật lý; chuyển sang trạng thái ngừng hoạt động nếu nhóm chọn hỗ trợ nghiệp vụ này.
 
 ### Kết quả
@@ -88,7 +88,7 @@ Tạo hồ sơ cho nhân viên mới và xác lập chi nhánh công tác ban đ
 1. Quản lý nhân sự nhập hồ sơ nhân viên, chức vụ, lương cơ bản, chi nhánh tiếp nhận và ngày bắt đầu.
 2. Hệ thống kiểm tra dữ liệu bắt buộc và tính duy nhất của mã nhân viên.
 3. Hệ thống tạo hồ sơ `NhanVien`.
-4. Hệ thống tạo bản ghi `LichSuCongTac` đầu tiên, có ngày bắt đầu và chưa có ngày kết thúc.
+4. Hệ thống tạo bản ghi `LichSuCongTac` đầu tiên, có ngày bắt đầu, chức vụ trùng hồ sơ và chưa có ngày kết thúc; hồ sơ và lịch sử cùng thành công hoặc cùng hoàn tác.
 5. Hệ thống thông báo tiếp nhận thành công.
 
 ### Ngoại lệ
@@ -109,31 +109,38 @@ Chuyển nhân viên sang chi nhánh khác mà vẫn bảo toàn lịch sử cô
 
 ### Điều kiện trước
 
-- Nhân viên đang làm việc và có đúng một bản ghi công tác hiện hành.
+- Nhân viên đang làm việc và có đúng một giai đoạn bao phủ ngày hôm nay.
 - Chi nhánh đích tồn tại, đang hoạt động và khác chi nhánh hiện tại.
-- Thời điểm hiệu lực điều chuyển phải sau thời điểm bắt đầu giai đoạn hiện hành.
+- Chưa có thay đổi vị trí đang chờ hiệu lực của nhân viên. Nếu đã có, từ chối yêu cầu tiếp theo và hiển thị thay đổi đang chờ; không ghi đè hoặc tạo hai giai đoạn cùng bắt đầu ngày mai.
 
 ### Luồng chính
 
-1. Quản lý chi nhánh gửi yêu cầu điều chuyển, gồm nhân viên, chi nhánh đích, thời điểm hiệu lực và lý do.
-2. Quản lý nhân sự kiểm tra và xác nhận yêu cầu.
-3. Hệ thống khóa dữ liệu công tác hiện hành của nhân viên trong thời gian xử lý.
-4. Hệ thống kiểm tra chi nhánh đích và kiểm tra khoảng thời gian mới không chồng với lịch sử đã có.
-5. Hệ thống cập nhật thời điểm kết thúc của giai đoạn công tác hiện hành bằng thời điểm hiệu lực điều chuyển.
-6. Hệ thống tạo giai đoạn công tác mới tại chi nhánh đích, bắt đầu đúng thời điểm hiệu lực và chưa có thời điểm kết thúc.
-7. Hệ thống hoàn tất đồng thời hai thay đổi và thông báo thành công.
+1. Người có quyền xác nhận nhân viên, chi nhánh đích và lý do; có thể đổi kèm chức vụ trong cùng yêu cầu. Nếu không đổi chức vụ, giữ chức vụ của giai đoạn hiện hành.
+2. Trong giao dịch, kiểm tra lại lịch sử và ngày hiện tại D theo Asia/Saigon. Ngày hiệu lực do hệ thống tính là D+1; hiển thị rõ ngày này khi thông báo kết quả.
+3. Kiểm tra lại quyền cập nhật, trạng thái nhân viên, chi nhánh đích và không có giai đoạn chờ. Dòng có NgayKetThuc rỗng nhưng bắt đầu ngày mai không được coi là hiện hành hôm nay.
+4. Trước khi ghi, đối chiếu các lịch PT theo mục Kiểm tra lịch PT dưới đây với lịch sử dự kiến sau thay đổi; có lịch không phù hợp thì từ chối toàn bộ yêu cầu. Nếu đều phù hợp, đặt NgayKetThuc của giai đoạn cũ = D. Tạo giai đoạn mới có NgayBatDau = D+1, NgayKetThuc rỗng, chi nhánh/chức vụ mới. Kiểm tra không chồng khoảng trên cả hai biên ngày.
+5. Ghi hai thay đổi trong cùng giao dịch. Giữ NhanVien.ChucVu và chi nhánh hiện tại (nếu lưu) theo giai đoạn của D; không đổi chúng sang vị trí ngày mai ngay khi bấm.
+6. Khi sang ngày mới, đồng bộ dữ liệu hiện tại theo QT-A04. Lịch sử là nguồn xác định vị trí tại từng ngày.
 
 ### Ngoại lệ
 
-- Chi nhánh đích trùng chi nhánh hiện tại: từ chối điều chuyển.
-- Thời điểm hiệu lực tạo ra khoảng chồng lấn hoặc khoảng thời gian không hợp lệ: từ chối thao tác.
-- Không có hoặc có nhiều bản ghi công tác hiện hành: dừng xử lý và yêu cầu sửa dữ liệu.
-- Một trong hai bước đóng bản ghi cũ hoặc mở bản ghi mới thất bại: hoàn tác toàn bộ giao dịch.
-- Có hai yêu cầu đồng thời cho cùng nhân viên: chỉ một giao dịch được hoàn tất; giao dịch còn lại phải đọc lại trạng thái mới.
+- Chi nhánh đích trùng hiện tại: không dùng luồng điều chuyển; đổi chức vụ trong cùng chi nhánh dùng QT-A04.
+- Thiếu/trùng giai đoạn hiện hành, khoảng không hợp lệ, hoặc đã có thay đổi đang chờ: từ chối và không ghi dữ liệu một phần.
+- Hai yêu cầu đồng thời: chỉ chấp nhận một yêu cầu; yêu cầu sau bị kiểm tra lại và bị từ chối nếu yêu cầu trước đã tạo giai đoạn chờ.
+- Bất kỳ bước ghi nào lỗi: hoàn tác cả việc kết thúc giai đoạn cũ và tạo giai đoạn mới.
 
 ### Kết quả
 
-Lịch sử cũ được giữ nguyên, giai đoạn mới được mở và tại mọi thời điểm nhân viên chỉ thuộc một chi nhánh.
+Ngày D vẫn thuộc vị trí cũ; từ D+1 thuộc vị trí mới. Ví dụ bấm đổi ngày 15/11 thì kết thúc vị trí cũ ngày 15/11, bắt đầu vị trí mới ngày 16/11. Chỉ tiếp nhận thay đổi khi không làm lịch PT chưa hủy mất điều kiện chức vụ/chi nhánh theo GD1-06.
+
+### Kiểm tra lịch PT trước khi đổi vị trí (GD1-06)
+
+- Gọi E là 00:00 ngày D+1 theo Asia/Saigon. Kiểm tra lại các lịch của nhân viên có TrangThai khác Hủy và thời điểm kết thúc > E. Bao gồm lịch bắt đầu trước E nhưng còn kéo dài sau E; lịch kết thúc đúng E không bị ảnh hưởng.
+- Đối chiếu từng lịch với lịch sử dự kiến sau thay đổi: toàn bộ khoảng buổi hẹn phải được một giai đoạn có ChucVu = PT và MaCN trùng lịch bao phủ. Với thiết kế khung một giờ hiện tại, thời điểm kết thúc = NgayGio + 1 giờ; QD10 đã chốt bắt đầu vào giờ tròn (phút/giây bằng 0).
+- Có lịch không phù hợp: trả MaLichHen, ngày giờ, chi nhánh và lý do (không còn là PT, sai chi nhánh hoặc không được một giai đoạn bao phủ). Không ghi ngày kết thúc cũ, giai đoạn mới hoặc chức vụ hiện tại. Các lịch và số buổi gói giữ nguyên.
+- Không tự hủy/đổi HLV/đổi chi nhánh lịch. Người dùng giải quyết lịch bằng luồng đã được phép rồi gửi lại yêu cầu đổi vị trí; hủy vẫn phải trước ít nhất hai giờ. Nếu không thể hủy hợp lệ thì giữ vị trí cũ để thực hiện lịch, chưa cho đổi. Ngày hiệu lực tính lại từ ngày gửi lại thành công.
+- Sau khi đã chấp nhận đổi vị trí, C phải xét cả giai đoạn chờ khi đặt lịch: từ ngày hiệu lực chỉ nhận lịch phù hợp vị trí mới. Buổi đã dạy trước E giữ chức vụ/chi nhánh lịch sử để tính hoa hồng.
+- Chống xung đột: đặt lịch thành công trước thì đổi vị trí phải thấy lịch đó; đổi vị trí thành công trước thì đặt lịch phải phù hợp giai đoạn mới. Không dùng kết quả kiểm tra cũ để ghi nhận; lỗi phải giữ nguyên dữ liệu.
 
 ## 7. QT-A04 — Cập nhật thông tin nhân viên và lương cơ bản
 
@@ -145,9 +152,14 @@ Duy trì thông tin liên hệ, chức vụ và lương cơ bản của nhân vi
 
 1. Quản lý nhân sự tìm nhân viên theo mã, tên hoặc chi nhánh hiện tại.
 2. Hệ thống hiển thị hồ sơ và nơi công tác hiện hành.
-3. Người dùng chỉnh sửa các thông tin được phép.
-4. Hệ thống kiểm tra định dạng và quyền cập nhật.
-5. Hệ thống lưu thay đổi.
+3. Với thông tin liên hệ/lương, kiểm tra định dạng và quyền cập nhật rồi lưu theo luồng hiện có.
+4. Với đổi chức vụ, dùng cùng giao dịch đóng/mở giai đoạn như QT-A03, giữ chi nhánh nếu không điều chuyển: kết thúc giai đoạn cũ hết hôm nay, tạo giai đoạn mới từ ngày mai. Không sửa ChucVu của bản ghi lịch sử cũ, không ghi đè chức vụ hiện tại ngay lúc gửi yêu cầu. Từ chối yêu cầu không đổi chức vụ/chi nhánh, đã có thay đổi đang chờ, hoặc còn lịch PT không phù hợp theo kiểm tra ở QT-A03.
+
+### Đồng bộ vị trí hiện tại khi sang ngày mới
+
+- Khi sang ngày mới theo Asia/Saigon, đồng bộ chức vụ/chi nhánh hiện tại từ giai đoạn bao phủ ngày đó. Các giá trị liên quan phải được cập nhật cùng nhau; chạy lại không tạo thêm lịch sử.
+- Nếu tác vụ chậm/lỗi, thao tác cần vị trí hiện tại phải đọc giai đoạn theo ngày và đồng bộ trước khi dùng giá trị lưu trên NhanVien; không dùng chức vụ cũ để phân quyền hoặc chọn PT. Tác vụ chạy bù theo ngày thực tế, không kích hoạt mù giai đoạn của ngày đã bỏ lỡ.
+- Không tìm được hoặc tìm thấy nhiều giai đoạn: báo dữ liệu bất thường, không tự chọn. Trong ngày đã gửi yêu cầu, giai đoạn có ngày kết thúc hôm nay vẫn là hiện hành.
 
 ### Ngoại lệ
 
@@ -168,9 +180,9 @@ Tra cứu nhân viên thuộc chi nhánh nào tại một thời điểm hoặc 
 ### Luồng chính
 
 1. Người dùng nhập nhân viên và có thể nhập thêm thời điểm cần tra cứu.
-2. Nếu có thời điểm, hệ thống tìm giai đoạn thỏa `NgayBatDau <= ThoiDiem` và `NgayKetThuc` rỗng hoặc `ThoiDiem < NgayKetThuc`.
+2. Nếu có thời điểm, đổi sang ngày địa phương Asia/Saigon rồi tìm giai đoạn thỏa `NgayBatDau <= NgayTraCuu AND (NgayKetThuc IS NULL OR NgayTraCuu <= NgayKetThuc)`. Dùng cùng điều kiện cho hiện tại và lịch sử.
 3. Nếu không có thời điểm, hệ thống trả về toàn bộ lịch sử theo thứ tự thời gian.
-4. Hệ thống hiển thị chi nhánh, thời gian bắt đầu, thời gian kết thúc và thông tin liên quan.
+4. Hệ thống hiển thị chi nhánh, chức vụ tại giai đoạn, ngày bắt đầu, ngày kết thúc và thông tin liên quan.
 
 ### Ngoại lệ
 
@@ -198,12 +210,12 @@ Tổng hợp đúng số buổi dạy của PT cho từng chi nhánh trong một
 
 1. Kế toán hoặc quản lý chọn kỳ tính, có thể lọc theo PT hoặc chi nhánh.
 2. Hệ thống lấy các lịch hẹn PT có trạng thái `Đã hoàn thành` và thời gian nằm trong kỳ.
-3. Với mỗi buổi dạy, hệ thống đối chiếu thời gian dạy với `LichSuCongTac` để tìm chi nhánh mà PT thuộc về tại thời điểm đó.
+3. Với mỗi buổi dạy, lấy ngày địa phương của NgayGio, tìm đúng giai đoạn LichSuCongTac bao gồm ngày đó và có ChucVu = PT. Dùng chức vụ/chi nhánh lịch sử, không dùng chức vụ hiện tại để loại buổi dạy cũ.
 4. Hệ thống kiểm tra chi nhánh của lịch hẹn với kết quả đối chiếu theo quy tắc mà nhóm đã chốt.
 5. Hệ thống nhóm các buổi hợp lệ theo PT và chi nhánh.
-6. Hệ thống tính hoa hồng theo công thức đã cấu hình.
+6. Kỳ chưa chốt xem trước theo mức HoaHongMoiBuoi của chi nhánh; kỳ đã chốt đọc mức và danh sách buổi đã lưu, không tính lại theo mức hiện tại.
 7. Hệ thống hiển thị tổng số buổi, mức hoa hồng, thành tiền và các dòng dữ liệu bất thường.
-8. Người có thẩm quyền xác nhận hoặc xuất bảng tổng hợp.
+8. Khi xác nhận chốt tháng đã kết thúc, lưu KyHoaHong và toàn bộ ChiTietHoaHong cùng giao dịch theo [thiết kế logic](thiet-ke-logic.md). Chặn nếu còn lịch Đã đặt hoặc dữ liệu lịch sử sai. Khóa kỳ và đọc lại nguồn/mức trước khi ghi; chạy lại trả kỳ đã có. Xem/xuất kỳ cũ chỉ dùng dữ liệu chốt.
 
 ### Ngoại lệ
 
@@ -211,7 +223,7 @@ Tổng hợp đúng số buổi dạy của PT cho từng chi nhánh trong một
 - Buổi dạy khớp nhiều giai đoạn: báo lỗi chồng lấn lịch sử công tác.
 - Chi nhánh ghi trên lịch hẹn khác chi nhánh xác định từ lịch sử công tác: đánh dấu sai lệch để nhóm xác định quy tắc xử lý.
 - Lịch hẹn chưa hoàn thành hoặc đã hủy: không tính hoa hồng.
-- Kỳ đã chốt: không cho tính lại nếu chưa thực hiện quy trình mở khóa hoặc điều chỉnh.
+- Kỳ đã chốt: không mở lại, sửa, xóa hoặc bổ sung buổi trong phạm vi hiện tại. Sửa mức hiện tại không đổi kỳ cũ. C không được bổ sung hoặc sửa nguồn làm thay đổi kỳ đã chốt, kể cả khi cập nhật đồng thời với chốt kỳ.
 
 ### Kết quả
 
@@ -222,5 +234,5 @@ Bảng hoa hồng phản ánh số buổi dạy theo đúng chi nhánh mà PT th
 | Module | Dữ liệu Module A cung cấp | Dữ liệu Module A sử dụng |
 |---|---|---|
 | B — Hội viên và gói | `ChiNhanh`, `NhanVien` khi phát sinh khóa ngoại liên quan | Không bắt buộc cho các quy trình chính của A |
-| C — Check-in và lịch PT | `ChiNhanh(MaCN, SucChua)`, `NhanVien(MaNV, ChucVu)`, `LichSuCongTac(MaNV, MaCN, NgayBatDau, NgayKetThuc)` | `LichHenPT(MaNV, MaCN, NgayGio, TrangThai)` để tính hoa hồng |
+| C — Check-in và lịch PT | `ChiNhanh(MaCN, SucChua, GioMoCua, GioDongCua)`, `NhanVien(MaNV, ChucVu)`, `LichSuCongTac(MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc)` | `LichHenPT(MaLichHen, MaNV, MaCN, NgayGio, TrangThai)` để tính hoa hồng và chặn đổi vị trí làm lịch không hợp lệ |
 | D — Hóa đơn và báo cáo | `ChiNhanh` và `NhanVien` cho tồn kho, hóa đơn và báo cáo | Không bắt buộc cho quy trình điều chuyển |

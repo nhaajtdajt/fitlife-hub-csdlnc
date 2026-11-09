@@ -1,0 +1,163 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="luoc-do-quan-he-a-current" name="Lược đồ quan hệ A hiện hành">
+    <mxGraphModel dx="2300" dy="1500" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2200" pageHeight="1400" background="#F8FAFC" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="tieu-de" parent="1" style="text;html=1;rounded=1;arcSize=12;strokeColor=#0F172A;fillColor=#0F172A;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Helvetica;fontColor=#FFFFFF;fontSize=17;fontStyle=1;spacingLeft=20;shadow=1;" value="LƯỢC ĐỒ QUAN HỆ — PHÂN HỆ A: CHI NHÁNH &amp; NHÂN SỰ" vertex="1">
+          <mxGeometry height="52" width="2100" x="50" y="22" as="geometry" />
+        </mxCell>
+        <mxCell id="chu-thich" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Helvetica;fontColor=#475569;fontSize=11;" value="&lt;b&gt;PK&lt;/b&gt; Khóa chính · &lt;b&gt;FK&lt;/b&gt; Khóa ngoại · &lt;b&gt;AK&lt;/b&gt; Khóa ứng viên · Chỉ bảy quan hệ nền xanh thuộc sở hữu Phân hệ A" vertex="1">
+          <mxGeometry height="28" width="1000" x="60" y="82" as="geometry" />
+        </mxCell>
+
+        <mxCell id="chi-nhanh" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=34;fillColor=#DBEAFE;swimlaneFillColor=#FFFFFF;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;strokeColor=#2563EB;strokeWidth=1.5;fontColor=#1E3A8A;fontFamily=Helvetica;fontSize=12;align=center;verticalAlign=middle;shadow=1;rounded=1;arcSize=8;" value="&lt;b&gt;CHI_NHANH&lt;/b&gt;" vertex="1">
+          <mxGeometry height="290" width="300" x="50" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="chi-nhanh-attributes" parent="chi-nhanh" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=0;spacingRight=0;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=12;fontColor=#334155;spacingTop=0;" value="&lt;table style=&quot;width:100%;border-collapse:collapse;font-size:12px;&quot;&gt;&lt;tr style=&quot;background:#F8FAFC;color:#64748B;font-weight:bold;&quot;&gt;&lt;td style=&quot;width:64px;padding:6px 8px;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;&quot;&gt;Khóa&lt;/td&gt;&lt;td style=&quot;padding:6px 10px;border-bottom:1px solid #E2E8F0;&quot;&gt;Thuộc tính&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#2563EB&quot;&gt;&lt;b&gt;PK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;&lt;b&gt;MaCN&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;TenCN&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;DiaChi&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;SDT&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;GioMoCua&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;GioDongCua&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;SucChua&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;HoaHongMoiBuoi&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;TrangThai&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="256" width="300" y="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="tien-ich" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=34;fillColor=#F3E8FF;swimlaneFillColor=#FFFFFF;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;strokeColor=#9333EA;strokeWidth=1.5;fontColor=#6B21A8;fontFamily=Helvetica;fontSize=12;align=center;verticalAlign=middle;shadow=1;rounded=1;arcSize=8;" value="&lt;b&gt;TIEN_ICH&lt;/b&gt;" vertex="1">
+          <mxGeometry height="200" width="290" x="1220" y="185" as="geometry" />
+        </mxCell>
+        <mxCell id="tien-ich-attributes" parent="tien-ich" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=0;spacingRight=0;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=12;fontColor=#334155;spacingTop=0;" value="&lt;table style=&quot;width:100%;border-collapse:collapse;font-size:12px;&quot;&gt;&lt;tr style=&quot;background:#F8FAFC;color:#64748B;font-weight:bold;&quot;&gt;&lt;td style=&quot;width:64px;padding:6px 8px;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;&quot;&gt;Khóa&lt;/td&gt;&lt;td style=&quot;padding:6px 10px;border-bottom:1px solid #E2E8F0;&quot;&gt;Thuộc tính&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#9333EA&quot;&gt;&lt;b&gt;PK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;&lt;b&gt;MaTI&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;TenTI&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;Loai&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;MoTa&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;TrangThai&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="166" width="290" y="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cung-cap-tien-ich" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=34;fillColor=#FCE7F3;swimlaneFillColor=#FFFFFF;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;strokeColor=#DB2777;strokeWidth=1.5;fontColor=#9D174D;fontFamily=Helvetica;fontSize=12;align=center;verticalAlign=middle;shadow=1;rounded=1;arcSize=8;" value="&lt;b&gt;CUNG_CAP_TIEN_ICH&lt;/b&gt;" vertex="1">
+          <mxGeometry height="220" width="410" x="580" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="cung-cap-tien-ich-attributes" parent="cung-cap-tien-ich" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=0;spacingRight=0;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=12;fontColor=#334155;spacingTop=0;" value="&lt;table style=&quot;width:100%;border-collapse:collapse;font-size:12px;&quot;&gt;&lt;tr style=&quot;background:#F8FAFC;color:#64748B;font-weight:bold;&quot;&gt;&lt;td style=&quot;width:86px;padding:6px 8px;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;&quot;&gt;Khóa&lt;/td&gt;&lt;td style=&quot;padding:6px 10px;border-bottom:1px solid #E2E8F0;&quot;&gt;Thuộc tính&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#DB2777&quot;&gt;&lt;b&gt;PK, FK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;MaCN → CHI_NHANH.MaCN&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#DB2777&quot;&gt;&lt;b&gt;PK, FK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;MaTI → TIEN_ICH.MaTI&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#DB2777&quot;&gt;&lt;b&gt;PK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;NgayBatDau&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;NgayKetThuc&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="186" width="410" y="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="nhan-vien" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=34;fillColor=#DCFCE7;swimlaneFillColor=#FFFFFF;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;strokeColor=#16A34A;strokeWidth=1.5;fontColor=#166534;fontFamily=Helvetica;fontSize=12;align=center;verticalAlign=middle;shadow=1;rounded=1;arcSize=8;" value="&lt;b&gt;NHAN_VIEN&lt;/b&gt;" vertex="1">
+          <mxGeometry height="220" width="300" x="50" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="nhan-vien-attributes" parent="nhan-vien" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=0;spacingRight=0;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=12;fontColor=#334155;spacingTop=0;" value="&lt;table style=&quot;width:100%;border-collapse:collapse;font-size:12px;&quot;&gt;&lt;tr style=&quot;background:#F8FAFC;color:#64748B;font-weight:bold;&quot;&gt;&lt;td style=&quot;width:64px;padding:6px 8px;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;&quot;&gt;Khóa&lt;/td&gt;&lt;td style=&quot;padding:6px 10px;border-bottom:1px solid #E2E8F0;&quot;&gt;Thuộc tính&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#16A34A&quot;&gt;&lt;b&gt;PK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;&lt;b&gt;MaNV&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;HoTen&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;SDT&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;ChucVu&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;LuongCoBan&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;TrangThaiLamViec&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="186" width="300" y="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lich-su-cong-tac" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=34;fillColor=#FEF3C7;swimlaneFillColor=#FFFFFF;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;strokeColor=#D97706;strokeWidth=1.5;fontColor=#92400E;fontFamily=Helvetica;fontSize=12;align=center;verticalAlign=middle;shadow=1;rounded=1;arcSize=8;" value="&lt;b&gt;LICH_SU_CONG_TAC&lt;/b&gt;" vertex="1">
+          <mxGeometry height="290" width="390" x="580" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="lich-su-cong-tac-attributes" parent="lich-su-cong-tac" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=0;spacingRight=0;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=12;fontColor=#334155;spacingTop=0;" value="&lt;table style=&quot;width:100%;border-collapse:collapse;font-size:12px;&quot;&gt;&lt;tr style=&quot;background:#F8FAFC;color:#64748B;font-weight:bold;&quot;&gt;&lt;td style=&quot;width:78px;padding:6px 8px;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;&quot;&gt;Khóa&lt;/td&gt;&lt;td style=&quot;padding:6px 10px;border-bottom:1px solid #E2E8F0;&quot;&gt;Thuộc tính&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#D97706&quot;&gt;&lt;b&gt;PK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;&lt;b&gt;MaLS&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:4px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#D97706&quot;&gt;&lt;b&gt;FK, AK¹&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;MaNV → NHAN_VIEN.MaNV&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:4px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#D97706&quot;&gt;&lt;b&gt;FK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;MaCN → CHI_NHANH.MaCN&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;ChucVu&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:4px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#D97706&quot;&gt;&lt;b&gt;AK¹&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;NgayBatDau&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;NgayKetThuc&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;LyDo&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="256" width="390" y="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ky-hoa-hong" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=34;fillColor=#E0F2FE;swimlaneFillColor=#FFFFFF;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;strokeColor=#0284C7;strokeWidth=1.5;fontColor=#075985;fontFamily=Helvetica;fontSize=12;align=center;verticalAlign=middle;shadow=1;rounded=1;arcSize=8;" value="&lt;b&gt;KY_HOA_HONG&lt;/b&gt;" vertex="1">
+          <mxGeometry height="235" width="400" x="1170" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="ky-hoa-hong-attributes" parent="ky-hoa-hong" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=0;spacingRight=0;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=12;fontColor=#334155;spacingTop=0;" value="&lt;table style=&quot;width:100%;border-collapse:collapse;font-size:12px;&quot;&gt;&lt;tr style=&quot;background:#F8FAFC;color:#64748B;font-weight:bold;&quot;&gt;&lt;td style=&quot;width:86px;padding:6px 8px;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;&quot;&gt;Khóa&lt;/td&gt;&lt;td style=&quot;padding:6px 10px;border-bottom:1px solid #E2E8F0;&quot;&gt;Thuộc tính&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#0284C7&quot;&gt;&lt;b&gt;PK, FK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;MaCN → CHI_NHANH.MaCN&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#0284C7&quot;&gt;&lt;b&gt;PK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;Thang&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;MucHoaHongChot&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;ThoiDiemChot&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:4px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#0284C7&quot;&gt;&lt;b&gt;FK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;MaNVChot → NHAN_VIEN.MaNV&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="201" width="400" y="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="chi-tiet-hoa-hong" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=34;fillColor=#FFEDD5;swimlaneFillColor=#FFFFFF;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;strokeColor=#EA580C;strokeWidth=1.5;fontColor=#9A3412;fontFamily=Helvetica;fontSize=12;align=center;verticalAlign=middle;shadow=1;rounded=1;arcSize=8;" value="&lt;b&gt;CHI_TIET_HOA_HONG&lt;/b&gt;" vertex="1">
+          <mxGeometry height="195" width="400" x="1680" y="595" as="geometry" />
+        </mxCell>
+        <mxCell id="chi-tiet-hoa-hong-attributes" parent="chi-tiet-hoa-hong" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=0;spacingRight=0;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=12;fontColor=#334155;spacingTop=0;" value="&lt;table style=&quot;width:100%;border-collapse:collapse;font-size:12px;&quot;&gt;&lt;tr style=&quot;background:#F8FAFC;color:#64748B;font-weight:bold;&quot;&gt;&lt;td style=&quot;width:92px;padding:6px 8px;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;&quot;&gt;Khóa&lt;/td&gt;&lt;td style=&quot;padding:6px 10px;border-bottom:1px solid #E2E8F0;&quot;&gt;Thuộc tính&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#EA580C&quot;&gt;&lt;b&gt;PK, FK&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;MaLichHen → C.LICH_HEN_PT.MaLichHen&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#EA580C&quot;&gt;&lt;b&gt;FK²&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;MaCN&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;font color=&quot;#EA580C&quot;&gt;&lt;b&gt;FK²&lt;/b&gt;&lt;/font&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;Thang&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="161" width="400" y="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="lich-hen-pt" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=34;fillColor=#E2E8F0;swimlaneFillColor=#FFFFFF;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;strokeColor=#64748B;strokeWidth=1.5;dashed=1;dashPattern=8 4;fontColor=#334155;fontFamily=Helvetica;fontSize=12;align=center;verticalAlign=middle;shadow=1;rounded=1;arcSize=8;" value="&lt;b&gt;C.LICH_HEN_PT&lt;/b&gt;" vertex="1">
+          <mxGeometry height="230" width="310" x="1680" y="930" as="geometry" />
+        </mxCell>
+        <mxCell id="lich-hen-pt-attributes" parent="lich-hen-pt" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=0;spacingRight=0;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Helvetica;fontSize=12;fontColor=#475569;spacingTop=0;" value="&lt;table style=&quot;width:100%;border-collapse:collapse;font-size:12px;&quot;&gt;&lt;tr style=&quot;background:#F8FAFC;color:#64748B;font-weight:bold;&quot;&gt;&lt;td style=&quot;width:64px;padding:6px 8px;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;&quot;&gt;Khóa&lt;/td&gt;&lt;td style=&quot;padding:6px 10px;border-bottom:1px solid #E2E8F0;&quot;&gt;Thuộc tính công bố&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:5px 8px;border-right:1px solid #E2E8F0;&quot;&gt;&lt;b&gt;PK&lt;/b&gt;&lt;/td&gt;&lt;td style=&quot;padding:5px 10px;&quot;&gt;MaLichHen&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;MaNV&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;MaCN&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;NgayGio&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;border-right:1px solid #E2E8F0;&quot;&gt;&lt;/td&gt;&lt;td style=&quot;padding:4px 10px;&quot;&gt;TrangThai&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" vertex="1">
+          <mxGeometry height="196" width="310" y="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rel-cn-cung-cap" edge="1" parent="1" source="chi-nhanh" target="cung-cap-tien-ich" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;exitX=1;exitY=0.34;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;strokeColor=#DB2777;strokeWidth=2;fontColor=#9D174D;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#FFFFFF;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;" value="có lịch cung cấp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-cn-cung-src" parent="rel-cn-cung-cap" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#9D174D;labelBackgroundColor=#FFFFFF;" value="1">
+          <mxGeometry x="-0.9" y="-14" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-cn-cung-dst" parent="rel-cn-cung-cap" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#9D174D;labelBackgroundColor=#FFFFFF;" value="0..N">
+          <mxGeometry x="0.88" y="-14" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rel-ti-cung-cap" edge="1" parent="1" source="tien-ich" target="cung-cap-tien-ich" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;exitX=0;exitY=0.34;exitDx=0;exitDy=0;entryX=1;entryY=0.35;entryDx=0;entryDy=0;strokeColor=#DB2777;strokeWidth=2;fontColor=#9D174D;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#FFFFFF;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;" value="được cung cấp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-ti-cung-src" parent="rel-ti-cung-cap" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#9D174D;labelBackgroundColor=#FFFFFF;" value="1">
+          <mxGeometry x="-0.9" y="-14" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-ti-cung-dst" parent="rel-ti-cung-cap" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#9D174D;labelBackgroundColor=#FFFFFF;" value="0..N">
+          <mxGeometry x="0.88" y="-14" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rel-cn-lich-su" edge="1" parent="1" source="chi-nhanh" target="lich-su-cong-tac" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;exitX=0.65;exitY=1;exitDx=0;exitDy=0;entryX=0.32;entryY=0;entryDx=0;entryDy=0;strokeColor=#D97706;strokeWidth=2;fontColor=#92400E;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#FFFFFF;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;" value="nơi công tác">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="245" y="500" /><mxPoint x="705" y="500" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="card-cn-ls-src" parent="rel-cn-lich-su" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#92400E;labelBackgroundColor=#FFFFFF;" value="1">
+          <mxGeometry x="-0.94" y="-14" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-cn-ls-dst" parent="rel-cn-lich-su" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#92400E;labelBackgroundColor=#FFFFFF;" value="0..N">
+          <mxGeometry x="0.92" y="-14" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rel-nv-lich-su" edge="1" parent="1" source="nhan-vien" target="lich-su-cong-tac" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#D97706;strokeWidth=2;fontColor=#92400E;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#FFFFFF;startArrow=ERmandOne;endArrow=ERoneToMany;startFill=0;endFill=0;" value="có lịch sử">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-nv-ls-src" parent="rel-nv-lich-su" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#92400E;labelBackgroundColor=#FFFFFF;" value="1">
+          <mxGeometry x="-0.9" y="-14" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-nv-ls-dst" parent="rel-nv-lich-su" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#92400E;labelBackgroundColor=#FFFFFF;" value="1..N">
+          <mxGeometry x="0.88" y="-14" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rel-cn-ky" edge="1" parent="1" source="chi-nhanh" target="ky-hoa-hong" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;exitX=1;exitY=0.9;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#0284C7;strokeWidth=2;fontColor=#075985;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#FFFFFF;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;" value="có kỳ hoa hồng">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="430" y="470" /><mxPoint x="1370" y="470" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="card-cn-ky-src" parent="rel-cn-ky" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#075985;labelBackgroundColor=#FFFFFF;" value="1">
+          <mxGeometry x="-0.95" y="-14" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-cn-ky-dst" parent="rel-cn-ky" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#075985;labelBackgroundColor=#FFFFFF;" value="0..N">
+          <mxGeometry x="0.93" y="-14" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rel-nv-ky" edge="1" parent="1" source="nhan-vien" target="ky-hoa-hong" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#0284C7;strokeWidth=2;fontColor=#075985;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#FFFFFF;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;" value="xác nhận chốt">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="200" y="910" /><mxPoint x="1370" y="910" /></Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="card-nv-ky-src" parent="rel-nv-ky" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#075985;labelBackgroundColor=#FFFFFF;" value="1">
+          <mxGeometry x="-0.95" y="-14" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-nv-ky-dst" parent="rel-nv-ky" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#075985;labelBackgroundColor=#FFFFFF;" value="0..N">
+          <mxGeometry x="0.93" y="-14" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rel-ky-chi-tiet" edge="1" parent="1" source="ky-hoa-hong" target="chi-tiet-hoa-hong" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#EA580C;strokeWidth=2;fontColor=#9A3412;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#FFFFFF;startArrow=ERmandOne;endArrow=ERzeroToMany;startFill=0;endFill=0;" value="gồm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-ky-ct-src" parent="rel-ky-chi-tiet" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#9A3412;labelBackgroundColor=#FFFFFF;" value="1">
+          <mxGeometry x="-0.88" y="-14" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-ky-ct-dst" parent="rel-ky-chi-tiet" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#9A3412;labelBackgroundColor=#FFFFFF;" value="0..N">
+          <mxGeometry x="0.86" y="-14" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rel-lich-chi-tiet" edge="1" parent="1" source="lich-hen-pt" target="chi-tiet-hoa-hong" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=1;exitX=0.65;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeColor=#64748B;strokeWidth=2;fontColor=#475569;fontFamily=Helvetica;fontSize=11;labelBackgroundColor=#FFFFFF;startArrow=ERmandOne;endArrow=ERzeroToOne;startFill=0;endFill=0;dashed=1;dashPattern=8 4;" value="được tính tối đa một lần">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-lh-ct-src" parent="rel-lich-chi-tiet" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#475569;labelBackgroundColor=#FFFFFF;" value="1">
+          <mxGeometry x="-0.88" y="-14" relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="card-lh-ct-dst" parent="rel-lich-chi-tiet" vertex="1" connectable="0" style="edgeLabel;html=1;resizable=0;align=center;verticalAlign=middle;fontStyle=1;fontColor=#475569;labelBackgroundColor=#FFFFFF;" value="0..1">
+          <mxGeometry x="0.84" y="-14" relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ghi-chu-khoa" parent="1" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#F1F5F9;strokeColor=#CBD5E1;strokeWidth=1;align=left;verticalAlign=top;spacing=14;fontFamily=Helvetica;fontColor=#334155;fontSize=11;shadow=1;" value="&lt;font color=&quot;#0F172A&quot;&gt;&lt;b&gt;KHÓA VÀ ÁNH XẠ&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;br&gt;• AK¹ = (MaNV, NgayBatDau).&lt;br&gt;• FK² = (MaCN, Thang) → KY_HOA_HONG.&lt;br&gt;• Phân cấp PT/Lễ tân/Quản lý/Bán hàng được ánh xạ bằng NHAN_VIEN.ChucVu; chức vụ quá khứ lưu tại LICH_SU_CONG_TAC.ChucVu.&lt;br&gt;• Bảy quan hệ A đạt BCNF theo các PTH đã công bố; không lưu số buổi hoặc thành tiền dẫn xuất trong kỳ." vertex="1">
+          <mxGeometry height="180" width="900" x="50" y="1030" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

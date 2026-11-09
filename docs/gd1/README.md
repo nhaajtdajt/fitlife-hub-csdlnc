@@ -12,7 +12,7 @@ Bản ghép A/B/C/D sau rà soát 17 mục. **Rà cuối phát hiện 8 nhóm vi
 | Bối cảnh, nội dung, tầm ảnh hưởng ràng buộc | Bảng T-R01–14 trong [thiết kế tổng](thiet-ke-tong.md), cùng các bảng nội module A/B/C/D |
 | Quyết định, giả định, giới hạn và dấu vết sửa lỗi | [Quyết định chung](../quyet-dinh.md), [sổ rà soát](theo-doi-ra-soat.md) |
 
-Dùng ERD tổng và các bản erd.md hiện hành; sơ đồ A drawio/C PNG cũ không đủ các cập nhật tích hợp. Không dùng bản vẽ cũ thay cho bản tổng khi nộp. Bản tổng thống nhất bảng cơ sở với quan hệ dẫn xuất vGoiHoiVien; không tạo bảng trùng theo module.
+Dùng ERD tổng và các bản `erd.md` hiện hành khi ghép báo cáo. Draw.io của A đã được đồng bộ với bảy quan hệ của module; PNG của C vẫn là bản lịch sử và không dùng thay ERD hiện hành. Bản tổng thống nhất bảng cơ sở với quan hệ dẫn xuất `vGoiHoiVien`; không tạo bảng trùng theo module.
 
 Kết luận chuẩn hóa: 19 quan hệ BCNF và HoiVien 2NF do giữ Hang phụ thuộc TongChiTieu12T; toàn lược đồ không được kết luận đạt 3NF/BCNF. Lịch PT đã chốt khung một giờ bắt đầu vào giờ tròn; trừ tại giờ hẹn, không phụ thuộc cổng.
 

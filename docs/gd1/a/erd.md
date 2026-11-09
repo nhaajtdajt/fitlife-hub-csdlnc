@@ -1,6 +1,6 @@
 # ERD A hiện hành sau GD1-10
 
-Sơ đồ quan hệ hiện hành dùng cùng [thiết kế logic](thiet-ke-logic.md). erd-a.drawio giữ bản quan niệm trước phần chốt kỳ; phân cấp nhân viên ánh xạ bằng ChucVu, quan hệ cung cấp có thời gian ánh xạ CungCapTienIch.
+Sơ đồ Mermaid hiện hành dùng cùng [thiết kế logic](thiet-ke-logic.md). [erd-a.drawio](erd-a.drawio) là bản vẽ quan niệm đã đồng bộ: có phân cấp nhân viên, quan hệ cung cấp tiện ích theo thời gian và phần kỳ hoa hồng; phân cấp nhân viên được ánh xạ bằng `ChucVu` ở mức logic.
 
 ```mermaid
 erDiagram

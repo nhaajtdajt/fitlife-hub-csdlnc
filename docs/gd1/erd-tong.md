@@ -6,7 +6,7 @@ Nguồn chỉnh sửa: [erd.drawio](erd.drawio). Ký hiệu giữ theo bản ERD
 
 - Hộp thực thể: tên ở tiêu đề, thuộc tính bên dưới; thuộc tính khóa **gạch chân**; thuộc tính trong `[ ]` là thuộc tính suy diễn (tính được từ dữ liệu khác, được lưu sẵn).
 - Bản số theo ký hiệu chân gà: `||` đúng một, `o<` không hoặc nhiều, `|<` một hoặc nhiều, `o|` không hoặc một. Tên mối kết hợp ghi trên đường nối.
-- Chuyên biệt hóa: vòng tròn `d` (các lớp con loại trừ nhau); nét đôi từ lớp cha = toàn phần (mỗi bộ của lớp cha thuộc một lớp con).
+- Chuyên biệt hóa: vòng tròn `d` (các lớp con loại trừ nhau); nét đôi từ lớp cha = toàn phần (mỗi bộ của lớp cha thuộc một lớp con). Chỉ dùng cho HẠNG MỤC CUNG CẤP; nhân viên không chuyên biệt hóa vì các chức vụ không có thuộc tính hay mối kết hợp riêng, chức vụ là một thuộc tính.
 - Mối kết hợp nhiều–nhiều có thuộc tính riêng: thuộc tính ghi trong hộp nét đứt nối vào đường (**chứa**: số lượng, đơn giá; **tồn kho**: số lượng tồn).
 
 ERD không vẽ khóa ngoại; khóa ngoại xuất hiện khi chuyển sang [lược đồ logic](luoc-do-logic.png).
@@ -17,12 +17,11 @@ ERD không vẽ khóa ngoại; khóa ngoại xuất hiện khi chuyển sang [l�
 |---|---|---|---|
 | áp dụng | CHI NHÁNH – LỊCH SỬ HOA HỒNG | 1 – 1..n | Mỗi chi nhánh có các khoảng mức hoa hồng theo thời gian |
 | thuộc / công tác | CHI NHÁNH – CÔNG TÁC – NHÂN VIÊN | 1 – 0..n; 1 – 1..n | Lịch sử công tác của nhân viên tại các chi nhánh |
-| (chuyên biệt hóa) | NHÂN VIÊN → HUẤN LUYỆN VIÊN (PT), LỄ TÂN, QUẢN LÝ CHI NHÁNH, NV BÁN HÀNG | d, toàn phần | Theo chức vụ, cố định từ lúc tiếp nhận; ở mức logic ánh xạ thành thuộc tính `ChucVu` |
 | đăng ký tại | CHI NHÁNH – HỘI VIÊN | 1 – 0..n | Chi nhánh nơi hội viên đăng ký |
 | (chuyên biệt hóa) | HẠNG MỤC CUNG CẤP → GÓI DỊCH VỤ, SẢN PHẨM | d, toàn phần | Gói và sản phẩm dùng chung danh mục; ở mức logic gộp một bảng, phân biệt bằng `LoaiHangMuc` |
 | sở hữu / thuộc loại | HỘI VIÊN – GÓI HỘI VIÊN – GÓI DỊCH VỤ | 1 – 0..n; 1 – 0..n | Mỗi lần mua gói là một gói hội viên, có mã QR riêng |
 | quét / diễn ra | GÓI HỘI VIÊN – CHECK IN – CHI NHÁNH | 1 – 0..n; 1 – 0..n | Hội viên quét mã gói để vào chi nhánh |
-| sử dụng / dạy / tổ chức | GÓI HỘI VIÊN, HUẤN LUYỆN VIÊN, CHI NHÁNH – LỊCH HẸN PT | 1 – 0..n mỗi phía | Buổi PT dùng một gói PT, do một PT dạy tại một chi nhánh |
+| sử dụng / dạy / tổ chức | GÓI HỘI VIÊN, NHÂN VIÊN, CHI NHÁNH – LỊCH HẸN PT | 1 – 0..n mỗi phía | Buổi PT dùng một gói PT, do một nhân viên có chức vụ PT dạy tại một chi nhánh (điều kiện chức vụ: ràng buộc 12) |
 | được đánh giá | LỊCH HẸN PT – ĐÁNH GIÁ | 1 – 0..1 | Mỗi buổi tối đa một đánh giá |
 | mua / lập / phát sinh tại | HỘI VIÊN, NHÂN VIÊN, CHI NHÁNH – HÓA ĐƠN | 1 – 0..n mỗi phía | Ai mua, ai lập, lập ở đâu |
 | chứa | HÓA ĐƠN – HẠNG MỤC CUNG CẤP | n – n (hóa đơn có 1..n hạng mục) | Thuộc tính: số lượng, đơn giá lúc bán |

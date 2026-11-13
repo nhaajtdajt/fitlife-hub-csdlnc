@@ -2,6 +2,7 @@
 
 | Mục | Nội dung |
 |---|---|
+| Người phụ trách | Phạm Anh Kiệt (24120197) |
 | Vấn đề của đề | Vấn đề 3 — báo cáo doanh thu và tỷ lệ lấp đầy chậm trên dữ liệu lớn |
 | Quan hệ sở hữu | HANG_MUC_CUNG_CAP, TON_KHO, HOA_DON, CHI_TIET_HOA_DON |
 

@@ -2,7 +2,7 @@
 
 | Mục | Nội dung |
 |---|---|
-| Người phụ trách | Nguyễn Phúc Hậu |
+| Người phụ trách | Nguyễn Phúc Hậu (23120252) |
 | Vấn đề của đề | Vấn đề 5 — xác định đúng chi nhánh và mức hoa hồng của PT tại ngày dạy |
 | Quan hệ sở hữu | CHI_NHANH, NHAN_VIEN, LICH_SU_CONG_TAC, HOA_HONG_CHI_NHANH |
 

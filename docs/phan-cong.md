@@ -8,14 +8,14 @@ Mẫu nội dung từng phần theo [required.md](../required.md).
 
 ## Module
 
-> Cập nhật 13/11/2026: thiết kế hiện hành theo [lược đồ logic](gd1/luoc-do-logic.png), [thiết kế tổng](gd1/thiet-ke-tong.md) và [quyết định](quyet-dinh.md). Các "ví dụ mẫu" ở từng bước bên dưới là gợi ý ban đầu, có thể dùng tên bảng/cột cũ.
+> Cập nhật 13/11/2026: toàn bộ bảng dưới đây dùng tên quan hệ và cột của [lược đồ logic](gd1/luoc-do-logic.png), [thiết kế tổng](gd1/thiet-ke-tong.md) và [quyết định](quyet-dinh.md) hiện hành.
 
-| Người | Module | Quan hệ sở hữu | Vấn đề của đề phải giải |
-|---|---|---|---|
-| **A** | Chi nhánh & Nhân sự | `CHI_NHANH`, `NHAN_VIEN`, `LICH_SU_CONG_TAC`, `HOA_HONG_CHI_NHANH` | 5 — lịch sử điều chuyển & hoa hồng |
-| **B** | Hội viên, Gói & Thân thiết | `HOI_VIEN`, `HANG_MUC_CUNG_CAP` (loại gói), `GOI_HOI_VIEN` | 4 — tính lại hạng quá tải |
-| **C** | Check-in & Lịch hẹn PT | `CHECK_IN`, `LICH_HEN_PT`, `DANH_GIA_HLV` | 1 — nghẽn check-in (< 50ms); 2 — overbooking PT |
-| **D** | Sản phẩm, Hóa đơn & Báo cáo | `HANG_MUC_CUNG_CAP` (loại Sản phẩm), `TON_KHO`, `HOA_DON`, `CHI_TIET_HOA_DON` | 3 — log lớn & báo cáo chậm |
+| Người | Thành viên | Module | Quan hệ sở hữu | Vấn đề của đề phải giải |
+|---|---|---|---|---|
+| **A** | Nguyễn Phúc Hậu (23120252) | Chi nhánh & Nhân sự | `CHI_NHANH`, `NHAN_VIEN`, `LICH_SU_CONG_TAC`, `HOA_HONG_CHI_NHANH` | 5 — lịch sử điều chuyển & hoa hồng |
+| **B** | Trương Nhật Đạt (23120231) | Hội viên, Gói & Thân thiết | `HOI_VIEN`, `HANG_MUC_CUNG_CAP` (loại gói), `GOI_HOI_VIEN` | 4 — tính lại hạng quá tải |
+| **C** | Ngô Gia An (23120205) | Check-in & Lịch hẹn PT | `CHECK_IN`, `LICH_HEN_PT`, `DANH_GIA_HLV` | 1 — nghẽn check-in (< 50ms); 2 — overbooking PT |
+| **D** | Phạm Anh Kiệt (24120197) | Sản phẩm, Hóa đơn & Báo cáo | `HANG_MUC_CUNG_CAP` (loại Sản phẩm), `TON_KHO`, `HOA_DON`, `CHI_TIET_HOA_DON` | 3 — log lớn & báo cáo chậm |
 
 ## Hợp đồng giao diện
 
@@ -42,31 +42,31 @@ Khóa chung: `MaCN`, `MaNV` (A) · `MaHV`, `MaHM`, `MaGHV` (B) · `MaHD` (D).
 # GIAI ĐOẠN 1 — Phân tích, mức quan niệm & logic
 
 ## Bước 1.0 — Chốt chung _(cả nhóm)_
-- Chốt hợp đồng giao diện ở trên và [7 quyết định](quyet-dinh.md) (hỏi cô chỗ chưa chắc, nhất là #4).
+- Chốt hợp đồng giao diện ở trên và [28 quyết định](quyet-dinh.md).
 - Chọn công cụ theo dõi tiến độ (GitHub Issues), web hay winform, ngôn ngữ, phiên bản SQL Server.
-- **Xong khi:** hợp đồng không còn ô trống, `quyet-dinh.md` có cột "Chốt" điền đủ.
+- **Xong khi:** hợp đồng không còn ô trống, `quyet-dinh.md` đã chốt đủ.
 
 ## Bước 1.1 — Mô tả quy trình & bảng tần suất
-Mỗi người viết cho module mình. Quy trình viết cụ thể hơn đề: ai làm, theo thứ tự nào, khi nào thất bại. Bảng tần suất: chức năng – mô tả – tần suất – mức độ. GD1-15 thống nhất toàn hệ thống: thấp <100 lần/ngày, trung bình 100–999, cao >=1.000; quy đổi tuần/tháng và tách số dòng/độ nặng theo quyet-dinh.md.
+Mỗi người viết cho module mình. Quy trình viết cụ thể hơn đề: ai làm, theo thứ tự nào, khi nào thất bại. Bảng tần suất: chức năng – mô tả – tần suất – mức độ. Quy ước chung toàn hệ thống (xem `quyet-dinh.md`): thấp <100 lần/ngày, trung bình 100–999, cao >=1.000; quy đổi tuần/tháng và tách số dòng/độ nặng.
 
 | Người | Ví dụ mẫu | Phụ thuộc |
 |---|---|---|
-| **A** | _Điều chuyển PT:_ quản lý chi nhánh gửi yêu cầu → hệ thống đóng bản ghi công tác cũ (ghi ngày kết thúc) và mở bản ghi mới. Trước khi ghi, chặn nếu còn lịch PT chưa hủy không phù hợp sau thay đổi; dùng dữ liệu C. ~10 lần/tháng, **thấp**. _Tính hoa hồng tháng:_ 1 lần/tháng/chi nhánh, **thấp** nhưng truy vấn nặng. | **Không phụ thuộc ai.** Buổi dạy PT lấy từ `LichHenPT` (cột đã chốt ở 1.0) |
-| **B** | _Mua gói:_ hội viên thanh toán → tạo `GoiHoiVien` với Gym/Yoga theo hạn nối sau gói cùng loại cuối cùng đã mua; ngày hết hạn = ngày bắt đầu cộng thời hạn tháng rồi trừ 1 ngày. ~200 lần/ngày, **trung bình**. _Xét hạng:_ hiện chạy mỗi khi có hóa đơn (hiện trạng của đề). | **Không phụ thuộc ai.** Hóa đơn lấy từ `HoaDon` (cột đã chốt) |
-| **C** | _Check-in:_ quét QR → kiểm tra gói còn hạn → ghi log vào/ra. Đề ghi >10.000 lượt quét đồng thời toàn hệ thống trong 17h–20h; không đồng nhất với số lượt cộng dồn. Tần suất minh họa và các đơn vị tải theo GD1-16 trong quyết định chung. _Đặt lịch PT:_ chọn PT, ngày giờ → tạo lịch "Đã đặt". | **Không phụ thuộc ai.** Thẻ/vé vào lấy từ `GoiHoiVien` (cột đã chốt); không dùng lịch/gói PT để mở cổng |
-| **D** | _Lập hóa đơn:_ nhân viên chọn gói/sản phẩm → tính tổng, giảm giá → chọn hình thức thanh toán. ~1.000 lần/ngày, **cao**. _Báo cáo doanh thu tháng:_ 1 lần/ngày/chi nhánh, **thấp** nhưng nặng. | **Không phụ thuộc ai** |
+| **A** | _Điều chuyển nhân viên:_ quản lý nhân sự gửi yêu cầu → hệ thống đóng giai đoạn công tác cũ (ghi ngày kết thúc) và mở giai đoạn mới. Trước khi ghi, chặn nếu còn lịch PT chưa hủy không phù hợp sau thay đổi; dùng dữ liệu C. ~10 lần/tháng, **thấp**. _Tính hoa hồng tháng:_ ~2 lần/tháng/chi nhánh, **thấp** nhưng truy vấn nặng. | **Không phụ thuộc ai.** Buổi dạy PT lấy từ `LICH_HEN_PT` (cột đã chốt ở 1.0) |
+| **B** | _Mua gói:_ hội viên thanh toán → tạo `GOI_HOI_VIEN` bắt đầu ngày mua; hết hạn = ngày mua + thời hạn tháng − 1 ngày (vé lượt: hạn 7 ngày). ~390 lần/ngày, **trung bình**. _Cộng điểm/hạng khi thanh toán:_ mỗi hóa đơn cộng một lần vào `HOI_VIEN`, ~1.400 lần/ngày, **cao** (vấn đề 4). | **Không phụ thuộc ai.** Hóa đơn lấy từ `HOA_DON` (cột đã chốt) |
+| **C** | _Check-in:_ quét mã QR của gói → kiểm tra gói còn hạn, không phải PT → ghi log vào/ra. Đề ghi >10.000 lượt quét đồng thời toàn hệ thống trong 17h–20h; không đồng nhất với số lượt cộng dồn. Tần suất minh họa và các đơn vị tải xem bảng giả định chung. _Đặt lịch PT:_ chọn PT, ngày giờ → tạo lịch Đã đặt. | **Không phụ thuộc ai.** Gói lấy từ `GOI_HOI_VIEN` (cột đã chốt); gói PT không mở cổng |
+| **D** | _Lập hóa đơn:_ nhân viên chọn gói/sản phẩm → tính tổng, giảm giá → chọn hình thức thanh toán. ~1.400 lần/ngày, **cao**. _Báo cáo doanh thu:_ 12 lần/ngày (mỗi chi nhánh một lần), **thấp** nhưng nặng. | **Không phụ thuộc ai** |
 
 **Xong khi:** mỗi người có `docs/gd1/<module>/quy-trinh.md` và bảng tần suất.
 
 ## Bước 1.2 — ERD module & ràng buộc quan niệm
-Thực thể của module khác vẽ thành hình chữ nhật chỉ có các cột trong hợp đồng (ví dụ C vẽ `HoiVien(MaHV)`, không vẽ các thuộc tính còn lại).
+Thực thể của module khác vẽ thành hình chữ nhật chỉ có các thuộc tính cần dùng (ví dụ C vẽ `GÓI HỘI VIÊN`, không vẽ các thuộc tính còn lại của hội viên).
 
 | Người | Ví dụ mẫu (ERD) | Ràng buộc ghi bằng chữ | Phụ thuộc |
 |---|---|---|---|
-| **A** | `NhanVien` 1–n `LichSuCongTac` n–1 `ChiNhanh`; `LichSuCongTac` có `NgayBatDau`, `NgayKetThuc` | Các khoảng công tác của cùng một nhân viên không được chồng nhau | **Không phụ thuộc ai** |
-| **B** | `HoiVien` 1–n `GoiHoiVien` n–1 `GoiDichVu`; `HoiVien` có hạng và điểm | Gym/Yoga theo hạn cùng loại không chồng khoảng; ngày hết hạn = ngày bắt đầu cộng thời hạn tháng rồi trừ 1 ngày | **Không phụ thuộc ai** |
-| **C** | `HoiVien` 1–n `CheckIn` n–1 `ChiNhanh`; `LichHenPT` nối `GoiHoiVien` (từ đó xác định `HoiVien`), PT (`NhanVien`), `ChiNhanh` | Một PT không có 2 lịch chưa hủy cùng ngày giờ; nhân viên trong lịch hẹn phải là PT | **Không phụ thuộc ai** |
-| **D** | `HoaDon` 1–n `ChiTietHoaDon` n–1 `GoiDichVu`/`SanPham`; `SanPham` n–n `ChiNhanh` qua tồn kho | Tổng tiền hóa đơn = tổng thành tiền trước giảm − giảm giá; doanh thu dòng sau phân bổ theo tỷ lệ và làm tròn GD1-08 cộng lại đúng TongTien | **Không phụ thuộc ai** |
+| **A** | `NHÂN VIÊN` 1–n `CÔNG TÁC` n–1 `CHI NHÁNH`; `CÔNG TÁC` có ngày bắt đầu, ngày kết thúc | Các khoảng công tác của cùng một nhân viên không được chồng nhau | **Không phụ thuộc ai** |
+| **B** | `HỘI VIÊN` 1–n `GÓI HỘI VIÊN` n–1 `GÓI DỊCH VỤ`; `HỘI VIÊN` có tổng chi tiêu, điểm, hạng | Gói bắt đầu ngày mua; ngày hết hạn = ngày mua + thời hạn tháng − 1 ngày | **Không phụ thuộc ai** |
+| **C** | `GÓI HỘI VIÊN` 1–n `CHECK IN` n–1 `CHI NHÁNH`; `LỊCH HẸN PT` nối `GÓI HỘI VIÊN`, `NHÂN VIÊN`, `CHI NHÁNH` | Một PT không có 2 lịch chưa hủy cùng ngày giờ; nhân viên trong lịch hẹn phải có chức vụ PT | **Không phụ thuộc ai** |
+| **D** | `HÓA ĐƠN` n–n `HẠNG MỤC CUNG CẤP` qua mối "chứa"; `SẢN PHẨM` n–n `CHI NHÁNH` qua tồn kho | Tổng tiền hóa đơn = Σ số lượng × đơn giá − giảm giá | **Không phụ thuộc ai** |
 
 **Điểm ghép — Ghép ERD tổng _(cả nhóm, lần đầu làm chung)_:** gộp 4 ERD, kiểm tra khóa chung khớp tên và kiểu, loại thực thể trùng. Review chéo. **Cả nhóm chờ đủ 4 ERD** mới ghép.
 
@@ -75,25 +75,25 @@ Mỗi quan hệ: khóa – tập phụ thuộc hàm – dạng chuẩn (chuẩn 
 
 | Người | Ví dụ mẫu | Phụ thuộc |
 |---|---|---|
-| **A** | `LichSuCongTac(MaLS, MaNV, MaCN, NgayBatDau, NgayKetThuc)`. Khóa `MaLS`. PTH: `MaLS → MaNV, MaCN, NgayBatDau, NgayKetThuc`. BCNF. Chức vụ cố định nên chỉ lưu ở `NhanVien.ChucVu`. | **Không phụ thuộc ai** (cần ERD tổng đã ghép từ bước 1.2) |
-| **B** | `GoiHoiVien(MaGHV, MaHD, STT, DonVi, NgayBatDau, NgayHetHan, SoBuoiConLai)`. PK MaGHV; AK (MaHD,STT,DonVi); mỗi khóa xác định phần còn lại, BCNF. MaHV/MaGoi suy ra qua hóa đơn/dòng, không lưu lặp. | **Không phụ thuộc ai** khi thiết kế; đối chiếu FK dòng với D |
-| **C** | `CuaKiemSoat(MaCN, SoHieuCua, ChucNang, DangHoatDong)` có khóa ghép `(MaCN, SoHieuCua)`. `CheckIn(MaCheckIn, MaHV, MaCN, SoHieuCuaVao, SoHieuCuaRa, TGVao, TGRa)` tham chiếu cửa bằng khóa ghép. Mỗi quan hệ đạt BCNF. | **Không phụ thuộc ai** — `MaHV` là khóa ngoại sang bảng của B, `MaCN` lấy từ A; chỉ cần các cột đã chốt, **không chờ A/B xong lược đồ** |
-| **D** | `ChiTietHoaDon(MaHD, STT, LoaiDong, MaGoi, MaSP, SoLuong, DonGia)`. GD1-12 chốt không lưu ThanhTien; tính SoLuong × DonGia khi đọc để tránh dư thừa và PTH ngoài khóa trên bảng cơ sở. | **Không phụ thuộc ai** |
+| **A** | `LICH_SU_CONG_TAC(MaLSCT, MaNV, MaCN, NgayBatDau, NgayKetThuc)`. Khóa `MaLSCT`; AK `(MaNV, NgayBatDau)`. PTH: `MaLSCT → MaNV, MaCN, NgayBatDau, NgayKetThuc`. BCNF. Chức vụ cố định nên chỉ lưu ở `NHAN_VIEN.ChucVu`. | **Không phụ thuộc ai** (cần ERD tổng đã ghép từ bước 1.2) |
+| **B** | `GOI_HOI_VIEN(MaGHV, MaHV, MaHM, NgayKichHoat, NgayHetHan, SoBuoiConLai)`. PK `MaGHV`; BCNF. `HOI_VIEN` đạt 2NF vì `TongChiTieu → Hang` (cố ý lưu sẵn hạng để giải vấn đề 4). | **Không phụ thuộc ai** khi thiết kế; đối chiếu khóa ngoại với D |
+| **C** | `CHECK_IN(MaCI, MaGHV, MaCN, ThoiGianVao, ThoiGianRa, ThietBiVao, ThietBiRa)` đạt BCNF. `LICH_HEN_PT` đạt 2NF vì `{MaNV, NgayTap} → MaCN` (cố ý giữ `MaCN`). | **Không phụ thuộc ai** — `MaGHV` là khóa ngoại sang bảng của B, `MaCN` lấy từ A; chỉ cần các cột đã chốt, **không chờ A/B xong lược đồ** |
+| **D** | `CHI_TIET_HOA_DON(MaCTHD, MaHD, MaHM, SoLuong, DonGia)`; AK `(MaHD, MaHM)`. Không lưu thành tiền, tính `SoLuong × DonGia` khi đọc. `HOA_DON` đạt 2NF vì `{MaNV, NgayLap} → MaCN` (cố ý giữ `MaCN`). | **Không phụ thuộc ai** |
 
 ## Bước 1.4 — Ràng buộc mức logic
 Theo mẫu: **bối cảnh – nội dung – bảng tầm ảnh hưởng** (dấu `+` nếu Thêm/Xóa/Sửa có thể vi phạm).
 
-Ví dụ mẫu (C): bối cảnh `LichHenPT`; nội dung: không tồn tại 2 lịch cùng `MaNV`, `NgayGio` mà cả hai chưa hủy.
+Ví dụ mẫu (C): bối cảnh `LICH_HEN_PT`; nội dung: không tồn tại 2 lịch cùng `MaNV`, `NgayTap`, `ThoiGianBatDau` mà cả hai `TrangThai` khác Hủy (R16 trong thiết kế tổng).
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
-| LichHenPT | + | − | + (`MaNV`, `NgayGio`, `TrangThai`) |
+| LICH_HEN_PT | + | − | + (`MaNV`, `NgayTap`, `ThoiGianBatDau`, `TrangThai`) |
 
 | Người | Ràng buộc nên có (tối thiểu 3 cái mỗi người) | Phụ thuộc |
 |---|---|---|
-| **A** | Khoảng công tác không chồng; nhân viên điều chuyển phải có chi nhánh đến khác chi nhánh đi; `NhanVien.MaCNHienTai` đồng bộ từ giai đoạn bao phủ ngày hiện tại; bấm điều chuyển ngày D thì lịch sử cũ kết thúc D, mới bắt đầu D+1; từ chối điều chuyển nếu lịch chưa hủy mất điều kiện chi nhánh, đặt lịch và điều chuyển phải được kiểm tra nhất quán | **Không phụ thuộc ai** |
+| **A** | Khoảng công tác không chồng; nhân viên điều chuyển phải có chi nhánh đến khác chi nhánh đi; `NHAN_VIEN.MaCNHienTai` đồng bộ từ giai đoạn bao phủ ngày hiện tại; bấm điều chuyển ngày D thì lịch sử cũ kết thúc D, mới bắt đầu D+1; từ chối điều chuyển nếu lịch chưa hủy mất điều kiện chi nhánh, đặt lịch và điều chuyển phải được kiểm tra nhất quán | **Không phụ thuộc ai** |
 | **B** | Ngày hết hạn đúng; số buổi còn lại ≥ 0; hạng phải khớp tổng chi tiêu | **Không phụ thuộc ai** |
-| **C** | Không trùng lịch PT; check-in chỉ hợp lệ khi hội viên có thẻ dịch vụ cấp quyền vào còn hạn hoặc vé vào còn lượt; PT chỉ dùng đặt lịch, tự trừ khi đến giờ hẹn (ràng buộc **liên module** — bảng `GoiHoiVien` của B cũng có trong bảng tầm ảnh hưởng) | Ràng buộc liên module: ghi thêm bảng của B bị ảnh hưởng, **báo B ở điểm ghép**, không cần chờ |
+| **C** | Không trùng lịch PT; check-in chỉ hợp lệ khi gói còn hạn, còn lượt (nếu có giới hạn) và không phải gói PT; tới giờ hẹn lịch tự hoàn thành và trừ buổi (ràng buộc **liên module** — bảng `GOI_HOI_VIEN` của B cũng có trong bảng tầm ảnh hưởng) | Ràng buộc liên module: ghi thêm bảng của B bị ảnh hưởng, **báo B ở điểm ghép**, không cần chờ |
 | **D** | Tổng tiền đúng; tồn kho không âm; hóa đơn phải có ít nhất 1 dòng | **Không phụ thuộc ai** |
 
 **Điểm ghép — Lược đồ tổng _(cả nhóm)_:** gộp lược đồ, kiểm tra khóa ngoại giữa module; với mỗi ràng buộc liên module, chủ bảng bị ảnh hưởng xác nhận. **Kết luận dạng chuẩn của cả lược đồ.** Hoàn thiện tài liệu GĐ1.
@@ -107,10 +107,10 @@ Mỗi người viết script tạo bảng module mình (`sql/01_tables_<module>.
 
 | Người | Việc | Phụ thuộc |
 |---|---|---|
-| **A** | Script `ChiNhanh`, `NhanVien`, `LichSuCongTac` (chạy đầu tiên) | **Không phụ thuộc ai** |
-| **B** | Script `HoiVien`, `GoiDichVu`, `GoiHoiVien`, bảng hạng/điểm | Khi **chạy**: chờ A xong (khóa ngoại sang `ChiNhanh`/`NhanVien` nếu có). Khi **viết**: không chờ |
-| **C** | Script `CheckIn`, `LichHenPT`, `DanhGiaHLV` | Khi chạy: chờ A và B xong. Khi viết: không chờ |
-| **D** | Script `SanPham`, tồn kho, `HoaDon`, `ChiTietHoaDon` | Khi chạy: chờ A và B xong. Khi viết: không chờ |
+| **A** | Script `CHI_NHANH`, `NHAN_VIEN`, `LICH_SU_CONG_TAC`, `HOA_HONG_CHI_NHANH` (chạy đầu tiên) | **Không phụ thuộc ai** |
+| **B** | Script `HOI_VIEN`, `HANG_MUC_CUNG_CAP`, `GOI_HOI_VIEN` | Khi **chạy**: chờ A xong (`HOI_VIEN.MaCN` là khóa ngoại sang `CHI_NHANH`). Khi **viết**: không chờ. B tạo bảng `HANG_MUC_CUNG_CAP`; D chỉ thêm dữ liệu loại Sản phẩm |
+| **C** | Script `CHECK_IN`, `LICH_HEN_PT`, `DANH_GIA_HLV` | Khi chạy: chờ A và B xong. Khi viết: không chờ |
+| **D** | Script `TON_KHO`, `HOA_DON`, `CHI_TIET_HOA_DON` | Khi chạy: chờ A và B xong. Khi viết: không chờ |
 
 **Điểm ghép:** gộp, chạy được từ CSDL trống trên SQL Server, một lệnh tạo xong toàn bộ bảng.
 
@@ -134,10 +134,10 @@ Ví dụ mẫu (C, xem khung giờ trống của PT):
 
 | Mục | Giá trị |
 |---|---|
-| Câu lệnh | `SELECT NgayGio FROM LichHenPT WHERE MaNV=@pt AND NgayGio>=@ngay AND NgayGio<DATEADD(day,1,@ngay) AND TrangThai<>N'Hủy'` |
-| Điều kiện lọc | `MaNV` (=), `NgayGio` (khoảng) |
-| Tần suất | ~15.000 lần/ngày |
-| Nhận xét | Chưa có index → quét toàn bảng; ứng viên index `(MaNV, NgayGio)` |
+| Câu lệnh | `SELECT ThoiGianBatDau FROM LICH_HEN_PT WHERE MaNV=@pt AND NgayTap=@ngay AND TrangThai<>1` |
+| Điều kiện lọc | `MaNV` (=), `NgayTap` (=) |
+| Tần suất | ~14.500 lần/ngày |
+| Nhận xét | Chưa có index → quét toàn bảng; ứng viên index `(MaNV, NgayTap)` |
 
 **Phụ thuộc:** cả 4 người **không phụ thuộc ai**. Truy vấn có dùng bảng của người khác thì ghi bảng đó ở cột R/W, chỉ cần các cột trong hợp đồng.
 
@@ -145,10 +145,10 @@ Ví dụ mẫu (C, xem khung giờ trống của PT):
 
 | Người | Giải pháp gợi ý (ví dụ mẫu) | Phụ thuộc |
 |---|---|---|
-| **A** | Index `(MaNV, NgayBatDau)` trên `LichSuCongTac`; truy vấn dùng `NgayBatDau <= CAST(NgayGio AS DATE) AND (NgayKetThuc IS NULL OR CAST(NgayGio AS DATE) <= NgayKetThuc)` (NgayGio theo Asia/Saigon) để xác định chi nhánh tại ngày dạy; stored procedure tính hoa hồng | **Viết thì không chờ ai** (dùng `LichHenPT(MaNV, MaCN, NgayGio, TrangThai)` đã chốt). **Chạy thử** cần dữ liệu `LichHenPT` của C → sau bước 2.4 |
-| **B** | Theo thiết kế GD1-09 tại b/diem-hang.md: lưu sẵn `TongChiTieu12T`, `DiemTichLuy`, `Hang` trong bảng hội viên và GhiNhanLoyalty khóa MaHD; thủ tục `sp_CapNhatDiemHang` cộng dồn khi có hóa đơn (không cộng lại 12 tháng); job đêm trừ hóa đơn quá 12 tháng | **Việc đầu tiên của B ở bước này: công bố chữ ký thủ tục** (D cần gọi). Phần còn lại không chờ ai |
-| **C** | Index `(MaHV, NgayHetHan)` là ứng viên trên gói hội viên; truy vấn vẫn phải kiểm tra `NgayBatDau` để loại gói chờ và đo mục tiêu check-in < 50ms; **partition `CheckIn` theo tháng** (phục vụ cả vấn đề 1 lẫn 3); unique filtered index `(MaNV, NgayGio) WHERE TrangThai<>N'Hủy'` chặn overbooking | **Không phụ thuộc ai** khi viết. Index trên `GoiHoiVien` là bảng của B: C đề xuất, **B tạo index trong script của B** |
-| **D** | Partition `HoaDon` theo tháng; bảng tổng hợp doanh thu theo ngày/chi nhánh và tỷ lệ lấp đầy theo giờ (đọc từ `CheckIn` của C), cập nhật bằng trigger hoặc job | Khi viết: chờ B công bố chữ ký thủ tục (để gọi sau khi lập hóa đơn) — nếu B chưa xong, D gọi một thủ tục rỗng cùng chữ ký. **D không partition `CheckIn`** — việc đó thuộc C, D chỉ đọc nó |
+| **A** | Index `(MaNV, NgayBatDau)` trên `LICH_SU_CONG_TAC`; truy vấn dùng `NgayBatDau <= NgayTap AND (NgayKetThuc IS NULL OR NgayTap <= NgayKetThuc)` để xác định chi nhánh tại ngày dạy; stored procedure tính hoa hồng | **Viết thì không chờ ai** (dùng `LICH_HEN_PT(MaNV, MaCN, NgayTap, ThoiGianBatDau, TrangThai)` đã chốt). **Chạy thử** cần dữ liệu `LICH_HEN_PT` của C → sau bước 2.4 |
+| **B** | Lưu sẵn `TongChiTieu`, `DiemTichLuy`, `Hang` trong `HOI_VIEN`; thủ tục `sp_CapNhatDiemHang` cộng dồn khi có hóa đơn (không cộng lại cả năm); job 00:00 ngày 1/1 tính lại tổng chi tiêu và hạng | **Việc đầu tiên của B ở bước này: công bố chữ ký thủ tục** (D cần gọi). Phần còn lại không chờ ai |
+| **C** | Quét cổng tra `GOI_HOI_VIEN` theo khóa chính `MaGHV`, đo mục tiêu check-in < 50ms; chỉ mục cho tìm phiên đang mở khi quét ra; **partition `CHECK_IN` theo tháng** (phục vụ cả vấn đề 1 lẫn 3); unique filtered index `(MaNV, NgayTap, ThoiGianBatDau) WHERE TrangThai<>1` chặn overbooking | **Không phụ thuộc ai** khi viết. Index trên `GOI_HOI_VIEN` là bảng của B: C đề xuất, **B tạo index trong script của B** |
+| **D** | Partition `HOA_DON` theo tháng; bảng tổng hợp doanh thu theo ngày/chi nhánh và tỷ lệ lấp đầy theo giờ (đọc từ `CHECK_IN` của C), cập nhật bằng trigger hoặc job | Khi viết: chờ B công bố chữ ký thủ tục (để gọi sau khi lập hóa đơn) — nếu B chưa xong, D gọi một thủ tục rỗng cùng chữ ký. **D không partition `CHECK_IN`** — việc đó thuộc C, D chỉ đọc nó |
 
 **Xong khi:** mỗi người có script trong `sql/` + file giải thích lý do chọn giải pháp ở `docs/gd2/<module>/`.
 
@@ -157,10 +157,10 @@ Chọn công cụ sinh hoặc tự code. **≥ 70.000 dòng/bảng** cho bảng 
 
 | Người | Sinh dữ liệu cho | Phụ thuộc |
 |---|---|---|
-| **A** | `ChiNhanh` (12), `NhanVien`, `LichSuCongTac` | **Làm đầu tiên, không chờ ai** |
-| **B** | `HoiVien`, `GoiDichVu`, `GoiHoiVien` | **Chờ A** (nếu bảng có khóa ngoại sang `ChiNhanh`/`NhanVien`) |
-| **C** | `CheckIn`, `LichHenPT` | **Chờ A và B xong**: cần `HoiVien`, `NhanVien`, `LichSuCongTac` để PT của buổi hẹn thuộc đúng chi nhánh tại ngày đó |
-| **D** | `SanPham`, tồn kho, `HoaDon`, `ChiTietHoaDon` | **Chờ A và B xong**: cần `HoiVien`, `NhanVien`, `GoiDichVu` |
+| **A** | `CHI_NHANH` (12), `NHAN_VIEN`, `LICH_SU_CONG_TAC`, `HOA_HONG_CHI_NHANH` | **Làm đầu tiên, không chờ ai** |
+| **B** | `HOI_VIEN`, `HANG_MUC_CUNG_CAP`, `GOI_HOI_VIEN` | **Chờ A** (`HOI_VIEN.MaCN` sang `CHI_NHANH`) |
+| **C** | `CHECK_IN`, `LICH_HEN_PT`, `DANH_GIA_HLV` | **Chờ A và B xong**: cần `GOI_HOI_VIEN`, `NHAN_VIEN`, `LICH_SU_CONG_TAC` để PT của buổi hẹn thuộc đúng chi nhánh tại ngày đó |
+| **D** | `TON_KHO`, `HOA_DON`, `CHI_TIET_HOA_DON` (và các dòng Sản phẩm của `HANG_MUC_CUNG_CAP`) | **Chờ A và B xong**: cần `HOI_VIEN`, `NHAN_VIEN`, `HANG_MUC_CUNG_CAP` |
 
 Cách làm: A và B xong thì commit file dữ liệu/script sinh; C và D bắt đầu cùng lúc (hai người này không chờ nhau). Kiểm tra toàn vẹn khóa ngoại sau khi sinh.
 

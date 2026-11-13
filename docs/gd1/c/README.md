@@ -2,6 +2,7 @@
 
 | Mục | Nội dung |
 |---|---|
+| Người phụ trách | Ngô Gia An (23120205) |
 | Vấn đề của đề | Vấn đề 1 — tra quyền vào cổng < 50 ms; vấn đề 2 — chặn tuyệt đối trùng lịch PT |
 | Quan hệ sở hữu | CHECK_IN, LICH_HEN_PT, DANH_GIA_HLV |
 

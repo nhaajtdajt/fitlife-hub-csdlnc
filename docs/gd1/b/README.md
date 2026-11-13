@@ -2,6 +2,7 @@
 
 | Mục | Nội dung |
 |---|---|
+| Người phụ trách | Trương Nhật Đạt (23120231) |
 | Vấn đề của đề | Vấn đề 4 — cộng điểm/hạng khi thanh toán không bị quá tải |
 | Quan hệ sở hữu | HOI_VIEN, HANG_MUC_CUNG_CAP, GOI_HOI_VIEN |
 

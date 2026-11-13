@@ -18,7 +18,7 @@ Nhiệm vụ và tiến độ: tab **Issues** (lọc theo milestone `Sprint N` h
 
 ## Trạng thái GĐ1 (13/11/2026)
 
-Đã chốt lại toàn bộ theo [lược đồ logic 13 quan hệ](docs/gd1/luoc-do-logic.png): quy trình, bảng tần suất, thiết kế logic và [28 quyết định](docs/quyet-dinh.md). Còn lại: vẽ lại [ERD quan niệm](docs/gd1/erd-tong.md), bổ sung tên/MSSV. Chưa triển khai GĐ2.
+Đã chốt lại toàn bộ theo [lược đồ logic 13 quan hệ](docs/gd1/luoc-do-logic.png): quy trình, bảng tần suất, thiết kế logic và [28 quyết định](docs/quyet-dinh.md). Đã có [ERD quan niệm](docs/gd1/erd-tong.md). Còn lại: bổ sung tên/MSSV. Chưa triển khai GĐ2.
 
 ## Thành viên
 

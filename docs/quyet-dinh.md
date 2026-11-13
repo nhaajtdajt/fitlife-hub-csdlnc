@@ -33,7 +33,7 @@ Những chỗ đề chưa rõ và quyết định của nhóm. Bản này đã c
 | 25 | Một hội viên có được đặt hai PT cùng giờ? | Không. Một hội viên không có hai lịch chưa hủy trùng ngày, trùng giờ bắt đầu | C |
 | 26 | Có lưu nhật ký nhập/xuất kho không? | Không. Chỉ lưu số tồn hiện tại; lượng đã bán tra từ `CHI_TIET_HOA_DON` | D |
 | 27 | Trạng thái lịch PT lưu thế nào? | `TrangThai` không rỗng: 0 = Đã đặt (mặc định), 1 = Hủy, 2 = Đã hoàn thành. Chỉ có 0 → 1 (hủy đúng hạn) và 0 → 2 (job tới giờ) | C |
-| 28 | Kết luận dạng chuẩn? | `HOI_VIEN` không đạt 3NF (`TongChiTieu → Hang`) và `LICH_HEN_PT` không đạt 3NF (`{MaNV, NgayTap} → MaCN`), đều **cố ý giữ** để truy vấn nhanh. Bỏ `ThoiGianKetThuc` khỏi `LICH_HEN_PT`. 11 bảng còn lại đạt BCNF. **Toàn lược đồ đạt 2NF** | Cả nhóm |
+| 28 | Kết luận dạng chuẩn? | `HOI_VIEN` (`TongChiTieu → Hang`), `LICH_HEN_PT` (`{MaNV, NgayTap} → MaCN`) và `HOA_DON` (`{MaNV, NgayLap} → MaCN`) không đạt 3NF, đều **cố ý giữ** để truy vấn nhanh. Bỏ `ThoiGianKetThuc` khỏi `LICH_HEN_PT`. 10 quan hệ còn lại đạt BCNF. **Toàn lược đồ đạt 2NF**. Chi tiết tại [thiết kế logic](gd1/thiet-ke-tong.md) | Cả nhóm |
 
 ## Quy ước phân loại tần suất chung
 

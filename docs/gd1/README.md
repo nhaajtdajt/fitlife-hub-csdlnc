@@ -1,19 +1,20 @@
-# Hồ sơ tổng giai đoạn 1 — FitLife Hub
+# Hồ sơ giai đoạn 1 — FitLife Hub
 
-Bản ghép A/B/C/D sau rà soát 17 mục. **Rà cuối phát hiện 8 nhóm việc còn cần xử lý; xem [báo cáo rà soát cuối](ra-soat-cuoi.md). Chưa coi đây là bản cuối sẵn sàng nộp.** Chỉ bao gồm nghiệp vụ, tần suất, mô hình quan niệm và thiết kế logic theo [yêu cầu GĐ1](../../required.md).
+Phân tích nghiệp vụ, thiết kế mức quan niệm và mức logic theo [yêu cầu GĐ1](../../required.md). Bản này đã chốt lại toàn bộ theo [lược đồ logic 13 quan hệ](luoc-do-logic.png) ngày 13/11/2026.
 
-| Đầu ra yêu cầu | Tài liệu |
-|---|---|
-| Quy trình nghiệp vụ chi tiết | [A](a/quy-trinh.md), [B](b/quy-trinh.md), [C](c/quy-trinh.md), [D](d/quy-trinh.md) |
-| Chức năng, mô tả, tần suất và mức độ | [A](a/bang-tan-suat.md), [B](b/bang-tan-suat.md), [C](c/bang-tan-suat.md), [D](d/bang-tan-suat.md); 52 hàng dùng [giả định chung](../quyet-dinh.md) |
-| ERD tổng và ràng buộc ngoài hình | [ERD tổng](erd-tong.md), [ràng buộc tổng](thiet-ke-tong.md) |
-| 20 lược đồ, khóa, PTH, dạng chuẩn, 33 FK | [Thiết kế tổng](thiet-ke-tong.md) |
-| Thông tin quan hệ/thuộc tính | [A](a/thiet-ke-logic.md), [B](b/thiet-ke-logic.md), [C](c/thiet-ke-logic.md), [D](d/thiet-ke-logic.md), dẫn chiếu từ bản tổng |
-| Bối cảnh, nội dung, tầm ảnh hưởng ràng buộc | Bảng T-R01–14 trong [thiết kế tổng](thiet-ke-tong.md), cùng các bảng nội module A/B/C/D |
-| Quyết định, giả định, giới hạn và dấu vết sửa lỗi | [Quyết định chung](../quyet-dinh.md), [sổ rà soát](theo-doi-ra-soat.md) |
+| Đầu ra yêu cầu | Tài liệu | Trạng thái |
+|---|---|---|
+| Mô tả chi tiết quy trình nghiệp vụ | [A](a/quy-trinh.md), [B](b/quy-trinh.md), [C](c/quy-trinh.md), [D](d/quy-trinh.md) | Xong |
+| Bảng tần suất: chức năng, mô tả, tần suất, mức độ | [A](a/bang-tan-suat.md), [B](b/bang-tan-suat.md), [C](c/bang-tan-suat.md), [D](d/bang-tan-suat.md) — 46 chức năng, dùng [giả định chung](../quyet-dinh.md#bảng-giả-định-số-liệu-chung) | Xong |
+| ERD mức quan niệm và ràng buộc ngoài hình | [ERD](erd-tong.md) | **Đang vẽ lại** |
+| Lược đồ CSDL quan hệ | [luoc-do-logic.png](luoc-do-logic.png) (nguồn [.drawio](luoc-do-logic.drawio)) | Xong |
+| Khóa, phụ thuộc hàm, dạng chuẩn từng quan hệ; kết luận dạng chuẩn | [Thiết kế logic tổng](thiet-ke-tong.md), mục 2–3 | Xong |
+| Mô tả quan hệ và thuộc tính | [Thiết kế logic tổng](thiet-ke-tong.md), mục 4 | Xong |
+| Ràng buộc: bối cảnh, nội dung, bảng tầm ảnh hưởng | [Thiết kế logic tổng](thiet-ke-tong.md), mục 6 (R01–R27) | Xong |
+| Quyết định và giả định của nhóm | [quyet-dinh.md](../quyet-dinh.md) (28 quyết định) | Xong |
 
-Dùng ERD tổng và các bản `erd.md` hiện hành khi ghép báo cáo. Draw.io của A đã được đồng bộ với bảy quan hệ của module; PNG của C vẫn là bản lịch sử và không dùng thay ERD hiện hành. Bản tổng thống nhất bảng cơ sở với quan hệ dẫn xuất `vGoiHoiVien`; không tạo bảng trùng theo module.
+**Kết luận dạng chuẩn:** 10 quan hệ đạt BCNF; HOI_VIEN, LICH_HEN_PT, HOA_DON đạt 2NF do cố ý lưu dư để tăng tốc truy vấn; toàn lược đồ đạt 2NF.
 
-Kết luận chuẩn hóa: 19 quan hệ BCNF và HoiVien 2NF do giữ Hang phụ thuộc TongChiTieu12T; toàn lược đồ không được kết luận đạt 3NF/BCNF. Lịch PT đã chốt khung một giờ bắt đầu vào giờ tròn; trừ tại giờ hẹn, không phụ thuộc cổng.
+Tóm tắt theo module: [A](a/README.md), [B](b/README.md), [C](c/README.md), [D](d/README.md).
 
-Trước khi nộp: bổ sung tên/MSSV còn thiếu. Các giả định/ngoài phạm vi khác được công bố trong thiết kế tổng. Ghi chú triển khai nằm riêng ở GĐ2; không phải phần đã cài đặt hoặc kiểm thử.
+Trước khi nộp: vẽ xong ERD, bổ sung tên/MSSV còn thiếu.

@@ -8,32 +8,34 @@ Mẫu nội dung từng phần theo [required.md](../required.md).
 
 ## Module
 
-| Người | Module | Thực thể chính | Vấn đề của đề phải giải |
+> Cập nhật 13/11/2026: thiết kế hiện hành theo [lược đồ logic](gd1/luoc-do-logic.png), [thiết kế tổng](gd1/thiet-ke-tong.md) và [quyết định](quyet-dinh.md). Các "ví dụ mẫu" ở từng bước bên dưới là gợi ý ban đầu, có thể dùng tên bảng/cột cũ.
+
+| Người | Module | Quan hệ sở hữu | Vấn đề của đề phải giải |
 |---|---|---|---|
-| **A** | Chi nhánh & Nhân sự | `ChiNhanh`, dịch vụ/tiện ích, `NhanVien`, `LichSuCongTac`, hoa hồng PT | 5 — lịch sử điều chuyển & hoa hồng |
-| **B** | Hội viên, Gói & Thân thiết | `HoiVien`, `GoiDichVu`, `GoiHoiVien` (gói đã mua), hạng, lịch sử điểm | 4 — tính lại hạng quá tải |
-| **C** | Check-in & Lịch hẹn PT | `CheckIn`, `CuaKiemSoat`, `LichHenPT`, `DanhGiaHLV` | 1 — nghẽn check-in (< 50ms); 2 — overbooking PT |
-| **D** | Sản phẩm, Hóa đơn & Báo cáo | `SanPham`, tồn kho theo chi nhánh, `HoaDon`, `ChiTietHoaDon` | 3 — log lớn & báo cáo chậm |
+| **A** | Chi nhánh & Nhân sự | `CHI_NHANH`, `NHAN_VIEN`, `LICH_SU_CONG_TAC`, `HOA_HONG_CHI_NHANH` | 5 — lịch sử điều chuyển & hoa hồng |
+| **B** | Hội viên, Gói & Thân thiết | `HOI_VIEN`, `HANG_MUC_CUNG_CAP` (loại gói), `GOI_HOI_VIEN` | 4 — tính lại hạng quá tải |
+| **C** | Check-in & Lịch hẹn PT | `CHECK_IN`, `LICH_HEN_PT`, `DANH_GIA_HLV` | 1 — nghẽn check-in (< 50ms); 2 — overbooking PT |
+| **D** | Sản phẩm, Hóa đơn & Báo cáo | `HANG_MUC_CUNG_CAP` (loại Sản phẩm), `TON_KHO`, `HOA_DON`, `CHI_TIET_HOA_DON` | 3 — log lớn & báo cáo chậm |
 
-## Hợp đồng giao diện (chốt ở bước 1.0)
+## Hợp đồng giao diện
 
-Mỗi dòng: bảng của ai, những cột nào được **công bố** cho người khác dùng, ai dùng. Thêm cột mới thì tự do; **đổi tên/kiểu hoặc xóa cột trong hợp đồng** thì mở issue và báo người dùng nó.
+Cột mỗi module công bố cho module khác dùng. Đổi tên/kiểu hoặc xóa cột trong hợp đồng thì báo người dùng nó.
 
 | Bảng (chủ) | Cột công bố | Ai dùng, để làm gì |
 |---|---|---|
-| `ChiNhanh` (A) | `MaCN`, `SucChua`, `GioMoCua`, `GioDongCua` | C dùng mã/giờ đóng lượt; D dùng SucChua nguyên dương tính báo cáo. Không dùng sức chứa chặn cổng |
-| `NhanVien` (A) | `MaNV`, `ChucVu` | C/D dùng chức vụ hiện tại sau đồng bộ ngày; chức vụ tại ngày dạy lấy từ LichSuCongTac |
-| `LichSuCongTac` (A) | `MaNV`, `MaCN`, `ChucVu`, `NgayBatDau`, `NgayKetThuc` | C (chức vụ/chi nhánh tại ngày dạy; DATE, tính cả hai biên) |
-| `HoiVien` (B) | `MaHV` | C, D |
-| `GoiDichVu` (B) | `MaGoi`, `LoaiGoi`, `Gia` | C (loại gói khi đặt PT), D (dòng hóa đơn là gói) |
-| `GoiHoiVien` và quan hệ dẫn xuất `vGoiHoiVien` (B) | Bảng cơ sở: `MaGHV, MaHD, STT, DonVi, NgayBatDau, NgayHetHan, SoBuoiConLai`; giao diện đọc suy ra `MaHV, MaGoi` từ hóa đơn/dòng | C (lưu gói của từng lịch, xác định chủ sở hữu, kiểm tra ngày và buổi khả dụng) |
-| `LichHenPT` (C) | `MaLichHen`, `MaGHV`, `MaNV`, `MaCN`, `NgayGio`, `TrangThai`, `DaTruBuoi` | A dùng MaLichHen/MaNV/MaCN/NgayGio/TrangThai kiểm tra/trả lịch vướng khi đổi vị trí và tính hoa hồng; B/C đếm giữ chỗ và trừ đúng gói. MaHV suy ra qua GoiHoiVien |
-| `CheckIn` (C) | `MaHV`, `MaCN`, `TGVao`, `TGRa`, `SoHieuCuaRa` | D (tỷ lệ lấp đầy và số lượt tự đóng: TGRa có, cửa ra rỗng) |
-| `HoaDon` (D) | `MaHD`, `MaHV`, `NgayLap`, `TongTien` | B cộng chi tiêu/điểm đúng một lần trên tổng sau giảm; không tính theo từng dòng phân bổ |
+| `CHI_NHANH` (A) | `MaCN`, `GioMoCua`, `GioDongCua`, `SucChua` | B: chi nhánh đăng ký; C: giờ mở cửa cho lịch PT, đóng phiên cuối ngày; D: sức chứa cho báo cáo lấp đầy |
+| `NHAN_VIEN` (A) | `MaNV`, `MaCNHienTai` | C: PT của lịch; D: chi nhánh lập hóa đơn |
+| `LICH_SU_CONG_TAC` (A) | `MaNV`, `MaCN`, `ChucVu`, `NgayBatDau`, `NgayKetThuc` | C: kiểm tra PT đúng chi nhánh tại ngày tập |
+| `HOI_VIEN` (B) | `MaHV` | C, D |
+| `HANG_MUC_CUNG_CAP` (B, D) | `MaHM`, `LoaiHangMuc`, `Gia`, `ThoiHanThang`, `SoBuoiBanDau` | B tạo gói; C kiểm tra loại gói; D lập hóa đơn |
+| `GOI_HOI_VIEN` (B) | `MaGHV`, `MaHV`, `MaHM`, `NgayKichHoat`, `NgayHetHan`, `SoBuoiConLai` | C: quét cổng, đặt lịch, trừ vé/buổi |
+| `LICH_HEN_PT` (C) | `MaLH`, `MaNV`, `MaCN`, `NgayTap`, `ThoiGianBatDau`, `TrangThai` | A: tính hoa hồng, kiểm tra lịch vướng |
+| `CHECK_IN` (C) | `MaCN`, `ThoiGianVao`, `ThoiGianRa` | B: lâu ngày chưa quay lại; D: báo cáo lấp đầy |
+| `HOA_DON`, `CHI_TIET_HOA_DON` (D) | `MaHD`, `MaHV`, `NgayLap`, `TongTien`; `MaHM`, `SoLuong` | B: tạo gói, cộng điểm/hạng trong cùng giao dịch thanh toán |
 
 Chữ ký thủ tục B công bố để D gọi (chốt ở bước 2.3): `sp_CapNhatDiemHang(@MaHV, @MaHD, @TongTien, @NgayLap)`.
 
-Khóa chung: `MaCN`, `MaNV` (A) · `MaHV`, `MaGoi`, `MaGHV` (B) · `MaHD` (D).
+Khóa chung: `MaCN`, `MaNV` (A) · `MaHV`, `MaHM`, `MaGHV` (B) · `MaHD` (D).
 
 ---
 
@@ -205,5 +207,3 @@ Ví dụ mẫu (C, xem lịch PT): bật `SET STATISTICS IO, TIME ON`, chạy tr
 - Tài liệu: `docs/gd1/<module>/`, `docs/gd2/<module>/` (`a`, `b`, `c`, `d`).
 - Script SQL Server: `sql/` — tên file có số thứ tự chạy, ví dụ `sql/01_tables_a.sql`.
 - Ảnh đo hiệu năng: `docs/gd2/<module>/img/`. Ứng dụng: `app/`.
-
-**GD1-11 — nguồn gói đã mua:** MaGHV vẫn là khóa bảng GoiHoiVien và đích FK của LichHenPT. MaHV/MaGoi trong giao diện B công bố được đọc từ vGoiHoiVien (nối dòng hóa đơn/đầu hóa đơn), không lưu lặp trên bảng gói cơ sở. Trừ số dư theo MaGHV vẫn tác động GoiHoiVien; giao diện đọc giữ các cột ngày và số dư đã công bố. Xem [thiết kế B](gd1/b/thiet-ke-logic.md).

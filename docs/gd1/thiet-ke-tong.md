@@ -1,197 +1,432 @@
-# Thiết kế tổng GĐ1 — A/B/C/D
+# Thiết kế mức logic — FitLife Hub (GĐ1)
 
-Phạm vi: quy trình, tần suất, ERD, lược đồ quan hệ, khóa/phụ thuộc hàm/dạng chuẩn, thuộc tính và ràng buộc. Không có script SQL, index, partition, thủ tục, ma trận truy vấn hoặc đo hiệu năng. [ERD tổng](erd-tong.md), [quyết định chung](../quyet-dinh.md), [sổ 17 mục rà soát](theo-doi-ra-soat.md).
+Lược đồ CSDL quan hệ gồm **13 quan hệ**, hình vẽ tại [luoc-do-logic.png](luoc-do-logic.png) (nguồn [luoc-do-logic.drawio](luoc-do-logic.drawio)). Các quyết định nghiệp vụ làm căn cứ ở [quyet-dinh.md](../quyet-dinh.md); quy trình ở `a/`, `b/`, `c/`, `d/quy-trinh.md`.
 
-## Lược đồ và quyền sở hữu
+Ký hiệu: <u>gạch chân</u> = khóa chính (PK); *nghiêng* = khóa ngoại (FK); AK = khóa ứng viên khác.
 
-Mỗi quan hệ có một module sở hữu. Bảng tham chiếu xuất hiện trong ERD module khác chỉ là phần nhìn, không phải bảng mới. Các tên cột cùng nghĩa và khóa tham chiếu dùng cùng miền logic; độ dài/kiểu SQL chốt ở GĐ2.
+## 1. Lược đồ quan hệ và module sở hữu
 
-### Module A
-
-```text
-ChiNhanh(MaCN, TenCN, DiaChi, SDT, GioMoCua, GioDongCua, SucChua, HoaHongMoiBuoi, TrangThai)
-TienIch(MaTI, TenTI, Loai, MoTa, TrangThai)
-CungCapTienIch(MaCN, MaTI, NgayBatDau, NgayKetThuc)
-NhanVien(MaNV, HoTen, SDT, ChucVu, LuongCoBan, TrangThaiLamViec)
-LichSuCongTac(MaLS, MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc, LyDo)
-KyHoaHong(MaCN, Thang, MucHoaHongChot, ThoiDiemChot, MaNVChot)
-ChiTietHoaHong(MaLichHen, MaCN, Thang)
-```
-
-### Module B
-
-```text
-HoiVien(MaHV, HoTen, SDT, Email, CCCD, GioiTinh, NgaySinh, NgayDangKy, MaCNDangKy, TongChiTieu12T, DiemTichLuy, Hang)
-GoiDichVu(MaGoi, TenGoi, LoaiGoi, CachTinh, ThoiHanThang, SoBuoiBanDau, Gia, DangKinhDoanh)
-GoiHoiVien(MaGHV, MaHD, STT, DonVi, NgayBatDau, NgayHetHan, SoBuoiConLai)
-GhiNhanLoyalty(MaHD, DiemCong, ThoiDiemGhiNhan, DaLoaiKhoi12T)
-```
-
-### Module C
-
-```text
-CuaKiemSoat(MaCN, SoHieuCua, ChucNang, DangHoatDong)
-CheckIn(MaCheckIn, MaHV, MaCN, SoHieuCuaVao, SoHieuCuaRa, TGVao, TGRa)
-LichHenPT(MaLichHen, MaGHV, MaNV, MaCN, NgayGio, ThoiDiemDat, TrangThai, DaTruBuoi, LyDoKetThuc)
-DanhGiaHLV(MaDanhGia, MaLichHen, Diem, NhanXet, ThoiDiemDanhGia)
-```
-
-### Module D
-
-```text
-SanPham(MaSP, TenSP, LoaiSP, GiaBan, DangKinhDoanh)
-TonKho(MaCN, MaSP, SoLuongTon)
-HoaDon(MaHD, MaHV, MaNV, MaCN, NgayLap, GiamGia, TongTien, HinhThucThanhToan)
-ChiTietHoaDon(MaHD, STT, LoaiDong, MaGoi, MaSP, SoLuong, DonGia)
-GiaoDichKho(MaGDKho, MaCN, MaSP, MaNV, MaHD, LoaiGiaoDich, SoLuongThayDoi, ThoiDiem)
-```
-
-## Khóa, phụ thuộc hàm và dạng chuẩn từng quan hệ
-
-PK là khóa chính, AK là khóa ứng viên khác. “Mỗi khóa → phần còn lại” là tập PTH tối thiểu theo các khóa công bố, không mặc định tên/ngày/số điện thoại nhân viên duy nhất.
-
-| Quan hệ | PK / AK | PTH và dạng chuẩn |
+| # | Quan hệ | Module |
 |---|---|---|
-| ChiNhanh | MaCN; không có khóa khác được giả định | MaCN → phần còn lại; BCNF |
-| TienIch | MaTI | MaTI → phần còn lại; BCNF |
-| CungCapTienIch | (MaCN, MaTI, NgayBatDau) | Khóa → NgayKetThuc; BCNF |
-| NhanVien | MaNV | MaNV → phần còn lại; BCNF theo PTH nội quan hệ này |
-| LichSuCongTac | MaLS; AK (MaNV, NgayBatDau) | Mỗi khóa → phần còn lại; BCNF |
-| KyHoaHong | (MaCN, Thang) | Khóa → phần còn lại; BCNF |
-| ChiTietHoaHong | MaLichHen | MaLichHen → MaCN, Thang; BCNF |
-| HoiVien | PK MaHV; AK CCCD, SDT (bắt buộc, duy nhất theo QT-B1) | Mỗi khóa → phần còn lại; TongChiTieu12T → Hang theo ngưỡng cố định. Đạt 2NF, không đạt 3NF/BCNF; lưu hạng dư thừa có chủ đích để đọc nhanh theo GD1-09 |
-| GoiDichVu | PK MaGoi | MaGoi → phần còn lại; BCNF theo PTH đã nêu; kiểm tra tổ hợp loại/cách tính bằng ràng buộc miền |
-| GoiHoiVien | PK MaGHV; AK (MaHD, STT, DonVi) | Mỗi khóa → phần còn lại; BCNF theo PTH đã nêu |
-| GhiNhanLoyalty | PK MaHD | MaHD → phần còn lại; BCNF; DiemCong tính từ tiền ở bảng khác, không tạo PTH ngoài khóa trong quan hệ này |
-| CuaKiemSoat | PK `{MaCN, SoHieuCua}` | `(MaCN, SoHieuCua) → ChucNang, DangHoatDong`; BCNF. Số hiệu cửa chỉ duy nhất trong phạm vi một chi nhánh; mọi định thức không tầm thường là khóa. |
-| CheckIn | PK `{MaCheckIn}` | `MaCheckIn → MaHV, MaCN, SoHieuCuaVao, SoHieuCuaRa, TGVao, TGRa`; BCNF. “Một lượt đang mở/hội viên” là ràng buộc có điều kiện, không phải PTH trên toàn quan hệ. Không lưu mô tả hội viên/chi nhánh/cửa. |
-| LichHenPT | PK `{MaLichHen}` | `MaLichHen → MaGHV, MaNV, MaCN, NgayGio, ThoiDiemDat, TrangThai, DaTruBuoi, LyDoKetThuc`; BCNF theo PTH đã nêu. Không lưu MaHV vì MaGHV xác định chủ gói; nhờ đó không tạo PTH không khóa MaGHV → MaHV trong lịch. Tính duy nhất `(MaNV, NgayGio)` chỉ áp dụng cho dòng chưa hủy nên là ràng buộc có điều kiện, không coi là khóa ứng viên toàn quan hệ. |
-| DanhGiaHLV | PK `{MaDanhGia}`; AK `{MaLichHen}` | `MaDanhGia → MaLichHen, Diem, NhanXet, ThoiDiemDanhGia`; `MaLichHen → MaDanhGia, Diem, NhanXet, ThoiDiemDanhGia`; BCNF. `MaLichHen` là khóa ứng viên `UNIQUE`, bảo đảm một lịch có tối đa một đánh giá. Không lặp `MaHV`, `MaNV` vì có thể suy ra qua lịch. |
-| SanPham | PK `{MaSP}` | `MaSP → TenSP, LoaiSP, GiaBan, DangKinhDoanh`; BCNF: vế trái của mọi PTH không tầm thường là khóa. Tên sản phẩm không mặc định duy nhất. |
-| TonKho | PK `{MaCN, MaSP}` | `(MaCN, MaSP) → SoLuongTon`; BCNF. Số dư tách riêng cho từng chi nhánh và mặt hàng. |
-| HoaDon | PK `{MaHD}` | `MaHD → MaHV, MaNV, MaCN, NgayLap, GiamGia, TongTien, HinhThucThanhToan`; BCNF. `TongTien` là tổng chụp tại thời điểm bán, được kiểm tra với chi tiết; không suy ra bằng PTH đơn trong cùng quan hệ. |
-| ChiTietHoaDon | PK `{MaHD, STT}` | `(MaHD, STT) → LoaiDong, MaGoi, MaSP, SoLuong, DonGia`; BCNF theo PTH đã nêu. Không lưu tên sản phẩm/gói hoặc ThanhTien dẫn xuất. (SoLuong, DonGia) → ThanhTien chỉ thuộc kết quả truy vấn mở rộng, không phải PTH của bảng cơ sở sau GD1-12. |
-| GiaoDichKho | PK `{MaGDKho}` | `MaGDKho → MaCN, MaSP, MaNV, MaHD, LoaiGiaoDich, SoLuongThayDoi, ThoiDiem`; BCNF. Nhật ký bất biến; `MaNV` hoặc `MaHD` có thể rỗng cho loại điều chỉnh không gắn người dùng/hóa đơn nếu nhóm cho phép. |
+| 1 | CHI_NHANH(<u>MaCN</u>, TenCN, DiaChi, SDT, GioMoCua, GioDongCua, SucChua) | A |
+| 2 | NHAN_VIEN(<u>MaNV</u>, HoTen, SDT, ChucVu, *MaCNHienTai*, LuongCoBan) | A |
+| 3 | LICH_SU_CONG_TAC(<u>MaLSCT</u>, *MaNV*, *MaCN*, ChucVu, NgayBatDau, NgayKetThuc) | A |
+| 4 | HOA_HONG_CHI_NHANH(<u>MaHHCN</u>, *MaCN*, NgayBatDau, NgayKetThuc, MucHoaHongMoiBuoi) | A |
+| 5 | HOI_VIEN(<u>MaHV</u>, HoTen, SDT, Email, CCCD, GioiTinh, NgaySinh, NgayDangKy, *MaCN*, TongChiTieu, DiemTichLuy, Hang) | B |
+| 6 | HANG_MUC_CUNG_CAP(<u>MaHM</u>, TenHangMuc, LoaiHangMuc, Gia, ThoiHanThang, SoBuoiBanDau, DangKinhDoanh) | B (gói), D (sản phẩm) |
+| 7 | GOI_HOI_VIEN(<u>MaGHV</u>, *MaHV*, *MaHM*, NgayKichHoat, NgayHetHan, SoBuoiConLai) | B |
+| 8 | CHECK_IN(<u>MaCI</u>, *MaGHV*, *MaCN*, ThoiGianVao, ThoiGianRa, ThietBiVao, ThietBiRa) | C |
+| 9 | LICH_HEN_PT(<u>MaLH</u>, *MaGHV*, *MaNV*, *MaCN*, NgayTap, ThoiGianBatDau, TrangThai) | C |
+| 10 | DANH_GIA_HLV(<u>MaDG</u>, *MaLH*, Diem, NhanXet) | C |
+| 11 | TON_KHO(<u>*MaCN*, *MaHM*</u>, SoLuongTon) | D |
+| 12 | HOA_DON(<u>MaHD</u>, *MaHV*, *MaNV*, *MaCN*, NgayLap, GiamGia, TongTien, HinhThucThanhToan) | D |
+| 13 | CHI_TIET_HOA_DON(<u>MaCTHD</u>, *MaHD*, *MaHM*, SoLuong, DonGia) | D |
 
-## Kết luận dạng chuẩn toàn lược đồ
+## 2. Khóa, phụ thuộc hàm và dạng chuẩn từng quan hệ
 
-Có 20 quan hệ: A 7, B 4, C 4, D 5. Theo tập PTH toàn quan hệ đã công bố, 19 quan hệ đạt BCNF; HoiVien đạt 2NF, không đạt 3NF vì TongChiTieu12T → Hang, trong đó TongChiTieu12T không là siêu khóa và Hang không là thuộc tính khóa. Do đó mức chuẩn chung bảo đảm của toàn lược đồ là **2NF, không tuyên bố toàn CSDL đạt 3NF/BCNF**.
+Chỉ liệt kê phụ thuộc hàm (PTH) không hiển nhiên. Các giá trị "chụp lại lúc phát sinh" (đơn giá, ngày hết hạn) không phải PTH, vì danh mục có thể đổi theo thời gian.
 
-Giữ Hang là quyết định lưu tổng/hạng đã chốt; bắt buộc đồng bộ theo B. Phương án chuẩn hóa nếu muốn đổi chính sách sau này: bỏ Hang khỏi bảng cơ sở, tính từ tổng khi đọc; bản hiện tại không tự đổi phương án người dùng đã chọn. TongTien/TonKho/TongChiTieu12T/NhanVien.ChucVu là tổng hoặc bản sao liên bảng cần ràng buộc nhất quán; sự dư thừa đó không tự tạo PTH ngoài khóa trong chính bảng nếu không có định thức nội bảng tương ứng.
+| Quan hệ | Khóa | Tập PTH | Dạng chuẩn | Giải thích |
+|---|---|---|---|---|
+| CHI_NHANH | MaCN | MaCN → TenCN, DiaChi, SDT, GioMoCua, GioDongCua, SucChua | BCNF | Mọi vế trái là khóa |
+| NHAN_VIEN | MaNV | MaNV → HoTen, SDT, ChucVu, MaCNHienTai, LuongCoBan | BCNF | `MaCNHienTai`, `ChucVu` được suy từ quan hệ **khác** (LICH_SU_CONG_TAC), không có PTH giữa các thuộc tính trong quan hệ này. Đây là dư thừa giữa các quan hệ, giữ khớp bằng R07 |
+| LICH_SU_CONG_TAC | MaLSCT; AK (MaNV, NgayBatDau) | MaLSCT → MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc; (MaNV, NgayBatDau) → MaLSCT, MaCN, ChucVu, NgayKetThuc | BCNF | Các giai đoạn của một nhân viên không chồng nhau nên (MaNV, NgayBatDau) là khóa |
+| HOA_HONG_CHI_NHANH | MaHHCN; AK (MaCN, NgayBatDau) | MaHHCN → MaCN, NgayBatDau, NgayKetThuc, MucHoaHongMoiBuoi; (MaCN, NgayBatDau) → phần còn lại | BCNF | Tương tự, các khoảng của một chi nhánh không chồng nhau |
+| HOI_VIEN | MaHV; AK CCCD; AK SDT | MaHV → mọi thuộc tính; CCCD → mọi thuộc tính; SDT → mọi thuộc tính; **TongChiTieu → Hang** | **2NF** | Hạng được xác định từ tổng chi tiêu theo ngưỡng. `TongChiTieu` không phải khóa, nên MaHV → TongChiTieu → Hang là phụ thuộc bắc cầu, vi phạm 3NF. Đạt 2NF vì mọi khóa chỉ có một thuộc tính. **Cố ý giữ** `Hang` để giải vấn đề 4 |
+| HANG_MUC_CUNG_CAP | MaHM | MaHM → TenHangMuc, LoaiHangMuc, Gia, ThoiHanThang, SoBuoiBanDau, DangKinhDoanh | BCNF | `LoaiHangMuc` không xác định giá hay thời hạn (nhiều gói cùng loại) |
+| GOI_HOI_VIEN | MaGHV | MaGHV → MaHV, MaHM, NgayKichHoat, NgayHetHan, SoBuoiConLai | BCNF | `NgayHetHan` chụp lại lúc mua, không phải PTH của (MaHM, NgayKichHoat) vì thời hạn danh mục có thể đổi |
+| CHECK_IN | MaCI | MaCI → MaGHV, MaCN, ThoiGianVao, ThoiGianRa, ThietBiVao, ThietBiRa | BCNF | Gói dùng ở mọi chi nhánh nên MaGHV không xác định MaCN. Tên thiết bị chỉ duy nhất **trong một chi nhánh** (ví dụ "Cổng 1"), nên ThietBiVao không xác định MaCN |
+| LICH_HEN_PT | MaLH | MaLH → MaGHV, MaNV, MaCN, NgayTap, ThoiGianBatDau, TrangThai; **(MaNV, NgayTap) → MaCN** | **2NF** | PT chỉ dạy tại chi nhánh đang công tác và một ngày chỉ thuộc một chi nhánh (#12, #13), nên cùng PT cùng ngày thì cùng chi nhánh. (MaNV, NgayTap) không phải khóa vì một PT dạy nhiều buổi/ngày → vi phạm 3NF. **Cố ý giữ** `MaCN` để tính hoa hồng và báo cáo không phải nối lịch sử công tác. Bộ (MaNV, NgayTap, ThoiGianBatDau) không phải khóa vì lịch đã hủy có thể trùng |
+| DANH_GIA_HLV | MaDG; AK MaLH | MaDG → MaLH, Diem, NhanXet; MaLH → MaDG, Diem, NhanXet | BCNF | Mỗi lịch tối đa một đánh giá |
+| TON_KHO | (MaCN, MaHM) | (MaCN, MaHM) → SoLuongTon | BCNF | |
+| HOA_DON | MaHD | MaHD → MaHV, MaNV, MaCN, NgayLap, GiamGia, TongTien, HinhThucThanhToan; **(MaNV, NgayLap) → MaCN** | **2NF** | Chi nhánh của hóa đơn là chi nhánh nhân viên lập đang công tác tại ngày lập (#24), nên cùng nhân viên, cùng thời điểm lập thì cùng chi nhánh. (MaNV, NgayLap) không được khai báo là khóa → vi phạm 3NF. **Cố ý giữ** `MaCN` vì báo cáo doanh thu theo chi nhánh (vấn đề 3) là truy vấn chính. `TongTien` suy từ CHI_TIET_HOA_DON (quan hệ khác) nên không làm vi phạm dạng chuẩn, giữ khớp bằng R23 |
+| CHI_TIET_HOA_DON | MaCTHD; AK (MaHD, MaHM) | MaCTHD → MaHD, MaHM, SoLuong, DonGia; (MaHD, MaHM) → MaCTHD, SoLuong, DonGia | BCNF | `DonGia` chụp lại lúc bán, không phụ thuộc MaHM. Thành tiền không lưu |
 
-Không đưa MaHV/MaGoi vào GoiHoiVien cơ sở: MaHD xác định MaHV và (MaHD,STT) xác định MaGoi, là phụ thuộc vào một phần AK (MaHD,STT,DonVi). Không lưu MaHV trên LichHenPT; chủ lịch suy ra qua MaGHV. Không lưu ThanhTien trên ChiTietHoaDon; tránh PTH (SoLuong,DonGia) → ThanhTien ngoài khóa. Không áp dụng kết luận chuẩn hóa của bảng cơ sở cho kết quả nối có thêm thuộc tính dẫn xuất.
+## 3. Kết luận dạng chuẩn toàn lược đồ
 
-Các ràng buộc chỉ áp dụng cho dòng chưa hủy, phiên đang mở, dòng loại gói/sản phẩm, giao dịch kho bán hàng là ràng buộc có điều kiện; không biến chúng thành AK/PTH trên toàn quan hệ. BCNF ở đây dựa trên tập PTH đã công bố, không phải bằng chứng các ràng buộc thời gian/tổng hợp tự được bảo đảm.
+- 10 quan hệ đạt **BCNF**.
+- HOI_VIEN, LICH_HEN_PT, HOA_DON đạt **2NF**, không đạt 3NF, do **cố ý lưu dư** `Hang`, `MaCN` (lịch hẹn), `MaCN` (hóa đơn) để các truy vấn tần suất cao hoặc nặng (thanh toán, hoa hồng, doanh thu theo chi nhánh) không phải tính lại hoặc nối thêm bảng.
+- **Toàn lược đồ đạt 2NF** (dạng chuẩn của lược đồ là dạng chuẩn thấp nhất của các quan hệ).
+- Muốn đạt 3NF thì tách `Hang` thành bảng ngưỡng hạng và bỏ hai cột `MaCN`; nhóm không chọn vì đi ngược mục tiêu tối ưu của vấn đề 3, 4, 5. Các dư thừa này được bảo vệ bằng ràng buộc R10, R18, R25.
 
-## Từ điển thuộc tính
+## 4. Mô tả quan hệ và thuộc tính
 
-Các mô tả đầy đủ được giữ tại module sở hữu, là thành phần của hồ sơ tổng:
+Kiểu ở mức logic: *Mã* (chuỗi/số định danh), *Chuỗi*, *Số nguyên*, *Tiền* (số nguyên, đơn vị đồng), *Ngày*, *Giờ*, *Ngày giờ*, *Bit* (0/1). Ngày giờ theo Asia/Saigon. "Rỗng" = được phép NULL.
 
-| Module | Quan hệ | Từ điển và miền thuộc tính |
-|---|---|---|
-| A | 7 quan hệ chi nhánh/nhân viên/công tác/hoa hồng | [Ánh xạ và thuộc tính A](a/thiet-ke-logic.md) |
-| B | 4 quan hệ hội viên/danh mục/gói đã mua/điểm | [Thuộc tính và miền B](b/thiet-ke-logic.md) |
-| C | 4 quan hệ cửa/phiên vào ra/lịch PT/đánh giá | [Thông tin thuộc tính C](c/thiet-ke-logic.md) |
-| D | 5 quan hệ sản phẩm/kho/hóa đơn/chi tiết/nhật ký | [Thông tin thuộc tính D](d/thiet-ke-logic.md) |
+### CHI_NHANH — chi nhánh của chuỗi (12 dòng cố định)
 
-Miền chung: mã là định danh ổn định; các cột mã FK cùng miền với khóa cha. Tiền là số đồng nguyên, số lượng/buổi là số nguyên; dấu và giá trị rỗng theo miền từng bảng. Ngày DATE gồm hai biên; thời điểm dùng Asia/Saigon. Mọi PK/AK bắt buộc có giá trị; FK bắt buộc trừ các trường hợp tùy chọn nêu dưới đây.
-
-## Danh mục khóa ngoại tổng
-
-| Bảng con | Cột FK | Bảng cha / khóa | Bắt buộc |
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
 |---|---|---|---|
-| CungCapTienIch | MaCN | ChiNhanh.MaCN | Có |
-| CungCapTienIch | MaTI | TienIch.MaTI | Có |
-| LichSuCongTac | MaNV | NhanVien.MaNV | Có |
-| LichSuCongTac | MaCN | ChiNhanh.MaCN | Có |
-| KyHoaHong | MaCN | ChiNhanh.MaCN | Có |
-| KyHoaHong | MaNVChot | NhanVien.MaNV | Có |
-| ChiTietHoaHong | MaLichHen | LichHenPT.MaLichHen | Có |
-| ChiTietHoaHong | MaCN, Thang | KyHoaHong.(MaCN,Thang) | Có |
-| HoiVien | MaCNDangKy | ChiNhanh.MaCN | Có |
-| GoiHoiVien | MaHD, STT | ChiTietHoaDon.(MaHD,STT) | Có |
-| GhiNhanLoyalty | MaHD | HoaDon.MaHD | Có |
-| CuaKiemSoat | MaCN | ChiNhanh.MaCN | Có |
-| CheckIn | MaHV | HoiVien.MaHV | Có |
-| CheckIn | MaCN | ChiNhanh.MaCN | Có |
-| CheckIn | MaCN, SoHieuCuaVao | CuaKiemSoat.(MaCN,SoHieuCua) | Có |
-| CheckIn | MaCN, SoHieuCuaRa | CuaKiemSoat.(MaCN,SoHieuCua) | Khi có cửa ra; cùng MaCN với cửa vào |
-| LichHenPT | MaGHV | GoiHoiVien.MaGHV | Có |
-| LichHenPT | MaNV | NhanVien.MaNV | Có |
-| LichHenPT | MaCN | ChiNhanh.MaCN | Có |
-| DanhGiaHLV | MaLichHen | LichHenPT.MaLichHen | Có; duy nhất |
-| TonKho | MaCN | ChiNhanh.MaCN | Có |
-| TonKho | MaSP | SanPham.MaSP | Có |
-| HoaDon | MaHV | HoiVien.MaHV | Có |
-| HoaDon | MaNV | NhanVien.MaNV | Có |
-| HoaDon | MaCN | ChiNhanh.MaCN | Có |
-| ChiTietHoaDon | MaHD | HoaDon.MaHD | Có |
-| ChiTietHoaDon | MaGoi | GoiDichVu.MaGoi | Chỉ dòng gói |
-| ChiTietHoaDon | MaSP | SanPham.MaSP | Chỉ dòng sản phẩm |
-| GiaoDichKho | MaCN | ChiNhanh.MaCN | Có |
-| GiaoDichKho | MaSP | SanPham.MaSP | Có |
-| GiaoDichKho | MaNV | NhanVien.MaNV | Có thể rỗng với ghi nhận không gắn người dùng |
-| GiaoDichKho | MaHD | HoaDon.MaHD | Bắt buộc khi xuất bán; loại khác có thể rỗng |
-| GiaoDichKho | MaCN, MaSP | TonKho.(MaCN,MaSP) | Có |
+| MaCN | Mã | Không | Mã chi nhánh |
+| TenCN, DiaChi, SDT | Chuỗi | Không | Tên, địa chỉ, số điện thoại |
+| GioMoCua, GioDongCua | Giờ | Không | Giờ mở, đóng cửa trong cùng ngày; GioMoCua < GioDongCua |
+| SucChua | Số nguyên | Không | Sức chứa > 0, chỉ dùng cho báo cáo lấp đầy |
 
-Tổng 33 FK, gồm 5 FK ghép. FK chỉ bảo đảm tồn tại, không thay thế điều kiện loại dòng, chủ gói, đủ quyền lợi hay thời gian. Không xóa dây chuyền lịch sử mua, tập, kho, điểm hoặc kỳ đã chốt.
+### NHAN_VIEN — nhân viên
 
-## Hợp đồng dữ liệu giữa module
-
-| Nơi cung cấp → nơi dùng | Dữ liệu / yêu cầu thống nhất |
-|---|---|
-| A → B/C/D | ChiNhanh, NhanVien dùng cùng mã; C đọc LichSuCongTac.ChucVu/MaCN theo toàn khoảng buổi hẹn; D đọc sức chứa/giờ cho báo cáo |
-| D → B | HoaDon.MaHV/NgayLap/TongTien; ChiTietHoaDon.MaGoi/LoaiDong/SoLuong; tạo mỗi đơn vị đúng một MaGHV |
-| B → C | vGoiHoiVien = GoiHoiVien nối ChiTietHoaDon theo (MaHD,STT), nối HoaDon theo MaHD; lấy MaHV từ HoaDon, MaGoi từ dòng. Đây là phép nối logic, không phải yêu cầu cài View |
-| C → A | LichHenPT.MaLichHen/MaNV/MaCN/NgayGio/TrangThai; chỉ buổi hoàn thành hợp lệ vào danh sách chốt; bảo vệ nguồn kỳ cũ |
-| C → D | CheckIn.MaCN/TGVao/TGRa/SoHieuCuaRa; số có mặt khác tổng lượt vào và khác tải yêu cầu đồng thời |
-| D ↔ B/C | Hóa đơn/gói/điểm/kho cùng thành công hoặc hoàn tác; quyền lợi chỉ sử dụng sau thanh toán thành công, không đọc quyền lợi chưa hoàn tất |
-
-## Ràng buộc liên module và bảng tầm ảnh hưởng
-
-Dấu +: thao tác có thể làm sai mệnh đề, phải kiểm tra; −: không trực tiếp làm sai mệnh đề đó. Thứ tự luôn Thêm / Xóa / Sửa; cột sửa nêu trường liên quan. Quy tắc bất biến/lịch sử là ràng buộc riêng: dấu − của một mệnh đề không có nghĩa được phép xóa. Với quy tắc kiểm tra tại thời điểm nghiệp vụ, thay đổi danh mục về sau không làm giao dịch quá khứ tự trở thành sai.
-
-| ID | Bối cảnh | Nội dung | Tầm ảnh hưởng (Thêm / Xóa / Sửa) |
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
 |---|---|---|---|
-| T-R01 | Toàn bộ 33 FK | Bản ghi con tham chiếu đúng khóa cha, đúng thứ tự/cặp cột; không có dữ liệu mồ côi | Mỗi bảng con (+/−/+ cột FK); mỗi bảng cha (−/+/+ khóa được tham chiếu). Danh mục cụ thể ở bảng FK tổng |
-| T-R02 | HoaDon, ChiTietHoaDon, GoiHoiVien, GoiDichVu | Hóa đơn hoàn tất có ít nhất một dòng. Dòng gói có đúng n đơn vị với DonVi=1..n; dòng sản phẩm có 0 gói. Mỗi gói đúng chủ hóa đơn, đúng danh mục dòng; chủ/loại không lưu lặp | HoaDon (+/+/+ MaHD,MaHV); ChiTietHoaDon (+/+/+ MaHD,STT,LoaiDong,MaGoi,MaSP,SoLuong); GoiHoiVien (+/+/+ MaGHV,MaHD,STT,DonVi); GoiDichVu (−/+/+ MaGoi,LoaiGoi,CachTinh) |
-| T-R03 | Thanh toán D và quyền lợi/điểm B, kho D | Hóa đơn/dòng/gói/ghi nhận điểm/tổng hội viên/nhật ký và số dư kho cùng thành công hoặc hoàn tác. Lặp MaHD không tạo lại, không trừ/cộng lần hai; không sửa hóa đơn đã trả tiền | HoaDon/ChiTietHoaDon/GoiHoiVien/GhiNhanLoyalty/GiaoDichKho (+/+/+ dữ liệu giao dịch); HoiVien (−/+/+ tổng,điểm,hạng); TonKho (−/+/+ số dư). Tính nguyên tử là yêu cầu chuyển trạng thái toàn bộ, không chỉ một dấu kiểm tra bảng |
-| T-R04 | GoiHoiVien, HoaDon, ChiTietHoaDon, GoiDichVu | Gym/Yoga theo hạn cùng hội viên/loại nối tiếp sau gói cuối cùng, gồm gói chờ; không chồng. PT mua thêm có hạn/buổi riêng và dùng ngay; vé lượt không nối hạn. Mua PT cần quyền vào hiện có hoặc mua kèm, chỉ kiểm tra tại lần mua | GoiHoiVien (+/−/+ ngày,số dư,MaHD,STT); HoaDon/ChiTietHoaDon (−/+/+ chủ,liên kết,loại,mã gói); GoiDichVu (−/+/+ loại,cách tính,hạn,số buổi). Việc tạo dòng cùng hóa đơn cũng thuộc T-R02/03 |
-| T-R05 | CheckIn, CuaKiemSoat, quyền vào B | Tại lúc vào: cửa đúng chi nhánh/chiều, đang hoạt động; có thẻ theo hạn hợp lệ hoặc vé còn lượt; PT không mở cổng. Trừ vé và tạo phiên cùng thành công; quét lặp phiên mở không trừ thêm. Tối đa một phiên mở/hội viên. Sau ra, vào lại phải còn quyền hợp lệ | CheckIn (+/−/+ MaHV,MaCN,cửa,TGVao,TGRa); dữ liệu ứng viên tại lúc vào: GoiHoiVien (+/+/+ ngày,số dư,liên kết), GoiDichVu (+/+/+ loại,cách tính), HoaDon/ChiTietHoaDon (+/+/+ chủ,liên kết,loại); CuaKiemSoat (+/+/+ khóa,chiều,trạng thái). Không dùng số dư hiện nay để xét lại lượt vào quá khứ |
-| T-R06 | LichHenPT, GoiHoiVien, hóa đơn/dòng, danh mục | Đặt đúng gói PT của hội viên, hạn bao phủ ngày hẹn. Số lịch Đã đặt/chưa trừ kể cả quá giờ <= SoBuoiConLai. Đến giờ trừ đúng MaGHV một lần, giảm số dư và bật cờ cùng nhau. Hủy còn >=2 giờ giải phóng giữ chỗ; vắng/hoàn thành không trừ lần hai | LichHenPT (+/−/+ MaGHV,NgayGio,TrangThai,DaTruBuoi,LyDoKetThuc); GoiHoiVien (−/+/+ ngày,số dư,liên kết); HoaDon/ChiTietHoaDon/GoiDichVu (−/+/+ chủ,loại,liên kết). Tới NgayGio kích hoạt nghĩa vụ trừ, không cần CheckIn |
-| T-R07 | LichHenPT, LichSuCongTac, NhanVien | QD10: khung một giờ bắt đầu giờ tròn, cùng PT không có hai lịch chưa hủy cùng NgayGio. Toàn buổi có chức vụ PT tại chi nhánh lịch theo lịch sử. Đổi vị trí từ ngày mai bị từ chối nếu làm lịch chưa hủy không phù hợp; không tự chuyển/hủy lịch | LichHenPT (+/−/+ MaNV,MaCN,NgayGio,TrangThai); LichSuCongTac (+/+/+ MaNV,MaCN,ChucVu,ngày). NhanVien.ChucVu hiện tại không thay thế lịch sử; sửa/xóa khóa nhân viên chịu T-R01 |
-| T-R08 | NhanVien và LichSuCongTac | Nhân viên đang làm có đúng một giai đoạn hôm nay; ChucVu hiện tại khớp lịch sử. Kết thúc ngày D, giai đoạn mới từ D+1; một thay đổi đang chờ/nhân viên; không chồng ngày | NhanVien (+/−/+ ChucVu,TrangThaiLamViec); LichSuCongTac (+/+/+ MaNV,ChucVu,MaCN,ngày). Sang ngày mới phải đồng bộ, không lấy NgayKetThuc rỗng làm điều kiện hiện hành duy nhất |
-| T-R09 | KyHoaHong, ChiTietHoaHong, LichHenPT, LichSuCongTac, ChiNhanh | Kỳ tháng đã kết thúc chứa đủ buổi hoàn thành hợp lệ tại chi nhánh; mỗi buổi một lần; vắng/hủy không có hoa hồng. Chụp mức khi chốt và danh sách buổi, bảo vệ kỳ và nguồn, không nhận thêm buổi sau chốt | KyHoaHong (+/+/+ cột kỳ/mức/người/thời điểm); ChiTietHoaHong (+/+/+); LichHenPT (+/+/+ MaNV,MaCN,NgayGio,TrangThai); LichSuCongTac (+/+/+ cột giai đoạn). ChiNhanh.HoaHongMoiBuoi chỉ ảnh hưởng chọn mức khi chốt kỳ mới, không ảnh hưởng tính lại kỳ cũ |
-| T-R10 | HoaDon, ChiTietHoaDon và báo cáo D | Tổng sau giảm = tổng SoLuong×DonGia − GiamGia. Phân bổ giảm trên mọi dòng theo tỷ lệ, chia đồng dư theo phần dư giảm dần/STT tăng; tổng giảm dòng = GiamGia, tổng doanh thu dòng = TongTien. Phân bổ trước khi lọc báo cáo | HoaDon (+/−/+ GiamGia,TongTien); ChiTietHoaDon (+/+/+ MaHD,STT,SoLuong,DonGia). Giá danh mục mới không đổi đơn giá lịch sử. Xóa hóa đơn bị cấm riêng bởi T-R03 |
-| T-R11 | HoaDon, GhiNhanLoyalty, HoiVien | Một ghi nhận/hóa đơn; điểm=floor(TongTien/100.000), tích lũy không hết hạn. Tổng xét hạng gồm các khoản NgayLap<=T<NgayLap+12 tháng (kẹp ngày cuối tháng). Trước đọc/dùng hạng xử lý khoản đã hết hạn, hạ hạng nếu cần, không trừ điểm | HoaDon (+/+/+ MaHV,TongTien,NgayLap); GhiNhanLoyalty (+/+/+); HoiVien (+/−/+ tổng,điểm,hạng); thời gian đến mốc hết hạn làm phát sinh đồng bộ. Xóa hội viên còn hóa đơn bị T-R01 chặn |
-| T-R12 | TonKho, GiaoDichKho, HoaDon, ChiTietHoaDon, SanPham | Tổng tồn đúng nhật ký, không âm. Xuất bán đúng chi nhánh hóa đơn và lượng gộp theo sản phẩm trên tất cả dòng; số dư mở đầu cũng có nhật ký. Điều kiện đang bán/đủ tồn xét tại lúc bán | TonKho (+/+/+ khóa,số dư); GiaoDichKho (+/+/+ khóa kho,MaHD,loại,lượng); HoaDon (−/+/+ MaCN); ChiTietHoaDon (+/+/+ MaHD,MaSP,SoLuong,LoaiDong); SanPham (+/−/+ DangKinhDoanh) tại bước kiểm tra ứng viên bán, FK riêng theo T-R01 |
-| T-R13 | CheckIn, ChiNhanh và báo cáo lấp đầy | N(T) đếm cùng chi nhánh có TGVao<=T và (TGRa rỗng hoặc TGRa>T). Tỷ lệ 100×N/SucChua; sức chứa dương, cho phép >100%, không chặn cổng. Báo cáo giờ chụp đầu khung. Tự đóng dùng mốc đóng cửa ngày vào, đánh dấu bằng cửa ra rỗng; báo cáo tạm tính nếu còn lượt quá hạn chưa đóng | CheckIn (+/+/+ MaCN,TGVao,TGRa,SoHieuCuaRa); ChiNhanh (−/+/+ MaCN,SucChua,GioMoCua,GioDongCua). Thời gian đến giờ đóng phát sinh xử lý; giờ/sức chứa cố định trong kỳ mô phỏng |
-| T-R14 | DanhGiaHLV, LichHenPT, gói và hóa đơn | Mỗi lịch hoàn thành có tối đa một đánh giá, điểm nguyên 1–5; người đánh giá là chủ hội viên suy qua gói→dòng→hóa đơn; không lưu lặp chủ/PT vào đánh giá | DanhGiaHLV (+/−/+ MaLichHen,Diem,ThoiDiemDanhGia); LichHenPT (−/+/+ MaGHV,TrangThai,NgayGio); GoiHoiVien/HoaDon/ChiTietHoaDon (−/+/+ liên kết,chủ). Bất biến nguồn sau thanh toán áp dụng cùng T-R03 |
+| MaNV | Mã | Không | Mã nhân viên |
+| HoTen, SDT | Chuỗi | Không | Họ tên, số điện thoại |
+| ChucVu | Chuỗi | Không | Chức vụ hiện tại ∈ {PT, Lễ tân, Quản lý chi nhánh, Nhân viên bán hàng}; đồng bộ từ lịch sử mỗi ngày |
+| MaCNHienTai | Mã | Có | Chi nhánh hiện tại, đồng bộ từ lịch sử mỗi ngày; rỗng = đã nghỉ việc |
+| LuongCoBan | Tiền | Không | Lương hiện tại ≥ 0; không lưu lịch sử lương |
 
-Miền, khóa, ràng buộc nội module và dấu ảnh hưởng chi tiết vẫn ở A-R01–11, B-R01–09, C-R01–13, D-R01–08. Bảng tổng bổ sung các bảng nguồn qua phép nối, không thay thế quy tắc cấm sửa/xóa hoặc thu hẹp ràng buộc nội module.
+### LICH_SU_CONG_TAC — các giai đoạn công tác
 
-## Đối chiếu chuỗi nghiệp vụ
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaLSCT | Mã | Không | Mã giai đoạn |
+| MaNV, MaCN | Mã | Không | Nhân viên, chi nhánh trong giai đoạn |
+| ChucVu | Chuỗi | Không | Chức vụ trong giai đoạn, cùng miền với NHAN_VIEN.ChucVu |
+| NgayBatDau | Ngày | Không | Ngày bắt đầu, tính cả ngày này |
+| NgayKetThuc | Ngày | Có | Ngày kết thúc, tính cả ngày này; rỗng = chưa xác định; nếu có thì ≥ NgayBatDau |
 
-| Điểm nối | Kết quả cần giữ |
-|---|---|
-| Mua 2 đơn vị PT trên một dòng | Hai MaGHV, DonVi=1/2, cùng FK dòng; lịch chọn đúng một gói, không chuyển buổi giữa hai gói |
-| Mua Gym còn hạn tới 14/11 | Gói nối bắt đầu 15/11; nếu đã có gói chờ phải nối sau đuôi chuỗi đó |
-| Mua PT kèm vé lượt | Thanh toán tạo cả quyền lợi; vé dùng khi vào cổng, PT dùng khi tới giờ hẹn; không trừ chéo |
-| PT 18h, vào 8h rồi hủy 12h | Cổng tiêu thụ quyền vào riêng; hủy hợp lệ giải phóng giữ PT, không trừ PT |
-| PT 18h, hủy 16h / 16h01 | 16h được hủy; 16h01 bị từ chối. Tới 18h lịch chưa hủy trừ một buổi; chạy lại không trừ thêm |
-| Cùng PT: 17h–18h và 18h–19h | Hai khung liền nhau hợp lệ; hai lịch chưa hủy cùng 17h bị chặn; 17h30 bị từ chối theo QD10 |
-| Đổi vị trí ngày 15 | Hiệu lực ngày 16; nếu lịch chưa hủy sau mốc đó không phù hợp thì từ chối toàn bộ thay đổi |
-| Buổi hoàn thành / không đến | Chỉ hoàn thành có hoa hồng và được đánh giá; cả hai đã trừ PT tại giờ hẹn |
-| Sửa mức hoa hồng sau chốt | Kỳ cũ dùng mức và danh sách cũ, không tính lại từ cấu hình mới |
-| Hóa đơn vừa hết cửa sổ 12 tháng | Loại tiền khỏi tổng xét hạng đúng một lần, giữ điểm và hóa đơn; hạng được đồng bộ trước khi dùng |
-| Vào đúng T / ra đúng T | Vào đúng T có tính hiện diện, ra đúng T không tính; sức chứa chỉ dùng báo cáo |
-| Chạy lại thanh toán cùng MaHD | Trả kết quả đã có; không thêm gói/điểm hoặc trừ tồn lần hai |
+### HOA_HONG_CHI_NHANH — mức hoa hồng mỗi buổi PT theo khoảng ngày
 
-Đây là đối chiếu yêu cầu và mô hình dữ liệu GĐ1, không phải kết quả kiểm thử ứng dụng hay SQL Server.
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaHHCN | Mã | Không | Mã khoảng mức |
+| MaCN | Mã | Không | Chi nhánh |
+| NgayBatDau, NgayKetThuc | Ngày | Không / Có | Khoảng hiệu lực, tính cả hai biên; kết thúc rỗng = đang áp dụng |
+| MucHoaHongMoiBuoi | Tiền | Không | Số tiền hoa hồng cho một buổi Đã hoàn thành, ≥ 0 |
 
-## Giới hạn và thông tin cần bổ sung khi nộp
+### HOI_VIEN — hội viên
 
-- Ngưỡng hạng 20/50 triệu là giả định nhóm đang dùng, cần giảng viên xác nhận; không ghi như ngưỡng do đề cho. QD10 đã được người dùng chốt giờ tròn, không còn là câu hỏi mở.
-- Bảo lưu chưa chốt và chưa đưa vào luồng/lược đồ; không tự thêm chức năng bảo lưu. Hoàn tiền/đổi điểm không thuộc phương án hiện tại. Giờ hoạt động trong ngày và sức chứa cố định là quy ước mô phỏng QD15.
-- Số liệu tần suất là giả định chung GD1-15/16; yêu cầu đồng thời và mục tiêu <50 ms chưa được kiểm chứng. Nền tảng ứng dụng, index, partition, thủ tục, ma trận truy vấn và benchmark dành cho GĐ2.
-- README còn thiếu tên/MSSV của một số thành viên; không tự điền danh tính. Các ô này cần người trong nhóm bổ sung trước khi nộp, không ảnh hưởng cấu trúc CSDL.
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaHV | Mã | Không | Mã hội viên |
+| HoTen | Chuỗi | Không | Họ tên |
+| SDT | Chuỗi | Không | Số điện thoại, duy nhất |
+| Email | Chuỗi | Có | Email |
+| CCCD | Chuỗi | Không | 12 chữ số, duy nhất |
+| GioiTinh | Chuỗi | Không | ∈ {Nam, Nữ, Khác} |
+| NgaySinh | Ngày | Không | Trước ngày đăng ký |
+| NgayDangKy | Ngày | Không | Ngày tạo hồ sơ |
+| MaCN | Mã | Không | Chi nhánh đăng ký |
+| TongChiTieu | Tiền | Không | Tổng `TongTien` các hóa đơn trong năm dương lịch hiện tại, ≥ 0 |
+| DiemTichLuy | Số nguyên | Không | Tổng điểm mọi hóa đơn, ≥ 0, không reset |
+| Hang | Chuỗi | Không | ∈ {Silver, Gold, Platinum}, theo ngưỡng 20/50 triệu của TongChiTieu |
+
+### HANG_MUC_CUNG_CAP — danh mục gói dịch vụ và sản phẩm
+
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaHM | Mã | Không | Mã hàng mục |
+| TenHangMuc | Chuỗi | Không | Tên; với sản phẩm ghi rõ nhóm (Whey, bình nước, thảm yoga…) |
+| LoaiHangMuc | Chuỗi | Không | ∈ {Gym, Yoga, PT, Spa, Vé lượt, Sản phẩm} |
+| Gia | Tiền | Không | Giá bán hiện tại > 0 |
+| ThoiHanThang | Số nguyên | Có | Gym/Yoga ∈ {1, 3, 6, 12}; PT ∈ {3, 6, 12}; loại khác rỗng |
+| SoBuoiBanDau | Số nguyên | Có | PT > 0; Spa, Vé lượt = 1; loại khác rỗng |
+| DangKinhDoanh | Bit | Không | 1 = đang bán, 0 = ngừng |
+
+### GOI_HOI_VIEN — gói hội viên đã mua (mỗi dòng một mã QR)
+
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaGHV | Mã | Không | Mã gói, đồng thời là mã QR quét cổng |
+| MaHV | Mã | Không | Hội viên sở hữu |
+| MaHM | Mã | Không | Hàng mục loại gói (không phải Sản phẩm) |
+| NgayKichHoat | Ngày | Không | Ngày mua |
+| NgayHetHan | Ngày | Không | Gym/Yoga/PT: ngày mua + số tháng − 1 ngày; Spa, Vé lượt: ngày mua + 6 ngày |
+| SoBuoiConLai | Số nguyên | Có | Gym/Yoga rỗng; PT, Spa, Vé lượt: 0 … SoBuoiBanDau |
+
+### CHECK_IN — một phiên vào/ra
+
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaCI | Mã | Không | Mã phiên |
+| MaGHV | Mã | Không | Gói đã quét để vào |
+| MaCN | Mã | Không | Chi nhánh |
+| ThoiGianVao | Ngày giờ | Không | Lúc quét vào |
+| ThoiGianRa | Ngày giờ | Có | Lúc ra; rỗng = đang trong phòng; nếu có thì > ThoiGianVao |
+| ThietBiVao | Chuỗi | Không | Tên thiết bị quét vào, duy nhất trong chi nhánh |
+| ThietBiRa | Chuỗi | Có | Tên thiết bị quét ra; rỗng khi đã có ThoiGianRa = phiên bị tự đóng, giờ ra ước tính |
+
+### LICH_HEN_PT — lịch hẹn PT một giờ
+
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaLH | Mã | Không | Mã lịch |
+| MaGHV | Mã | Không | Gói PT dùng cho buổi này (suy ra hội viên) |
+| MaNV | Mã | Không | PT dạy |
+| MaCN | Mã | Không | Chi nhánh dạy |
+| NgayTap | Ngày | Không | Ngày tập |
+| ThoiGianBatDau | Giờ | Không | Giờ tròn; buổi kéo dài 1 giờ, nằm trong giờ mở cửa |
+| TrangThai | Số nguyên | Không | 0 = Đã đặt (mặc định), 1 = Hủy, 2 = Đã hoàn thành |
+
+### DANH_GIA_HLV — đánh giá của hội viên cho một buổi PT
+
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaDG | Mã | Không | Mã đánh giá |
+| MaLH | Mã | Không | Lịch được đánh giá, duy nhất |
+| Diem | Số nguyên | Không | 1 … 5 |
+| NhanXet | Chuỗi | Có | Nhận xét |
+
+### TON_KHO — tồn kho sản phẩm tại chi nhánh
+
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaCN, MaHM | Mã | Không | Chi nhánh, sản phẩm; có dòng = chi nhánh đang bán sản phẩm này |
+| SoLuongTon | Số nguyên | Không | ≥ 0 |
+
+### HOA_DON — hóa đơn
+
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaHD | Mã | Không | Mã hóa đơn |
+| MaHV | Mã | Không | Hội viên mua |
+| MaNV | Mã | Không | Nhân viên lập |
+| MaCN | Mã | Không | Chi nhánh lập = chi nhánh của nhân viên tại ngày lập |
+| NgayLap | Ngày giờ | Không | Thời điểm thanh toán |
+| GiamGia | Tiền | Không | 0 ≤ GiamGia ≤ tạm tính |
+| TongTien | Tiền | Không | Tạm tính − GiamGia, ≥ 0; lưu sẵn |
+| HinhThucThanhToan | Chuỗi | Không | ∈ {Tiền mặt, VNPay, Thẻ} |
+
+### CHI_TIET_HOA_DON — dòng hóa đơn
+
+| Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
+|---|---|---|---|
+| MaCTHD | Mã | Không | Mã dòng |
+| MaHD | Mã | Không | Hóa đơn |
+| MaHM | Mã | Không | Hàng mục (gói hoặc sản phẩm); (MaHD, MaHM) duy nhất |
+| SoLuong | Số nguyên | Không | > 0 |
+| DonGia | Tiền | Không | Giá của hàng mục tại lúc bán, > 0 |
+
+## 5. Khóa ngoại (20)
+
+| # | Khóa ngoại | Tham chiếu | Bản số |
+|---|---|---|---|
+| 1 | NHAN_VIEN.MaCNHienTai | CHI_NHANH.MaCN | n–0..1 (rỗng khi nghỉ việc) |
+| 2 | LICH_SU_CONG_TAC.MaNV | NHAN_VIEN.MaNV | n–1, mỗi nhân viên ≥ 1 giai đoạn |
+| 3 | LICH_SU_CONG_TAC.MaCN | CHI_NHANH.MaCN | n–1 |
+| 4 | HOA_HONG_CHI_NHANH.MaCN | CHI_NHANH.MaCN | n–1 |
+| 5 | HOI_VIEN.MaCN | CHI_NHANH.MaCN | n–1 |
+| 6 | GOI_HOI_VIEN.MaHV | HOI_VIEN.MaHV | n–1 |
+| 7 | GOI_HOI_VIEN.MaHM | HANG_MUC_CUNG_CAP.MaHM | n–1 |
+| 8 | CHECK_IN.MaGHV | GOI_HOI_VIEN.MaGHV | n–1 |
+| 9 | CHECK_IN.MaCN | CHI_NHANH.MaCN | n–1 |
+| 10 | LICH_HEN_PT.MaGHV | GOI_HOI_VIEN.MaGHV | n–1 |
+| 11 | LICH_HEN_PT.MaNV | NHAN_VIEN.MaNV | n–1 |
+| 12 | LICH_HEN_PT.MaCN | CHI_NHANH.MaCN | n–1 |
+| 13 | DANH_GIA_HLV.MaLH | LICH_HEN_PT.MaLH | 0..1–1 |
+| 14 | TON_KHO.MaCN | CHI_NHANH.MaCN | n–1 |
+| 15 | TON_KHO.MaHM | HANG_MUC_CUNG_CAP.MaHM | n–1 |
+| 16 | HOA_DON.MaHV | HOI_VIEN.MaHV | n–1 |
+| 17 | HOA_DON.MaNV | NHAN_VIEN.MaNV | n–1 |
+| 18 | HOA_DON.MaCN | CHI_NHANH.MaCN | n–1 |
+| 19 | CHI_TIET_HOA_DON.MaHD | HOA_DON.MaHD | n–1, mỗi hóa đơn ≥ 1 dòng |
+| 20 | CHI_TIET_HOA_DON.MaHM | HANG_MUC_CUNG_CAP.MaHM | n–1 |
+
+Không xóa dây chuyền (cascade) dữ liệu lịch sử. Bảng cha đã được tham chiếu thì không xóa.
+
+## 6. Ràng buộc toàn vẹn
+
+Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội dung**, và **bảng tầm ảnh hưởng**: `+` là thao tác có thể vi phạm nên phải kiểm tra, `−` là không vi phạm; ghi trong ngoặc các thuộc tính mà thao tác Sửa cần kiểm tra. Ràng buộc khóa chính, khóa ứng viên và 20 khóa ngoại ở mục 2, 5 không lặp lại ở đây.
+
+### 6.1. Ràng buộc miền giá trị
+
+**R01** — Bối cảnh: CHI_NHANH. Nội dung: ∀c ∈ CHI_NHANH: c.GioMoCua < c.GioDongCua ∧ c.SucChua > 0.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| CHI_NHANH | + | − | + (GioMoCua, GioDongCua, SucChua) |
+
+**R02** — Bối cảnh: NHAN_VIEN, LICH_SU_CONG_TAC. Nội dung: ChucVu ∈ {PT, Lễ tân, Quản lý chi nhánh, Nhân viên bán hàng}; NHAN_VIEN.LuongCoBan ≥ 0; LICH_SU_CONG_TAC.NgayKetThuc rỗng hoặc ≥ NgayBatDau.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| NHAN_VIEN | + | − | + (ChucVu, LuongCoBan) |
+| LICH_SU_CONG_TAC | + | − | + (ChucVu, NgayBatDau, NgayKetThuc) |
+
+**R03** — Bối cảnh: HOA_HONG_CHI_NHANH. Nội dung: MucHoaHongMoiBuoi ≥ 0; NgayKetThuc rỗng hoặc ≥ NgayBatDau.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| HOA_HONG_CHI_NHANH | + | − | + (MucHoaHongMoiBuoi, NgayBatDau, NgayKetThuc) |
+
+**R04** — Bối cảnh: HOI_VIEN. Nội dung: CCCD gồm 12 chữ số; GioiTinh ∈ {Nam, Nữ, Khác}; NgaySinh < NgayDangKy; TongChiTieu ≥ 0; DiemTichLuy ≥ 0; Hang ∈ {Silver, Gold, Platinum}.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| HOI_VIEN | + | − | + (CCCD, GioiTinh, NgaySinh, NgayDangKy, TongChiTieu, DiemTichLuy, Hang) |
+
+**R05** — Bối cảnh: HANG_MUC_CUNG_CAP. Nội dung: Gia > 0; LoaiHangMuc ∈ {Gym, Yoga, PT, Spa, Vé lượt, Sản phẩm}; Gym/Yoga: ThoiHanThang ∈ {1, 3, 6, 12}, SoBuoiBanDau rỗng; PT: ThoiHanThang ∈ {3, 6, 12}, SoBuoiBanDau > 0; Spa, Vé lượt: ThoiHanThang rỗng, SoBuoiBanDau = 1; Sản phẩm: cả hai rỗng.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| HANG_MUC_CUNG_CAP | + | − | + (Gia, LoaiHangMuc, ThoiHanThang, SoBuoiBanDau) |
+
+**R06** — Bối cảnh: CHECK_IN, CHI_TIET_HOA_DON, HOA_DON, TON_KHO, DANH_GIA_HLV, LICH_HEN_PT. Nội dung: CHECK_IN.ThoiGianRa rỗng hoặc > ThoiGianVao; CHI_TIET_HOA_DON.SoLuong > 0, DonGia > 0; HOA_DON.HinhThucThanhToan ∈ {Tiền mặt, VNPay, Thẻ}; TON_KHO.SoLuongTon ≥ 0; DANH_GIA_HLV.Diem ∈ 1..5; LICH_HEN_PT.TrangThai ∈ {0, 1, 2}.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| CHECK_IN | + | − | + (ThoiGianVao, ThoiGianRa) |
+| CHI_TIET_HOA_DON | + | − | + (SoLuong, DonGia) |
+| HOA_DON | + | − | + (HinhThucThanhToan) |
+| TON_KHO | + | − | + (SoLuongTon) |
+| DANH_GIA_HLV | + | − | + (Diem) |
+| LICH_HEN_PT | + | − | + (TrangThai) |
+
+### 6.2. Ràng buộc liên thuộc tính, liên bộ và liên quan hệ — Module A
+
+**R07** — Bối cảnh: NHAN_VIEN, LICH_SU_CONG_TAC. Nội dung: sau khi đồng bộ đầu ngày, với mỗi nhân viên: nếu có giai đoạn g bao phủ hôm nay thì NHAN_VIEN.MaCNHienTai = g.MaCN và NHAN_VIEN.ChucVu = g.ChucVu; nếu không có thì MaCNHienTai rỗng.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| NHAN_VIEN | + | − | + (MaCNHienTai, ChucVu) |
+| LICH_SU_CONG_TAC | + | + | + (MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc) |
+
+**R08** — Bối cảnh: LICH_SU_CONG_TAC. Nội dung: hai giai đoạn khác nhau của cùng một nhân viên không có ngày chung (khoảng `[NgayBatDau, NgayKetThuc]` không giao nhau, NgayKetThuc rỗng coi là vô hạn).
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| LICH_SU_CONG_TAC | + | − | + (MaNV, NgayBatDau, NgayKetThuc) |
+
+**R09** — Bối cảnh: HOA_HONG_CHI_NHANH. Nội dung: hai khoảng mức khác nhau của cùng một chi nhánh không có ngày chung.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| HOA_HONG_CHI_NHANH | + | − | + (MaCN, NgayBatDau, NgayKetThuc) |
+
+### 6.3. Module B
+
+**R10** — Bối cảnh: HOI_VIEN. Nội dung: Hang = Silver nếu TongChiTieu < 20.000.000; Gold nếu 20.000.000 ≤ TongChiTieu < 50.000.000; Platinum nếu TongChiTieu ≥ 50.000.000.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| HOI_VIEN | + | − | + (TongChiTieu, Hang) |
+
+**R11** — Bối cảnh: HOI_VIEN, HOA_DON. Nội dung: TongChiTieu của hội viên = tổng TongTien các hóa đơn của hội viên có NgayLap thuộc năm hiện tại; DiemTichLuy = tổng ⌊TongTien / 100.000⌋ trên mọi hóa đơn của hội viên.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| HOI_VIEN | + | − | + (TongChiTieu, DiemTichLuy) |
+| HOA_DON | + | + | + (MaHV, TongTien, NgayLap) |
+
+(Xóa/sửa hóa đơn bị cấm bởi R24; job đầu năm tính lại TongChiTieu.)
+
+**R12** — Bối cảnh: GOI_HOI_VIEN, HANG_MUC_CUNG_CAP. Nội dung: hàng mục của gói không phải Sản phẩm. NgayHetHan = NgayKichHoat + ThoiHanThang tháng − 1 ngày (Gym, Yoga, PT; tháng đích thiếu ngày thì lấy cuối tháng) hoặc NgayKichHoat + 6 ngày (Spa, Vé lượt), theo thời hạn tại lúc mua. SoBuoiConLai rỗng với Gym/Yoga; 0 ≤ SoBuoiConLai ≤ SoBuoiBanDau với loại còn lại.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| GOI_HOI_VIEN | + | − | + (MaHM, NgayKichHoat, NgayHetHan, SoBuoiConLai) |
+| HANG_MUC_CUNG_CAP | − | − | + (LoaiHangMuc) |
+
+**R13** — Bối cảnh: GOI_HOI_VIEN, HOA_DON, CHI_TIET_HOA_DON. Nội dung: mỗi dòng hóa đơn loại gói có SoLuong = n sinh đúng n gói cùng MaHV của hóa đơn, cùng MaHM, NgayKichHoat = ngày của NgayLap; gói chỉ được tạo trong giao dịch thanh toán.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| GOI_HOI_VIEN | + | + | + (MaHV, MaHM, NgayKichHoat) |
+| CHI_TIET_HOA_DON | + | + | + (MaHM, SoLuong) |
+| HOA_DON | − | + | + (MaHV, NgayLap) |
+
+### 6.4. Module C
+
+**R14** — Bối cảnh: CHECK_IN, GOI_HOI_VIEN, HANG_MUC_CUNG_CAP. Nội dung: tại thời điểm thêm phiên, gói có NgayKichHoat ≤ ngày(ThoiGianVao) ≤ NgayHetHan, SoBuoiConLai rỗng hoặc > 0, và loại hàng mục ≠ PT. Nếu gói giới hạn lượt thì SoBuoiConLai giảm 1 cùng giao dịch.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| CHECK_IN | + | − | + (MaGHV, ThoiGianVao) |
+| GOI_HOI_VIEN | − | − | + (SoBuoiConLai) |
+
+**R15** — Bối cảnh: LICH_HEN_PT, CHI_NHANH. Nội dung: ThoiGianBatDau là giờ tròn (phút = giây = 0); GioMoCua ≤ ThoiGianBatDau và ThoiGianBatDau + 1 giờ ≤ GioDongCua của chi nhánh lịch.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| LICH_HEN_PT | + | − | + (MaCN, ThoiGianBatDau) |
+| CHI_NHANH | − | − | + (GioMoCua, GioDongCua) |
+
+**R16** — Bối cảnh: LICH_HEN_PT. Nội dung (chống trùng lịch PT — vấn đề 2): không có hai lịch có TrangThai ≠ 1 cùng (MaNV, NgayTap, ThoiGianBatDau).
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| LICH_HEN_PT | + | − | + (MaNV, NgayTap, ThoiGianBatDau, TrangThai) |
+
+**R17** — Bối cảnh: LICH_HEN_PT, GOI_HOI_VIEN. Nội dung: không có hai lịch có TrangThai ≠ 1 của cùng một hội viên (MaHV của gói) cùng NgayTap, ThoiGianBatDau.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| LICH_HEN_PT | + | − | + (MaGHV, NgayTap, ThoiGianBatDau, TrangThai) |
+| GOI_HOI_VIEN | − | − | + (MaHV) |
+
+**R18** — Bối cảnh: LICH_HEN_PT, LICH_SU_CONG_TAC. Nội dung: với mỗi lịch, tồn tại đúng một giai đoạn của MaNV bao phủ NgayTap, có ChucVu = PT và MaCN = LICH_HEN_PT.MaCN.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| LICH_HEN_PT | + | − | + (MaNV, MaCN, NgayTap) |
+| LICH_SU_CONG_TAC | + | + | + (MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc) |
+
+**R19** — Bối cảnh: LICH_HEN_PT, GOI_HOI_VIEN, HANG_MUC_CUNG_CAP. Nội dung: gói của lịch có loại PT và NgayKichHoat ≤ NgayTap ≤ NgayHetHan; với mỗi gói PT, số lịch có TrangThai = 0 ≤ SoBuoiConLai.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| LICH_HEN_PT | + | − | + (MaGHV, NgayTap, TrangThai) |
+| GOI_HOI_VIEN | − | − | + (NgayHetHan, SoBuoiConLai) |
+
+**R20** — Bối cảnh: LICH_HEN_PT, GOI_HOI_VIEN. Nội dung: lịch mới có TrangThai = 0; chỉ được chuyển 0 → 1 khi thời điểm hủy ≤ (NgayTap + ThoiGianBatDau) − 2 giờ, và 0 → 2 khi đã tới giờ tập, đồng thời SoBuoiConLai của gói giảm đúng 1. Không có chuyển trạng thái nào khác.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| LICH_HEN_PT | + | − | + (TrangThai) |
+| GOI_HOI_VIEN | − | − | + (SoBuoiConLai) |
+
+**R21** — Bối cảnh: LICH_HEN_PT. Nội dung: lịch có NgayTap thuộc tháng đã qua không được sửa hoặc xóa (bảo đảm hoa hồng tháng cũ không đổi).
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| LICH_HEN_PT | − | + | + (MaGHV, MaNV, MaCN, NgayTap, ThoiGianBatDau, TrangThai) |
+
+**R22** — Bối cảnh: DANH_GIA_HLV, LICH_HEN_PT. Nội dung: lịch được đánh giá có TrangThai = 2.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| DANH_GIA_HLV | + | − | + (MaLH) |
+| LICH_HEN_PT | − | − | + (TrangThai) |
+
+### 6.5. Module D
+
+**R23** — Bối cảnh: HOA_DON, CHI_TIET_HOA_DON. Nội dung: mỗi hóa đơn có ít nhất một dòng; gọi TamTinh = Σ SoLuong × DonGia các dòng của hóa đơn, thì 0 ≤ GiamGia ≤ TamTinh và TongTien = TamTinh − GiamGia.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| HOA_DON | + | − | + (GiamGia, TongTien) |
+| CHI_TIET_HOA_DON | + | + | + (MaHD, SoLuong, DonGia) |
+
+**R24** — Bối cảnh: HOA_DON, CHI_TIET_HOA_DON. Nội dung: hóa đơn đã thanh toán và các dòng của nó không được thêm dòng, sửa hoặc xóa.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| HOA_DON | − | + | + (mọi thuộc tính) |
+| CHI_TIET_HOA_DON | + | + | + (mọi thuộc tính) |
+
+**R25** — Bối cảnh: HOA_DON, LICH_SU_CONG_TAC. Nội dung: HOA_DON.MaCN = chi nhánh của giai đoạn công tác của MaNV bao phủ ngày(NgayLap).
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| HOA_DON | + | − | + (MaNV, MaCN, NgayLap) |
+| LICH_SU_CONG_TAC | − | + | + (MaNV, MaCN, NgayBatDau, NgayKetThuc) |
+
+**R26** — Bối cảnh: TON_KHO, HANG_MUC_CUNG_CAP. Nội dung: hàng mục trong tồn kho có loại Sản phẩm.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| TON_KHO | + | − | + (MaHM) |
+| HANG_MUC_CUNG_CAP | − | − | + (LoaiHangMuc) |
+
+**R27** — Bối cảnh: TON_KHO, CHI_TIET_HOA_DON, HOA_DON. Nội dung: mỗi dòng sản phẩm của hóa đơn có dòng TON_KHO(MaCN của hóa đơn, MaHM) tại lúc bán, và SoLuongTon giảm đúng SoLuong trong cùng giao dịch, không âm.
+
+| | Thêm | Xóa | Sửa |
+|---|---|---|---|
+| CHI_TIET_HOA_DON | + | − | + (MaHM, SoLuong) |
+| TON_KHO | − | + | + (SoLuongTon) |
+
+## 7. Ràng buộc kiểm tra tại thời điểm nghiệp vụ
+
+Một số điều kiện chỉ đúng **tại lúc thao tác** chứ không phải mọi lúc, nên không viết thành ràng buộc trạng thái ở trên mà được kiểm tra trong thủ tục ở GĐ2:
+- Gói còn hiệu lực khi quét vào (R14) — gói hết hạn về sau không làm phiên cũ sai.
+- Hàng mục đang kinh doanh khi lập hóa đơn — ngừng bán về sau không làm hóa đơn cũ sai.
+- Đổi vị trí/nghỉ việc chỉ được chấp nhận khi không làm lịch Đã đặt từ ngày hiệu lực vi phạm R18 (QT-A03).
+- Mức hoa hồng mới chỉ bắt đầu từ ngày mai (QT-A07).
+- Ba thao tác ghi gộp trong một giao dịch: thanh toán (R11, R13, R23, R27), quét vào (R14), job tới giờ (R20).

@@ -224,15 +224,33 @@ Không xóa dây chuyền (cascade) dữ liệu lịch sử. Bảng cha đã đ�
 
 Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội dung**, và **bảng tầm ảnh hưởng**: `+` là thao tác có thể vi phạm nên phải kiểm tra, `−` là không vi phạm; ghi trong ngoặc các thuộc tính mà thao tác Sửa cần kiểm tra. Ràng buộc khóa chính, khóa ứng viên và 20 khóa ngoại ở mục 2, 5 không lặp lại ở đây.
 
+Ngoài lời diễn giải, mỗi ràng buộc có thêm dòng **ký hiệu hình thức** (logic vị từ trên các bộ của quan hệ). Quy ước:
+
+- `t.A`: giá trị thuộc tính A của bộ t; `NULL`: rỗng; `∀`: với mọi; `∃`, `∃!`: tồn tại, tồn tại duy nhất; `⇒`: suy ra; `|S|`: số phần tử của tập S; `Σ`: tổng.
+- `BP(g, d)` ≡ `g.NgayBatDau ≤ d ∧ (g.NgayKetThuc = NULL ∨ d ≤ g.NgayKetThuc)`: giai đoạn g bao phủ ngày d (hai biên đều tính).
+- `Ngày(x)`, `Tháng(x)`, `Năm(x)`, `Phút(x)`, `Giây(x)`: thành phần của ngày giờ x; `hôm_nay`: ngày hiện tại theo Asia/Saigon.
+- `CongThang(d, k)`: ngày d cộng k tháng; tháng đích thiếu ngày tương ứng thì lấy ngày cuối tháng.
+- Ràng buộc chuyển tiếp (R02, R14, R20, R21, R24, R27) nói về trạng thái trước và sau một thao tác; dấu phẩy trên (`l'`, `g'`) là bộ sau thao tác.
+
 ### 6.1. Ràng buộc miền giá trị
 
 **R01** — Bối cảnh: CHI_NHANH. Nội dung: ∀c ∈ CHI_NHANH: c.GioMoCua < c.GioDongCua ∧ c.SucChua > 0.
+
+*Ký hiệu hình thức:*
+
+- `∀c ∈ CHI_NHANH: c.GioMoCua < c.GioDongCua ∧ c.SucChua > 0`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | CHI_NHANH | + | − | + (GioMoCua, GioDongCua, SucChua) |
 
 **R02** — Bối cảnh: NHAN_VIEN, LICH_SU_CONG_TAC. Nội dung: NHAN_VIEN.ChucVu ∈ {PT, Lễ tân, Quản lý chi nhánh, Nhân viên bán hàng} và không đổi sau khi tạo; NHAN_VIEN.LuongCoBan ≥ 0; LICH_SU_CONG_TAC.NgayKetThuc rỗng hoặc ≥ NgayBatDau.
+
+*Ký hiệu hình thức:*
+
+- `∀n ∈ NHAN_VIEN: n.ChucVu ∈ {'PT', 'Lễ tân', 'Quản lý chi nhánh', 'Nhân viên bán hàng'} ∧ n.LuongCoBan ≥ 0`
+- `∀g ∈ LICH_SU_CONG_TAC: g.NgayKetThuc = NULL ∨ g.NgayKetThuc ≥ g.NgayBatDau`
+- `Bất biến chuyển tiếp: ∀n ∈ NHAN_VIEN, với n' là bộ n sau khi sửa: n'.ChucVu = n.ChucVu`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -241,11 +259,19 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R03** — Bối cảnh: HOA_HONG_CHI_NHANH. Nội dung: MucHoaHongMoiBuoi ≥ 0; NgayKetThuc rỗng hoặc ≥ NgayBatDau.
 
+*Ký hiệu hình thức:*
+
+- `∀h ∈ HOA_HONG_CHI_NHANH: h.MucHoaHongMoiBuoi ≥ 0 ∧ (h.NgayKetThuc = NULL ∨ h.NgayKetThuc ≥ h.NgayBatDau)`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | HOA_HONG_CHI_NHANH | + | − | + (MucHoaHongMoiBuoi, NgayBatDau, NgayKetThuc) |
 
 **R04** — Bối cảnh: HOI_VIEN. Nội dung: CCCD gồm 12 chữ số; GioiTinh ∈ {Nam, Nữ, Khác}; NgaySinh < NgayDangKy; TongChiTieu ≥ 0; DiemTichLuy ≥ 0; Hang ∈ {Silver, Gold, Platinum}.
+
+*Ký hiệu hình thức:*
+
+- `∀v ∈ HOI_VIEN: Dài(v.CCCD) = 12 ∧ v.CCCD chỉ gồm chữ số ∧ v.GioiTinh ∈ {'Nam', 'Nữ', 'Khác'} ∧ v.NgaySinh < v.NgayDangKy ∧ v.TongChiTieu ≥ 0 ∧ v.DiemTichLuy ≥ 0 ∧ v.Hang ∈ {'Silver', 'Gold', 'Platinum'}`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -253,11 +279,28 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R05** — Bối cảnh: HANG_MUC_CUNG_CAP. Nội dung: Gia > 0; LoaiHangMuc ∈ {Gym, Yoga, PT, Spa, Vé lượt, Sản phẩm}; Gym/Yoga: ThoiHanThang ∈ {1, 3, 6, 12}, SoBuoiBanDau rỗng; PT: ThoiHanThang ∈ {3, 6, 12}, SoBuoiBanDau > 0; Spa, Vé lượt: ThoiHanThang rỗng, SoBuoiBanDau = 1; Sản phẩm: cả hai rỗng.
 
+*Ký hiệu hình thức:*
+
+- `∀m ∈ HANG_MUC_CUNG_CAP: m.Gia > 0 ∧ m.LoaiHangMuc ∈ {'Gym', 'Yoga', 'PT', 'Spa', 'Vé lượt', 'Sản phẩm'}`
+- `m.LoaiHangMuc ∈ {'Gym', 'Yoga'} ⇒ m.ThoiHanThang ∈ {1, 3, 6, 12} ∧ m.SoBuoiBanDau = NULL`
+- `m.LoaiHangMuc = 'PT' ⇒ m.ThoiHanThang ∈ {3, 6, 12} ∧ m.SoBuoiBanDau > 0`
+- `m.LoaiHangMuc ∈ {'Spa', 'Vé lượt'} ⇒ m.ThoiHanThang = NULL ∧ m.SoBuoiBanDau = 1`
+- `m.LoaiHangMuc = 'Sản phẩm' ⇒ m.ThoiHanThang = NULL ∧ m.SoBuoiBanDau = NULL`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | HANG_MUC_CUNG_CAP | + | − | + (Gia, LoaiHangMuc, ThoiHanThang, SoBuoiBanDau) |
 
 **R06** — Bối cảnh: CHECK_IN, CHI_TIET_HOA_DON, HOA_DON, TON_KHO, DANH_GIA_HLV, LICH_HEN_PT. Nội dung: CHECK_IN.ThoiGianRa rỗng hoặc > ThoiGianVao; CHI_TIET_HOA_DON.SoLuong > 0, DonGia > 0; HOA_DON.HinhThucThanhToan ∈ {Tiền mặt, VNPay, Thẻ}; TON_KHO.SoLuongTon ≥ 0; DANH_GIA_HLV.Diem ∈ 1..5; LICH_HEN_PT.TrangThai ∈ {0, 1, 2}.
+
+*Ký hiệu hình thức:*
+
+- `∀c ∈ CHECK_IN: c.ThoiGianRa = NULL ∨ c.ThoiGianRa > c.ThoiGianVao`
+- `∀d ∈ CHI_TIET_HOA_DON: d.SoLuong > 0 ∧ d.DonGia > 0`
+- `∀h ∈ HOA_DON: h.HinhThucThanhToan ∈ {'Tiền mặt', 'VNPay', 'Thẻ'}`
+- `∀k ∈ TON_KHO: k.SoLuongTon ≥ 0`
+- `∀e ∈ DANH_GIA_HLV: 1 ≤ e.Diem ≤ 5`
+- `∀l ∈ LICH_HEN_PT: l.TrangThai ∈ {0, 1, 2}`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -272,6 +315,11 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R07** — Bối cảnh: NHAN_VIEN, LICH_SU_CONG_TAC. Nội dung: sau khi đồng bộ đầu ngày, với mỗi nhân viên: nếu có giai đoạn g bao phủ hôm nay thì NHAN_VIEN.MaCNHienTai = g.MaCN; nếu không có thì MaCNHienTai rỗng.
 
+*Ký hiệu hình thức:*
+
+- `∀n ∈ NHAN_VIEN, ∀g ∈ LICH_SU_CONG_TAC: (g.MaNV = n.MaNV ∧ BP(g, hôm_nay)) ⇒ n.MaCNHienTai = g.MaCN`
+- `∀n ∈ NHAN_VIEN: (¬∃g ∈ LICH_SU_CONG_TAC: g.MaNV = n.MaNV ∧ BP(g, hôm_nay)) ⇒ n.MaCNHienTai = NULL`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | NHAN_VIEN | + | − | + (MaCNHienTai) |
@@ -279,11 +327,19 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R08** — Bối cảnh: LICH_SU_CONG_TAC. Nội dung: hai giai đoạn khác nhau của cùng một nhân viên không có ngày chung (khoảng `[NgayBatDau, NgayKetThuc]` không giao nhau, NgayKetThuc rỗng coi là vô hạn).
 
+*Ký hiệu hình thức:*
+
+- `∀g1, g2 ∈ LICH_SU_CONG_TAC: (g1 ≠ g2 ∧ g1.MaNV = g2.MaNV) ⇒ (g1.NgayKetThuc ≠ NULL ∧ g1.NgayKetThuc < g2.NgayBatDau) ∨ (g2.NgayKetThuc ≠ NULL ∧ g2.NgayKetThuc < g1.NgayBatDau)`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | LICH_SU_CONG_TAC | + | − | + (MaNV, NgayBatDau, NgayKetThuc) |
 
 **R09** — Bối cảnh: HOA_HONG_CHI_NHANH. Nội dung: hai khoảng mức khác nhau của cùng một chi nhánh không có ngày chung.
+
+*Ký hiệu hình thức:*
+
+- `∀h1, h2 ∈ HOA_HONG_CHI_NHANH: (h1 ≠ h2 ∧ h1.MaCN = h2.MaCN) ⇒ (h1.NgayKetThuc ≠ NULL ∧ h1.NgayKetThuc < h2.NgayBatDau) ∨ (h2.NgayKetThuc ≠ NULL ∧ h2.NgayKetThuc < h1.NgayBatDau)`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -293,11 +349,20 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R10** — Bối cảnh: HOI_VIEN. Nội dung: Hang = Silver nếu TongChiTieu < 20.000.000; Gold nếu 20.000.000 ≤ TongChiTieu < 50.000.000; Platinum nếu TongChiTieu ≥ 50.000.000.
 
+*Ký hiệu hình thức:*
+
+- `∀v ∈ HOI_VIEN: (v.TongChiTieu < 20.000.000 ⇒ v.Hang = 'Silver') ∧ (20.000.000 ≤ v.TongChiTieu < 50.000.000 ⇒ v.Hang = 'Gold') ∧ (v.TongChiTieu ≥ 50.000.000 ⇒ v.Hang = 'Platinum')`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | HOI_VIEN | + | − | + (TongChiTieu, Hang) |
 
 **R11** — Bối cảnh: HOI_VIEN, HOA_DON. Nội dung: TongChiTieu của hội viên = tổng TongTien các hóa đơn của hội viên có NgayLap thuộc năm hiện tại; DiemTichLuy = tổng ⌊TongTien / 100.000⌋ trên mọi hóa đơn của hội viên.
+
+*Ký hiệu hình thức:*
+
+- `∀v ∈ HOI_VIEN: v.TongChiTieu = Σ { h.TongTien : h ∈ HOA_DON ∧ h.MaHV = v.MaHV ∧ Năm(h.NgayLap) = Năm(hôm_nay) }`
+- `∀v ∈ HOI_VIEN: v.DiemTichLuy = Σ { ⌊h.TongTien / 100.000⌋ : h ∈ HOA_DON ∧ h.MaHV = v.MaHV }`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -308,12 +373,26 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R12** — Bối cảnh: GOI_HOI_VIEN, HANG_MUC_CUNG_CAP. Nội dung: hàng mục của gói không phải Sản phẩm. NgayHetHan = NgayKichHoat + ThoiHanThang tháng − 1 ngày (Gym, Yoga, PT; tháng đích thiếu ngày thì lấy cuối tháng) hoặc NgayKichHoat + 6 ngày (Spa, Vé lượt), theo thời hạn tại lúc mua. SoBuoiConLai rỗng với Gym/Yoga; 0 ≤ SoBuoiConLai ≤ SoBuoiBanDau với loại còn lại.
 
+*Ký hiệu hình thức:*
+
+- `∀g ∈ GOI_HOI_VIEN, với m ∈ HANG_MUC_CUNG_CAP, m.MaHM = g.MaHM: m.LoaiHangMuc ≠ 'Sản phẩm'`
+- `m.LoaiHangMuc ∈ {'Gym', 'Yoga', 'PT'} ⇒ g.NgayHetHan = CongThang(g.NgayKichHoat, m.ThoiHanThang) − 1 ngày`
+- `m.LoaiHangMuc ∈ {'Spa', 'Vé lượt'} ⇒ g.NgayHetHan = g.NgayKichHoat + 6 ngày`
+- `m.LoaiHangMuc ∈ {'Gym', 'Yoga'} ⇒ g.SoBuoiConLai = NULL`
+- `m.LoaiHangMuc ∈ {'PT', 'Spa', 'Vé lượt'} ⇒ 0 ≤ g.SoBuoiConLai ≤ m.SoBuoiBanDau`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | GOI_HOI_VIEN | + | − | + (MaHM, NgayKichHoat, NgayHetHan, SoBuoiConLai) |
 | HANG_MUC_CUNG_CAP | − | − | + (LoaiHangMuc) |
 
 **R13** — Bối cảnh: GOI_HOI_VIEN, HOA_DON, CHI_TIET_HOA_DON. Nội dung: mỗi dòng hóa đơn loại gói có SoLuong = n sinh đúng n gói cùng MaHV của hóa đơn, cùng MaHM, NgayKichHoat = ngày của NgayLap; gói chỉ được tạo trong giao dịch thanh toán.
+
+*Ký hiệu hình thức:*
+
+- `∀v ∈ HOI_VIEN, ∀m ∈ HANG_MUC_CUNG_CAP với m.LoaiHangMuc ≠ 'Sản phẩm', ∀ngày x:`
+- `|{ g ∈ GOI_HOI_VIEN : g.MaHV = v.MaHV ∧ g.MaHM = m.MaHM ∧ g.NgayKichHoat = x }| = Σ { d.SoLuong : d ∈ CHI_TIET_HOA_DON ∧ h ∈ HOA_DON ∧ d.MaHD = h.MaHD ∧ h.MaHV = v.MaHV ∧ d.MaHM = m.MaHM ∧ Ngày(h.NgayLap) = x }`
+- `Việc chỉ tạo gói trong giao dịch thanh toán là ràng buộc thủ tục, không viết được thành điều kiện trên dữ liệu`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -325,12 +404,23 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R14** — Bối cảnh: CHECK_IN, GOI_HOI_VIEN, HANG_MUC_CUNG_CAP. Nội dung: tại thời điểm thêm phiên, gói có NgayKichHoat ≤ ngày(ThoiGianVao) ≤ NgayHetHan, SoBuoiConLai rỗng hoặc > 0, và loại hàng mục ≠ PT. Nếu gói giới hạn lượt thì SoBuoiConLai giảm 1 cùng giao dịch.
 
+*Ký hiệu hình thức:*
+
+- `∀c ∈ CHECK_IN, với g ∈ GOI_HOI_VIEN, g.MaGHV = c.MaGHV và m ∈ HANG_MUC_CUNG_CAP, m.MaHM = g.MaHM, tại thời điểm thêm c:`
+- `g.NgayKichHoat ≤ Ngày(c.ThoiGianVao) ≤ g.NgayHetHan ∧ (g.SoBuoiConLai = NULL ∨ g.SoBuoiConLai > 0) ∧ m.LoaiHangMuc ≠ 'PT'`
+- `g.SoBuoiConLai ≠ NULL ⇒ g'.SoBuoiConLai = g.SoBuoiConLai − 1, với g' là gói sau khi thêm c`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | CHECK_IN | + | − | + (MaGHV, ThoiGianVao) |
 | GOI_HOI_VIEN | − | − | + (SoBuoiConLai) |
 
 **R15** — Bối cảnh: LICH_HEN_PT, CHI_NHANH. Nội dung: ThoiGianBatDau là giờ tròn (phút = giây = 0); GioMoCua ≤ ThoiGianBatDau và ThoiGianBatDau + 1 giờ ≤ GioDongCua của chi nhánh lịch.
+
+*Ký hiệu hình thức:*
+
+- `∀l ∈ LICH_HEN_PT, với cn ∈ CHI_NHANH, cn.MaCN = l.MaCN:`
+- `Phút(l.ThoiGianBatDau) = 0 ∧ Giây(l.ThoiGianBatDau) = 0 ∧ cn.GioMoCua ≤ l.ThoiGianBatDau ∧ l.ThoiGianBatDau + 1 giờ ≤ cn.GioDongCua`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -339,11 +429,20 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R16** — Bối cảnh: LICH_HEN_PT. Nội dung (chống trùng lịch PT — vấn đề 2): không có hai lịch có TrangThai ≠ 1 cùng (MaNV, NgayTap, ThoiGianBatDau).
 
+*Ký hiệu hình thức:*
+
+- `∀l1, l2 ∈ LICH_HEN_PT: (l1 ≠ l2 ∧ l1.TrangThai ≠ 1 ∧ l2.TrangThai ≠ 1 ∧ l1.MaNV = l2.MaNV ∧ l1.NgayTap = l2.NgayTap) ⇒ l1.ThoiGianBatDau ≠ l2.ThoiGianBatDau`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | LICH_HEN_PT | + | − | + (MaNV, NgayTap, ThoiGianBatDau, TrangThai) |
 
 **R17** — Bối cảnh: LICH_HEN_PT, GOI_HOI_VIEN. Nội dung: không có hai lịch có TrangThai ≠ 1 của cùng một hội viên (MaHV của gói) cùng NgayTap, ThoiGianBatDau.
+
+*Ký hiệu hình thức:*
+
+- `∀l1, l2 ∈ LICH_HEN_PT, ∀g1, g2 ∈ GOI_HOI_VIEN với g1.MaGHV = l1.MaGHV, g2.MaGHV = l2.MaGHV:`
+- `(l1 ≠ l2 ∧ l1.TrangThai ≠ 1 ∧ l2.TrangThai ≠ 1 ∧ g1.MaHV = g2.MaHV ∧ l1.NgayTap = l2.NgayTap) ⇒ l1.ThoiGianBatDau ≠ l2.ThoiGianBatDau`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -351,6 +450,10 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 | GOI_HOI_VIEN | − | − | + (MaHV) |
 
 **R18** — Bối cảnh: LICH_HEN_PT, NHAN_VIEN, LICH_SU_CONG_TAC. Nội dung: với mỗi lịch, NHAN_VIEN.ChucVu của MaNV = PT, và tồn tại đúng một giai đoạn của MaNV bao phủ NgayTap có MaCN = LICH_HEN_PT.MaCN.
+
+*Ký hiệu hình thức:*
+
+- `∀l ∈ LICH_HEN_PT: (∃n ∈ NHAN_VIEN: n.MaNV = l.MaNV ∧ n.ChucVu = 'PT') ∧ (∃!g ∈ LICH_SU_CONG_TAC: g.MaNV = l.MaNV ∧ BP(g, l.NgayTap) ∧ g.MaCN = l.MaCN)`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -360,12 +463,25 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R19** — Bối cảnh: LICH_HEN_PT, GOI_HOI_VIEN, HANG_MUC_CUNG_CAP. Nội dung: gói của lịch có loại PT và NgayKichHoat ≤ NgayTap ≤ NgayHetHan; với mỗi gói PT, số lịch có TrangThai = 0 ≤ SoBuoiConLai.
 
+*Ký hiệu hình thức:*
+
+- `∀l ∈ LICH_HEN_PT, với g ∈ GOI_HOI_VIEN, g.MaGHV = l.MaGHV và m ∈ HANG_MUC_CUNG_CAP, m.MaHM = g.MaHM: m.LoaiHangMuc = 'PT' ∧ g.NgayKichHoat ≤ l.NgayTap ≤ g.NgayHetHan`
+- `∀g ∈ GOI_HOI_VIEN thuộc loại 'PT': |{ l ∈ LICH_HEN_PT : l.MaGHV = g.MaGHV ∧ l.TrangThai = 0 }| ≤ g.SoBuoiConLai`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | LICH_HEN_PT | + | − | + (MaGHV, NgayTap, TrangThai) |
 | GOI_HOI_VIEN | − | − | + (NgayHetHan, SoBuoiConLai) |
 
 **R20** — Bối cảnh: LICH_HEN_PT, GOI_HOI_VIEN. Nội dung: lịch mới có TrangThai = 0; chỉ được chuyển 0 → 1 khi thời điểm hủy ≤ (NgayTap + ThoiGianBatDau) − 2 giờ, và 0 → 2 khi đã tới giờ tập, đồng thời SoBuoiConLai của gói giảm đúng 1. Không có chuyển trạng thái nào khác.
+
+*Ký hiệu hình thức:*
+
+- `Đặt ThoiDiem(l) = l.NgayTap + l.ThoiGianBatDau; l' là bộ l sau khi sửa; g, g' là gói của l trước và sau khi sửa`
+- `Thêm l mới: l.TrangThai = 0`
+- `Sửa l: (l.TrangThai, l'.TrangThai) ∈ {(0, 1), (0, 2)}`
+- `l.TrangThai = 0 ∧ l'.TrangThai = 1 ⇒ thời_điểm_hủy ≤ ThoiDiem(l) − 2 giờ ∧ g'.SoBuoiConLai = g.SoBuoiConLai`
+- `l.TrangThai = 0 ∧ l'.TrangThai = 2 ⇒ hôm_nay ≥ ThoiDiem(l) ∧ g'.SoBuoiConLai = g.SoBuoiConLai − 1`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -374,11 +490,19 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R21** — Bối cảnh: LICH_HEN_PT. Nội dung: lịch có NgayTap thuộc tháng đã qua không được sửa hoặc xóa (bảo đảm hoa hồng tháng cũ không đổi).
 
+*Ký hiệu hình thức:*
+
+- `∀l ∈ LICH_HEN_PT: Tháng(l.NgayTap) < Tháng(hôm_nay) ⇒ (l không bị xóa ∧ l' = l), với l' là bộ l sau mọi thao tác sửa`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | LICH_HEN_PT | − | + | + (MaGHV, MaNV, MaCN, NgayTap, ThoiGianBatDau, TrangThai) |
 
 **R22** — Bối cảnh: DANH_GIA_HLV, LICH_HEN_PT. Nội dung: lịch được đánh giá có TrangThai = 2.
+
+*Ký hiệu hình thức:*
+
+- `∀e ∈ DANH_GIA_HLV: ∃l ∈ LICH_HEN_PT: l.MaLH = e.MaLH ∧ l.TrangThai = 2`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -389,12 +513,22 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R23** — Bối cảnh: HOA_DON, CHI_TIET_HOA_DON. Nội dung: mỗi hóa đơn có ít nhất một dòng; gọi TamTinh = Σ SoLuong × DonGia các dòng của hóa đơn, thì 0 ≤ GiamGia ≤ TamTinh và TongTien = TamTinh − GiamGia.
 
+*Ký hiệu hình thức:*
+
+- `Đặt TT(h) = Σ { d.SoLuong × d.DonGia : d ∈ CHI_TIET_HOA_DON ∧ d.MaHD = h.MaHD }`
+- `∀h ∈ HOA_DON: |{ d ∈ CHI_TIET_HOA_DON : d.MaHD = h.MaHD }| ≥ 1 ∧ 0 ≤ h.GiamGia ≤ TT(h) ∧ h.TongTien = TT(h) − h.GiamGia`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | HOA_DON | + | − | + (GiamGia, TongTien) |
 | CHI_TIET_HOA_DON | + | + | + (MaHD, SoLuong, DonGia) |
 
 **R24** — Bối cảnh: HOA_DON, CHI_TIET_HOA_DON. Nội dung: hóa đơn đã thanh toán và các dòng của nó không được thêm dòng, sửa hoặc xóa.
+
+*Ký hiệu hình thức:*
+
+- `∀h ∈ HOA_DON (mọi hóa đơn trong bảng đều đã thanh toán): h không bị xóa ∧ h' = h với mọi thao tác sửa`
+- `∀d ∈ CHI_TIET_HOA_DON: d không bị xóa ∧ d' = d với mọi thao tác sửa; không thêm được d'' mới với d''.MaHD = h.MaHD sau khi h đã được ghi`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
@@ -403,6 +537,10 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R25** — Bối cảnh: HOA_DON, LICH_SU_CONG_TAC. Nội dung: HOA_DON.MaCN = chi nhánh của giai đoạn công tác của MaNV bao phủ ngày(NgayLap).
 
+*Ký hiệu hình thức:*
+
+- `∀h ∈ HOA_DON: ∃g ∈ LICH_SU_CONG_TAC: g.MaNV = h.MaNV ∧ BP(g, Ngày(h.NgayLap)) ∧ g.MaCN = h.MaCN`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | HOA_DON | + | − | + (MaNV, MaCN, NgayLap) |
@@ -410,12 +548,21 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 **R26** — Bối cảnh: TON_KHO, HANG_MUC_CUNG_CAP. Nội dung: hàng mục trong tồn kho có loại Sản phẩm.
 
+*Ký hiệu hình thức:*
+
+- `∀k ∈ TON_KHO, với m ∈ HANG_MUC_CUNG_CAP, m.MaHM = k.MaHM: m.LoaiHangMuc = 'Sản phẩm'`
+
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | TON_KHO | + | − | + (MaHM) |
 | HANG_MUC_CUNG_CAP | − | − | + (LoaiHangMuc) |
 
 **R27** — Bối cảnh: TON_KHO, CHI_TIET_HOA_DON, HOA_DON. Nội dung: mỗi dòng sản phẩm của hóa đơn có dòng TON_KHO(MaCN của hóa đơn, MaHM) tại lúc bán, và SoLuongTon giảm đúng SoLuong trong cùng giao dịch, không âm.
+
+*Ký hiệu hình thức:*
+
+- `∀h ∈ HOA_DON, ∀d ∈ CHI_TIET_HOA_DON với d.MaHD = h.MaHD và hàng mục của d có loại 'Sản phẩm', tại thời điểm ghi h:`
+- `∃k ∈ TON_KHO: k.MaCN = h.MaCN ∧ k.MaHM = d.MaHM ∧ k.SoLuongTon ≥ d.SoLuong ∧ k'.SoLuongTon = k.SoLuongTon − d.SoLuong, với k' là k sau giao dịch`
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|

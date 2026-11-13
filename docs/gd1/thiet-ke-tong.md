@@ -13,7 +13,7 @@ Ký hiệu: <u>gạch chân</u> = khóa chính (PK); *nghiêng* = khóa ngoại 
 | 3 | LICH_SU_CONG_TAC(<u>MaLSCT</u>, *MaNV*, *MaCN*, NgayBatDau, NgayKetThuc) | A |
 | 4 | HOA_HONG_CHI_NHANH(<u>MaHHCN</u>, *MaCN*, NgayBatDau, NgayKetThuc, MucHoaHongMoiBuoi) | A |
 | 5 | HOI_VIEN(<u>MaHV</u>, HoTen, SDT, Email, CCCD, GioiTinh, NgaySinh, NgayDangKy, *MaCN*, TongChiTieu, DiemTichLuy, Hang) | B |
-| 6 | HANG_MUC_CUNG_CAP(<u>MaHM</u>, TenHangMuc, LoaiHangMuc, Gia, ThoiHanThang, SoBuoiBanDau, DangKinhDoanh) | B (gói), D (sản phẩm) |
+| 6 | HANG_MUC_CUNG_CAP(<u>MaHM</u>, TenSanPham, LoaiHangMuc, Gia, ThoiHanThang, SoBuoiBanDau, DangKinhDoanh) | B (gói), D (sản phẩm) |
 | 7 | GOI_HOI_VIEN(<u>MaGHV</u>, *MaHV*, *MaHM*, NgayKichHoat, NgayHetHan, SoBuoiConLai) | B |
 | 8 | CHECK_IN(<u>MaCI</u>, *MaGHV*, *MaCN*, ThoiGianVao, ThoiGianRa, ThietBiVao, ThietBiRa) | C |
 | 9 | LICH_HEN_PT(<u>MaLH</u>, *MaGHV*, *MaNV*, *MaCN*, NgayTap, ThoiGianBatDau, TrangThai) | C |
@@ -33,7 +33,7 @@ Chỉ liệt kê phụ thuộc hàm (PTH) không hiển nhiên. Các giá trị 
 | LICH_SU_CONG_TAC | MaLSCT; AK (MaNV, NgayBatDau) | MaLSCT → MaNV, MaCN, NgayBatDau, NgayKetThuc; (MaNV, NgayBatDau) → MaLSCT, MaCN, NgayKetThuc | BCNF | Các giai đoạn của một nhân viên không chồng nhau nên (MaNV, NgayBatDau) là khóa |
 | HOA_HONG_CHI_NHANH | MaHHCN; AK (MaCN, NgayBatDau) | MaHHCN → MaCN, NgayBatDau, NgayKetThuc, MucHoaHongMoiBuoi; (MaCN, NgayBatDau) → phần còn lại | BCNF | Tương tự, các khoảng của một chi nhánh không chồng nhau |
 | HOI_VIEN | MaHV; AK CCCD; AK SDT | MaHV → mọi thuộc tính; CCCD → mọi thuộc tính; SDT → mọi thuộc tính; **TongChiTieu → Hang** | **2NF** | Hạng được xác định từ tổng chi tiêu theo ngưỡng. `TongChiTieu` không phải khóa, nên MaHV → TongChiTieu → Hang là phụ thuộc bắc cầu, vi phạm 3NF. Đạt 2NF vì mọi khóa chỉ có một thuộc tính. **Cố ý giữ** `Hang` để giải vấn đề 4 |
-| HANG_MUC_CUNG_CAP | MaHM | MaHM → TenHangMuc, LoaiHangMuc, Gia, ThoiHanThang, SoBuoiBanDau, DangKinhDoanh | BCNF | `LoaiHangMuc` không xác định giá hay thời hạn (nhiều gói cùng loại) |
+| HANG_MUC_CUNG_CAP | MaHM | MaHM → TenSanPham, LoaiHangMuc, Gia, ThoiHanThang, SoBuoiBanDau, DangKinhDoanh | BCNF | `LoaiHangMuc` không xác định giá hay thời hạn (nhiều gói cùng loại) |
 | GOI_HOI_VIEN | MaGHV | MaGHV → MaHV, MaHM, NgayKichHoat, NgayHetHan, SoBuoiConLai | BCNF | `NgayHetHan` chụp lại lúc mua, không phải PTH của (MaHM, NgayKichHoat) vì thời hạn danh mục có thể đổi |
 | CHECK_IN | MaCI | MaCI → MaGHV, MaCN, ThoiGianVao, ThoiGianRa, ThietBiVao, ThietBiRa | BCNF | Gói dùng ở mọi chi nhánh nên MaGHV không xác định MaCN. Tên thiết bị chỉ duy nhất **trong một chi nhánh** (ví dụ "Cổng 1"), nên ThietBiVao không xác định MaCN |
 | LICH_HEN_PT | MaLH | MaLH → MaGHV, MaNV, MaCN, NgayTap, ThoiGianBatDau, TrangThai; **(MaNV, NgayTap) → MaCN** | **2NF** | PT chỉ dạy tại chi nhánh đang công tác và một ngày chỉ thuộc một chi nhánh (#12, #13), nên cùng PT cùng ngày thì cùng chi nhánh. (MaNV, NgayTap) không phải khóa vì một PT dạy nhiều buổi/ngày → vi phạm 3NF. **Cố ý giữ** `MaCN` để tính hoa hồng và báo cáo không phải nối lịch sử công tác. Bộ (MaNV, NgayTap, ThoiGianBatDau) không phải khóa vì lịch đã hủy có thể trùng |
@@ -112,7 +112,7 @@ Kiểu ở mức logic: *Mã* (chuỗi/số định danh), *Chuỗi*, *Số nguy
 | Thuộc tính | Kiểu | Rỗng | Ý nghĩa / miền |
 |---|---|---|---|
 | MaHM | Mã | Không | Mã hàng mục |
-| TenHangMuc | Chuỗi | Không | Tên; với sản phẩm ghi rõ nhóm (Whey, bình nước, thảm yoga…) |
+| TenSanPham | Chuỗi | Không | Tên sản phẩm hoặc gói dịch vụ; với sản phẩm ghi rõ nhóm (Whey, bình nước, thảm yoga…) |
 | LoaiHangMuc | Chuỗi | Không | ∈ {Gym, Yoga, PT, Spa, Vé lượt, Sản phẩm} |
 | Gia | Tiền | Không | Giá bán hiện tại > 0 |
 | ThoiHanThang | Số nguyên | Có | Gym/Yoga ∈ {1, 3, 6, 12}; PT ∈ {3, 6, 12}; loại khác rỗng |

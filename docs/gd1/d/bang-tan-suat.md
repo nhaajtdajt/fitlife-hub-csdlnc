@@ -1,39 +1,33 @@
-# Module D — Bảng phân tích tần suất chức năng
+# Bảng phân tích tần suất — Module D
 
-Số liệu dùng chung lấy từ [bảng giả định](../../quyet-dinh.md#bảng-giả-định-số-liệu-chung). Tần suất chức năng bổ sung chưa có trong đề được ghi là giả định. Quy ước mức độ theo tài liệu nhóm: **Cao** từ 1.000 lần/ngày; **Trung bình** 100–999 lần/ngày; **Thấp** dưới 100 lần/ngày sau quy đổi. Mức độ chỉ phản ánh số lần, không phản ánh chi phí mỗi lần.
+Số liệu lấy từ [bảng giả định chung](../../quyet-dinh.md#bảng-giả-định-số-liệu-chung); chỗ bảng chung không có thì ghi **tự đặt**. Quy trình tương ứng ở [quy-trinh.md](quy-trinh.md).
 
-## Chức năng của Module D
+**Mức độ** (toàn hệ thống, theo [quy ước chung](../../quyet-dinh.md#quy-ước-phân-loại-tần-suất-chung)): Cao ≥ 1.000 lần/ngày · Trung bình 100–999 lần/ngày · Thấp < 100 lần/ngày.
 
-| Mã | Chức năng | Mô tả | Tần suất toàn hệ thống | Mức độ | Căn cứ/nhận xét |
-|---|---|---|---:|---|---|
-| D-F01 | Tra cứu danh mục sản phẩm | Xem tên, loại, giá và trạng thái sản phẩm khi bán hàng | ~750 lần/ngày | Trung bình | Tạm lấy một lượt tra cứu cho mỗi hóa đơn có bán sản phẩm; giả định G9 |
-| D-F02 | Quản lý sản phẩm | Thêm/sửa thông tin, giá hoặc ngừng bán sản phẩm | ~5 lần/tháng | Thấp | Giả định; danh mục khoảng 150 mã, thay đổi ít |
-| D-F03 | Xem tồn kho | Tra số lượng theo sản phẩm và chi nhánh | ~100 lần/ngày | Trung bình | Giả định, khoảng 8 lượt/chi nhánh/ngày |
-| D-F04 | Nhập/điều chỉnh tồn kho | Cộng/trừ tồn kho khi nhập hàng hoặc kiểm kê | ~24 lần/ngày | Thấp | Giả định 2 lần/chi nhánh/ngày; không tính trừ kho bán hàng |
-| D-F05 | Lập hóa đơn có sản phẩm | Tạo hóa đơn bán lẻ, ghi dòng sản phẩm và trừ tồn | ~750 hóa đơn/ngày | Trung bình | 25.000 check-in/ngày × 3% lượt đến mua sản phẩm |
-| D-F06 | Lập hóa đơn có gói dịch vụ | Ghi nhận thanh toán gói, dùng mã/giá gói của B và gọi cập nhật điểm/hạng | ~690 hóa đơn/ngày | Trung bình | G11: 390 Gym/Yoga (gồm một tháng/vé lượt) + 100 PT + 200 Spa; giả định một đơn vị gói/vé trên mỗi hóa đơn có gói |
-| D-F07 | Lập hóa đơn tổng | Thanh toán hóa đơn có thể chứa gói, sản phẩm hoặc cả hai | ~1.400 lần/ngày (~117/chi nhánh/ngày) | **Cao** | 690 có gói + 750 có sản phẩm − 40 có cả hai = 1.400 hóa đơn riêng biệt; khoảng 42.000/tháng |
-| D-F08 | Tra cứu/đối chiếu hóa đơn | Tìm hóa đơn và dòng theo mã, hội viên, chi nhánh, nhân viên hoặc thời gian | ~300 lần/ngày | Trung bình | Giả định, trung bình 25 lượt/chi nhánh/ngày |
-| D-F09 | Báo cáo doanh thu | Tổng hợp TongTien sau giảm; doanh thu theo gói phân bổ giảm trên toàn hóa đơn trước khi lọc/nhóm | 12 lần/ngày (1 lần/chi nhánh) + 1 lần/tuần toàn hệ thống | Thấp | Theo mẫu ở phân công; ít lần nhưng đọc lịch sử lớn |
-| D-F10 | Báo cáo sản phẩm bán chạy/tồn kho | Xếp hạng mặt hàng, xem tồn kho theo chi nhánh | 12 lần/ngày (1 lần/chi nhánh) | Thấp | Giả định theo lịch quản lý cuối ngày |
-| D-F11 | Báo cáo tỷ lệ lấp đầy | Tính số người đang tập theo thời điểm/khung giờ chia sức chứa | ~12 lần/ngày theo chi nhánh | Thấp | Đọc CheckIn của C theo ảnh chụp đầu khung giờ; ghi rõ lượt tự đóng và trạng thái tạm tính theo #15, không chặn cổng |
+## Chức năng
 
-## Quy mô dữ liệu liên quan
+| Mã | Chức năng | Mô tả | Loại | Tần suất | Mức độ | Căn cứ / nhận xét |
+|---|---|---|---|---|---|---|
+| D-F01 | Tra cứu danh mục sản phẩm | Xem tên, giá, trạng thái sản phẩm khi bán hàng (QT-D1) | Đọc | ~750 lần/ngày | Trung bình | Một lượt cho mỗi hóa đơn có sản phẩm (G9) |
+| D-F02 | Quản lý danh mục sản phẩm | Thêm, sửa giá, ngừng kinh doanh (QT-D1) | Ghi | ~5 lần/tháng | Thấp | Tự đặt; ~150 sản phẩm |
+| D-F03 | Mở/ngừng bán sản phẩm tại chi nhánh | Tạo hoặc xóa dòng `TON_KHO` (QT-D2) | Ghi | ~10 lần/tháng | Thấp | Tự đặt |
+| D-F04 | Xem tồn kho | Số lượng theo sản phẩm và chi nhánh | Đọc | ~100 lần/ngày | Trung bình | Tự đặt, ~8 lượt/chi nhánh/ngày |
+| D-F05 | Nhập hàng, điều chỉnh tồn | Cộng/trừ `SoLuongTon`, không âm (QT-D3) | Ghi | ~24 lần/ngày | Thấp | Tự đặt, 2 lần/chi nhánh/ngày; không gồm trừ kho khi bán |
+| D-F06 | Lập và thanh toán hóa đơn | Ghi hóa đơn, các dòng, trừ kho; gọi B tạo gói và cộng điểm trong cùng giao dịch (QT-D4) | Đọc + ghi | ~1.400 hóa đơn/ngày (~42.000/tháng) | **Cao** | 690 hóa đơn có gói + 750 có sản phẩm − 40 có cả hai |
+| D-F07 | Tra cứu, đối chiếu hóa đơn | Lọc theo mã, hội viên, ngày, chi nhánh, nhân viên (QT-D5) | Đọc | ~300 lần/ngày | Trung bình | Tự đặt, ~25 lượt/chi nhánh/ngày |
+| D-F08 | Báo cáo doanh thu | Cộng `TongTien` theo ngày/tháng/quý/năm, chi nhánh; doanh thu theo hàng mục trước giảm giá (QT-D6) | Đọc nặng | 12 lần/ngày + ~1 lần/tuần toàn hệ thống | Thấp | Tự đặt. Ít lần nhưng đọc nhiều tháng hóa đơn; đề nêu là chậm > 1 phút (vấn đề 3) |
+| D-F09 | Báo cáo bán chạy, tồn kho | Xếp hạng hàng mục theo số lượng; xem tồn theo chi nhánh (QT-D6) | Đọc | 12 lần/ngày | Thấp | Tự đặt, 1/chi nhánh/ngày |
+| D-F10 | Báo cáo tỷ lệ lấp đầy | Số người có mặt tại từng mốc giờ chia sức chứa (QT-D7) | Đọc nặng | ~12 lần/ngày | Thấp | Tự đặt. Đọc `CHECK_IN` của C (~750.000 dòng/tháng); đề nêu là chậm > 1 phút (vấn đề 3) |
 
-- Khoảng 1.400 hóa đơn/ngày, 42.000/tháng; 500.000 hóa đơn cho một năm trong bộ dữ liệu demo.
-- Khoảng 150 mã sản phẩm và 1.800 dòng tồn kho (150 × 12 chi nhánh).
-- `ChiTietHoaDon` dự kiến khoảng 750.000 dòng/năm theo bảng giả định chung; số dòng trung bình trên mỗi hóa đơn xấp xỉ 1,5–2.
-- Check-in nguồn cho báo cáo khoảng 750.000 dòng/tháng toàn hệ thống; bảng này do C quản lý.
+## Quy mô dữ liệu
+
+- `HOA_DON`: ~1.400 dòng/ngày, ~42.000/tháng; bộ dữ liệu GĐ2 ~500.000 dòng (một năm).
+- `CHI_TIET_HOA_DON`: ~1,5 dòng/hóa đơn, ~750.000 dòng/năm.
+- `HANG_MUC_CUNG_CAP`: ~180 dòng (~30 gói + ~150 sản phẩm); `TON_KHO`: tối đa ~1.800 dòng.
 
 ## Nhận xét
 
-1. `HoaDon` ghi khoảng 1.400 lần/ngày nhưng cũng là bảng nguồn cho doanh thu, điểm/hạng và đối chiếu, nên cả đường ghi hóa đơn lẫn truy vấn theo ngày/chi nhánh đều quan trọng.
-2. `ChiTietHoaDon` là nơi lưu đơn giá lịch sử và phân biệt hàng hóa với gói dịch vụ. Bán chạy theo số lượng; doanh thu theo loại dùng tiền dòng sau phân bổ giảm giá của toàn hóa đơn (GD1-08). Tính phần dư cần đọc các dòng cùng MaHD; đo chi phí ở GĐ2, không cộng thành giao dịch mới.
-3. `TonKho` chỉ có tối đa khoảng 1.800 cặp sản phẩm–chi nhánh nhưng cập nhật phải nhất quán với thanh toán để không âm kho.
-4. Báo cáo doanh thu và lấp đầy chạy ít hơn giao dịch bán hàng nhưng có thể đọc nhiều tháng dữ liệu; ở giai đoạn 2 cần đo riêng chi phí và cân nhắc tổng hợp/partition theo mẫu truy vấn thực tế.
-5. Số 750 sản phẩm/ngày là số hóa đơn có sản phẩm theo giả định tỷ lệ 3% lượt đến, không phải số lượng món bán ra.
-
-
-**GD1-16:** đã bổ sung cơ cấu thẻ một tháng/vé lượt trong G11, không cộng trùng vé mua lại hoặc hóa đơn hỗn hợp. Đây là giả định quy mô; nhiều đơn vị gói trên cùng hóa đơn được nghiệp vụ cho phép và cần ước lượng lại khi thay cơ cấu. Số dòng CheckIn khác tổng thao tác quét vào/ra.
-
-**GD1-15:** áp dụng [quy ước chung](../../quyet-dinh.md#quy-ước-phân-loại-tần-suất-chung-gd1-15); nhãn theo lượt nghiệp vụ/ngày toàn hệ thống, độ nặng ghi riêng. Một lượt là đơn vị của chức năng ở từng hàng, không mặc định là một câu SQL hay một lần chạy tác vụ. Không cộng các chức năng bao hàm nhau hoặc lượt xử lý theo lô thành tổng giao dịch.
+1. `HOA_DON` ghi ~1.400 lần/ngày và là nguồn cho doanh thu, lịch sử điểm, đối chiếu; cả đường ghi lẫn truy vấn theo ngày và chi nhánh đều quan trọng.
+2. D-F06 là giao dịch dài nhất hệ thống (hóa đơn + dòng + kho + gói + điểm). Phần cộng điểm đã được làm nhẹ ở B-F08 để không kéo dài thời gian chờ in hóa đơn.
+3. `TON_KHO` nhỏ nhưng phải trừ nhất quán khi hai hóa đơn cùng bán món cuối cùng, để không âm kho.
+4. D-F08 và D-F10 chạy ít nhưng đọc dữ liệu lớn; đây là hai báo cáo vấn đề 3 yêu cầu tối ưu (phân vùng, bảng tổng hợp) ở GĐ2.

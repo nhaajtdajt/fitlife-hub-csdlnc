@@ -1,113 +1,126 @@
-# Module D — Mô tả quy trình nghiệp vụ
+# Mô tả quy trình — Module D: Sản phẩm, tồn kho, hóa đơn và báo cáo
 
-Phạm vi: sản phẩm bán lẻ, tồn kho theo chi nhánh, hóa đơn và báo cáo. Dùng các cột đã công bố của A (`MaCN`, `SucChua`, `GioMoCua`, `GioDongCua`, `MaNV`), B (`MaHV`, `MaGoi`, `LoaiGoi`, `Gia`) và C (`MaCN`, `TGVao`, `TGRa`, `SoHieuCuaRa`). Hóa đơn công bố `MaHD`, `MaHV`, `NgayLap`, `TongTien` cho B theo [hợp đồng giao diện](../../phan-cong.md).
+## 1. Mục tiêu và phạm vi
 
-Các số lượng trong tài liệu lấy từ [bảng giả định chung](../../quyet-dinh.md#bảng-giả-định-số-liệu-chung). Quyết định #3, #5 và #16 đã được chốt; GD1-07/#15 đã chốt chỉ báo cáo lấp đầy, không chặn cổng; quy ước tự đóng lượt và giới hạn dữ liệu mô phỏng được nêu bên dưới.
+Module D quản lý sản phẩm bán lẻ, tồn kho theo chi nhánh, hóa đơn và các báo cáo. Vấn đề của đề cần giải: **vấn đề 3 — dữ liệu log lớn, báo cáo doanh thu và tỷ lệ lấp đầy chậm.**
 
-## Tác nhân và dữ liệu
+Dữ liệu theo [lược đồ logic](../luoc-do-logic.png).
+
+## 2. Tác nhân và dữ liệu
 
 | Tác nhân | Trách nhiệm |
 |---|---|
-| Nhân viên bán hàng/lễ tân | Lập hóa đơn, chọn gói và sản phẩm, nhận thanh toán |
-| Quản lý chi nhánh | Xem doanh thu, sản phẩm bán chạy và tồn kho tại chi nhánh |
-| Ban giám đốc/kế toán | Xem doanh thu toàn hệ thống, đối chiếu hóa đơn và báo cáo |
-| Hệ thống | Tính tiền, kiểm tra tồn, ghi hóa đơn/dòng hàng, cập nhật tồn và gọi thủ tục B cộng điểm/hạng |
+| Nhân viên bán hàng / lễ tân | Lập và thanh toán hóa đơn |
+| Nhân viên kho / quản lý chi nhánh | Nhập hàng, điều chỉnh tồn, mở/ngừng bán sản phẩm tại chi nhánh |
+| Quản lý chi nhánh | Xem doanh thu, bán chạy, tồn kho, lấp đầy của chi nhánh mình |
+| Ban giám đốc / kế toán | Quản lý danh mục sản phẩm, xem báo cáo toàn hệ thống, đối chiếu hóa đơn |
+| Hệ thống | Tính tiền, kiểm tra tồn, ghi hóa đơn, trừ kho, gọi B tạo gói và cộng điểm |
 
-| Dữ liệu | Nội dung |
+| Bảng | Nội dung chính |
 |---|---|
-| `SanPham` | Mã, tên, loại, giá bán hiện hành, trạng thái kinh doanh |
-| `TonKho` | Chi nhánh, sản phẩm, số lượng tồn |
-| `HoaDon` | Mã, hội viên, nhân viên lập, chi nhánh, thời điểm, tiền hàng, giảm giá, tổng sau giảm, phương thức thanh toán |
-| `ChiTietHoaDon` | Hóa đơn, số thứ tự dòng, loại dòng, mã gói hoặc mã sản phẩm, số lượng, đơn giá chụp tại lúc bán; thành tiền tính khi đọc |
-| `CheckIn` (C) | Lượt vào/ra theo hội viên, chi nhánh và thời gian; dữ liệu nguồn cho báo cáo lấp đầy |
-| `GoiDichVu` (B) | Mã gói, loại gói và giá hiện hành; dòng hóa đơn giữ giá bán riêng |
+| `HANG_MUC_CUNG_CAP` | Danh mục chung với B. D quản lý các dòng loại **Sản phẩm** |
+| `TON_KHO` | Chi nhánh, sản phẩm, số lượng tồn |
+| `HOA_DON` | Hội viên, nhân viên lập, chi nhánh, ngày lập, giảm giá, tổng tiền, hình thức thanh toán |
+| `CHI_TIET_HOA_DON` | Hóa đơn, hàng mục (gói hoặc sản phẩm), số lượng, đơn giá lúc bán |
+| `CHECK_IN` (C) | Nguồn dữ liệu cho báo cáo lấp đầy, D chỉ đọc |
 
-## Quy tắc nghiệp vụ chung
+## 3. Quy tắc nghiệp vụ chung
 
-1. Một hóa đơn thuộc đúng một chi nhánh; nhân viên lập hóa đơn và hội viên phải tồn tại.
-2. Hóa đơn có ít nhất một dòng hàng. Mỗi dòng là **một trong hai loại**: gói dịch vụ hoặc sản phẩm; không được đồng thời có cả `MaGoi` và `MaSP`, cũng không được bỏ trống cả hai.
-3. Số lượng mỗi dòng là số nguyên dương. Gói dịch vụ bán theo đơn vị gói; sản phẩm có thể bán nhiều đơn vị.
-4. Đơn giá dòng là giá tại thời điểm thanh toán. Giá danh mục thay đổi về sau không sửa lịch sử bán. GD1-12: chỉ lưu SoLuong và DonGia; ThanhTien = SoLuong × DonGia là giá trị truy vấn/hiển thị, không ghi vào ChiTietHoaDon.
-5. Tạm tính hóa đơn bằng tổng thành tiền các dòng; giảm giá không âm và không lớn hơn tạm tính; `TongTien = TamTinh - GiamGia`, không âm. `TongTien` đã gồm giảm giá và là giá trị truyền cho Module B.
-6. Hình thức thanh toán thuộc `Tiền mặt`, `VNPay`, `Thẻ`. Chỉ thanh toán thành công mới ghi nhận hóa đơn bán hàng.
-7. Với dòng sản phẩm, kho của chi nhánh trên hóa đơn phải đủ hàng. Ghi hóa đơn, dòng chi tiết và trừ kho là một giao dịch nguyên tử; lỗi ở bất kỳ bước nào thì hủy toàn bộ.
-8. Với dòng gói, D ghi nhận nội dung và giá bán; sau thanh toán, Module B tạo `GoiHoiVien`. Việc tạo gói và cộng điểm/hạng phải nằm trong luồng giao dịch đã thống nhất giữa B và D.
-9. Hóa đơn đã thanh toán không được sửa, xóa hoặc hoàn tiền theo quyết định #16. Sai sót trước khi thanh toán phải được sửa trước khi xác nhận giao dịch.
-10. Không xóa vật lý sản phẩm đã xuất hiện trên hóa đơn hoặc tồn kho; chuyển trạng thái ngừng bán. Hóa đơn và dòng hóa đơn là dữ liệu lịch sử.
-11. Mọi báo cáo doanh thu dùng số tiền sau giảm giá (#18): tổng hóa đơn dùng NgayLap/MaCN/TongTien; theo gói/sản phẩm dùng doanh thu dòng đã phân bổ giảm giá. Báo cáo sản phẩm bán chạy theo số lượng không thay đổi; tồn kho đọc TonKho.
-12. Tỷ lệ lấp đầy tại thời điểm T = 100 × số lượt CheckIn cùng chi nhánh thỏa `TGVao <= T AND (TGRa IS NULL OR TGRa > T)` / SucChua. SucChua là số nguyên dương; tỷ lệ có thể vượt 100%, không chặn cổng hoặc ép kết quả về 100%. Lượt quên quét ra theo quy ước tự đóng C QT-C3 (#15).
+1. Mỗi hóa đơn thuộc một hội viên, một nhân viên lập và một chi nhánh. **Chi nhánh của hóa đơn là chi nhánh hiện tại của nhân viên lập** (`NHAN_VIEN.MaCNHienTai`), không chọn tự do. Khách chưa là hội viên phải đăng ký (QT-B1) trước khi mua.
+2. Hóa đơn có ít nhất một dòng. Mỗi dòng là một hàng mục (gói hoặc sản phẩm). Trong một hóa đơn, mỗi hàng mục xuất hiện tối đa một dòng; mua nhiều thì tăng `SoLuong`.
+3. `SoLuong` nguyên dương. `DonGia` là giá của hàng mục **tại lúc bán**; sửa giá danh mục về sau không đổi hóa đơn cũ.
+4. Thành tiền dòng = `SoLuong × DonGia`, tính khi đọc, không lưu. Tạm tính = tổng thành tiền các dòng. `0 <= GiamGia <= tạm tính`. `TongTien = tạm tính − GiamGia`, được lưu sẵn trên `HOA_DON` để báo cáo và cộng điểm nhanh.
+5. `HinhThucThanhToan` thuộc {Tiền mặt, VNPay, Thẻ}. Chỉ thanh toán thành công mới ghi nhận hóa đơn.
+6. Thanh toán là **một giao dịch nguyên tử**: tạo hóa đơn, các dòng, trừ tồn kho cho dòng sản phẩm, B tạo gói cho dòng gói (QT-B2), B cộng điểm/hạng (QT-B4). Lỗi ở bất kỳ bước nào thì hoàn tác toàn bộ.
+7. Hóa đơn đã thanh toán không sửa, không xóa, không hoàn tiền. Sai sót chỉ sửa được trước khi thanh toán.
+8. **Tồn kho:** có dòng `TON_KHO(MaCN, MaHM)` nghĩa là chi nhánh đó bán sản phẩm đó. `SoLuongTon >= 0`. Hết hàng thì tồn bằng 0 và vẫn giữ dòng. Chỉ hàng mục loại Sản phẩm mới có dòng tồn kho; gói có ở mọi chi nhánh.
+9. Chỉ lưu số tồn hiện tại; nhật ký từng lần nhập/xuất kho nằm ngoài phạm vi. Lượng đã bán vẫn tra được từ `CHI_TIET_HOA_DON`.
+10. Không xóa hàng mục đã xuất hiện trên hóa đơn hoặc tồn kho; chuyển `DangKinhDoanh` = 0.
+11. **Doanh thu:** doanh thu thực thu (tổng, theo chi nhánh, theo thời gian) cộng `TongTien`, tức là sau giảm giá. Doanh thu **theo từng hàng mục** tính theo giá niêm yết lúc bán, `SoLuong × DonGia`, trước giảm giá, vì giảm giá chỉ có ở cấp hóa đơn. Vì vậy tổng doanh thu các hàng mục có thể lớn hơn doanh thu thực thu; báo cáo phải ghi rõ "trước giảm giá".
 
-## QT-D1. Quản lý danh mục sản phẩm
+## 4. QT-D1 — Quản lý danh mục sản phẩm
 
-**Ai làm:** quản trị danh mục hoặc quản lý được phân quyền.
+**Ai làm:** ban giám đốc / quản lý được phân quyền.
 
-1. Người dùng tạo/sửa sản phẩm với mã, tên, loại, giá bán và trạng thái.
-2. Hệ thống kiểm tra mã duy nhất, tên và loại bắt buộc, giá dương.
-3. Khi bắt đầu kinh doanh sản phẩm tại chi nhánh, hệ thống khởi tạo dòng tồn kho cho cặp chi nhánh–sản phẩm với số lượng ban đầu được kiểm kê; nếu số lượng đầu kỳ khác 0 thì ghi một giao dịch kho mở đầu tương ứng.
-4. Khi ngừng kinh doanh, hệ thống đánh dấu ngừng bán; không xóa sản phẩm đã có giao dịch.
+1. Thêm sản phẩm vào `HANG_MUC_CUNG_CAP` với `LoaiHangMuc` = Sản phẩm: tên (ghi rõ nhóm như Whey protein, bình nước, thảm yoga), giá bán.
+2. Sửa tên, giá, hoặc chuyển ngừng kinh doanh.
+3. Hệ thống kiểm tra: tên bắt buộc, giá dương, `ThoiHanThang` và `SoBuoiBanDau` rỗng.
 
-**Lỗi:** mã trùng, giá không dương, dữ liệu thiếu; chi nhánh/sản phẩm đã được tham chiếu thì không xóa vật lý.
+**Ngoại lệ:** thiếu tên, giá không dương, có thời hạn hoặc số buổi → nhập lại. Xóa sản phẩm đã có giao dịch → từ chối, chỉ ngừng kinh doanh.
 
-## QT-D2. Nhập hoặc điều chỉnh tồn kho
+## 5. QT-D2 — Mở hoặc ngừng bán sản phẩm tại chi nhánh
 
-**Ai làm:** nhân viên kho/quản lý chi nhánh.
+**Ai làm:** quản lý chi nhánh.
 
-1. Chọn chi nhánh, sản phẩm và loại nghiệp vụ (nhập hàng, kiểm kê điều chỉnh).
-2. Hệ thống xác nhận cặp sản phẩm–chi nhánh đã được mở kinh doanh và số lượng điều chỉnh hợp lệ.
-3. Hệ thống cộng/trừ số lượng tồn và ghi nhận kết quả cùng giao dịch.
-4. Người dùng xem số lượng mới.
+1. **Mở bán:** chọn sản phẩm đang kinh doanh, nhập số lượng kiểm kê ban đầu (>= 0). Hệ thống tạo dòng `TON_KHO` cho chi nhánh mình.
+2. **Ngừng bán tại chi nhánh:** chỉ được khi `SoLuongTon` = 0; hệ thống xóa dòng `TON_KHO`. Hóa đơn cũ không bị ảnh hưởng vì dòng hóa đơn tham chiếu hàng mục, không tham chiếu tồn kho.
 
-**Lỗi:** cặp tồn kho không tồn tại, số lượng sau điều chỉnh âm hoặc đầu vào không phải số nguyên; không ghi một phần.
+**Ngoại lệ:** sản phẩm đã có dòng tồn tại chi nhánh; hàng mục không phải loại Sản phẩm; ngừng bán khi còn hàng → từ chối.
 
-## QT-D3. Lập và thanh toán hóa đơn
+## 6. QT-D3 — Nhập hàng và điều chỉnh tồn kho
 
-**Ai làm:** nhân viên bán hàng/lễ tân tại chi nhánh.
+**Ai làm:** nhân viên kho / quản lý chi nhánh.
 
-1. Nhân viên chọn chi nhánh và tìm hội viên theo mã. Hệ thống ghi nhận nhân viên lập hóa đơn.
-2. Nhân viên thêm một hay nhiều dòng sản phẩm và/hoặc gói dịch vụ. Với mỗi dòng, hệ thống kiểm tra mặt hàng đang bán, số lượng và chụp đơn giá hiện hành. Nếu mua PT mà chưa có thẻ dịch vụ cấp quyền vào còn hiệu lực hoặc vé vào còn lượt, phải thêm thẻ/vé vào hóa đơn (có lựa chọn 1 tháng hoặc một lượt). B kiểm tra điều kiện này trước khi hoàn tất; vé mua kèm không được giữ riêng cho giờ PT.
-3. Hệ thống tính thành tiền trước giảm từng dòng, tổng tiền hàng, giảm giá và số phải trả. Phân bổ giảm giá theo tỷ lệ toàn bộ các dòng và quy tắc làm tròn GD1-08 trong thiết kế logic; hiển thị giảm phân bổ và tiền sau giảm, kiểm tra tổng khớp hóa đơn trước thanh toán. Với Gym/Yoga theo hạn, B tính ngày bắt đầu/hết hạn nối tiếp sau gói cùng loại cuối cùng đã mua; D hiển thị rõ gói dùng ngay hay chờ kích hoạt để hội viên xác nhận trước khi thanh toán. Việc tính ngày và tạo gói phải được B kiểm tra nguyên tử khi ghi, tránh hai lần mua đồng thời chồng khoảng. Nhân viên xác nhận phương thức thanh toán.
-4. Trước khi chấp nhận thanh toán, hệ thống kiểm tra tồn kho của mọi dòng sản phẩm tại chi nhánh; không đủ hàng thì báo dòng thiếu và không trừ kho.
-5. Khi thanh toán thành công, hệ thống trong một giao dịch: tạo `HoaDon`, tạo toàn bộ `ChiTietHoaDon`, trừ tồn kho theo số lượng, và yêu cầu B cập nhật điểm/hạng theo hội viên, mã hóa đơn, tổng tiền và ngày lập.
-6. Module B xử lý quyền lợi gói và điểm/hạng theo phần việc của B. Mỗi đơn vị gói PT trên hóa đơn tạo MaGHV mới, bắt đầu ngày mua, buổi/hạn riêng; không nhập số buổi vào gói cũ hoặc đổi lịch đã đặt. D chỉ hoàn tất nếu các bước tích hợp bắt buộc thành công.
-7. Hệ thống trả mã hóa đơn và biên nhận cho nhân viên/hội viên.
+1. Chọn sản phẩm đang bán tại chi nhánh, chọn nhập hàng (số dương) hoặc kiểm kê điều chỉnh (số dương hoặc âm).
+2. Hệ thống cộng số lượng vào `SoLuongTon` trong một giao dịch, kiểm tra kết quả không âm.
+3. Hiển thị số tồn mới.
 
-**Lỗi:** thanh toán bị từ chối, sản phẩm ngừng bán, tồn kho thiếu, số tiền không hợp lệ, hoặc thủ tục B thất bại. Giao dịch phải rollback để không tạo hóa đơn thiếu dòng, không trừ kho một phần và không có trạng thái tiền/điểm lệch nhau. Yêu cầu về ranh giới giao dịch khi B tạo `GoiHoiVien` cần D và B xác nhận ở bước 2.3.
+**Ngoại lệ:** chi nhánh chưa mở bán sản phẩm đó; số lượng không phải số nguyên; tồn sau điều chỉnh âm → từ chối, không ghi.
 
-## QT-D4. Tra cứu và đối chiếu hóa đơn
+## 7. QT-D4 — Lập và thanh toán hóa đơn
 
-**Ai làm:** nhân viên bán hàng, kế toán hoặc quản lý theo quyền.
+**Ai làm:** nhân viên bán hàng / lễ tân.
 
-1. Người dùng lọc theo mã hóa đơn, hội viên, khoảng ngày, chi nhánh hoặc nhân viên lập.
-2. Hệ thống trả thông tin đầu hóa đơn và các dòng, gồm giá bán tại thời điểm giao dịch.
-3. Kế toán đối chiếu tổng tiền đầu hóa đơn với các dòng và khoản giảm giá.
+1. Nhân viên đăng nhập; hệ thống lấy chi nhánh hiện tại của nhân viên làm chi nhánh hóa đơn.
+2. Tìm hội viên theo mã hoặc SĐT; chưa có thì làm QT-B1.
+3. Thêm các dòng gói và/hoặc sản phẩm. Với mỗi dòng: hàng mục đang kinh doanh, số lượng nguyên dương, đơn giá lấy từ giá hiện tại. Dòng sản phẩm phải có dòng tồn kho tại chi nhánh.
+4. Với dòng gói, hệ thống hiển thị ngày kích hoạt, ngày hết hạn và cảnh báo nếu chồng với gói cùng loại còn hạn (QT-B2).
+5. Hệ thống tính tạm tính, nhân viên nhập giảm giá, hệ thống tính `TongTien`. Chọn hình thức thanh toán.
+6. Kiểm tra tồn kho mọi dòng sản phẩm đủ hàng.
+7. Khi thanh toán thành công, trong một giao dịch:
+   1. tạo `HOA_DON` và các `CHI_TIET_HOA_DON`;
+   2. trừ `SoLuongTon` của từng dòng sản phẩm tại chi nhánh, chỉ khi vẫn đủ hàng lúc ghi;
+   3. B tạo `GOI_HOI_VIEN` cho từng đơn vị gói (QT-B2);
+   4. B cộng `TongChiTieu`, `DiemTichLuy` và cập nhật `Hang` (QT-B4).
+8. In biên nhận.
 
-**Lỗi:** bộ lọc ngày không hợp lệ; không tìm thấy thì trả danh sách rỗng. Hóa đơn đã thanh toán chỉ xem/đối chiếu, không sửa.
+**Ngoại lệ:** thanh toán bị từ chối; hàng mục ngừng kinh doanh; thiếu tồn (kể cả do hóa đơn khác vừa bán hết); giảm giá âm hoặc lớn hơn tạm tính; nhân viên đã nghỉ việc; B tạo gói hoặc cộng điểm lỗi. Mọi lỗi đều hoàn tác toàn bộ: không có hóa đơn thiếu dòng, không trừ kho một phần, không có tiền mà thiếu gói hoặc điểm.
 
-## QT-D5. Báo cáo doanh thu, sản phẩm và tồn kho
+## 8. QT-D5 — Tra cứu và đối chiếu hóa đơn
 
-**Ai làm:** quản lý chi nhánh hoặc ban giám đốc.
+**Ai làm:** nhân viên bán hàng, kế toán, quản lý theo quyền.
 
-- Doanh thu: chọn khoảng thời gian và phạm vi chi nhánh; tổng hợp TongTien sau giảm theo ngày/tháng/quý/năm, mỗi hóa đơn đúng một lần. Không cộng TongTien lặp sau khi nối sang nhiều dòng chi tiết. Tổng doanh thu tất cả gói cộng tất cả sản phẩm phải khớp tổng hóa đơn trong cùng phạm vi; riêng phần gói không cần bằng toàn hóa đơn có cả sản phẩm.
-- Sản phẩm bán chạy: cộng số lượng dòng sản phẩm trong kỳ, có thể lọc chi nhánh.
-- Tồn kho: xem số lượng hiện có theo chi nhánh và sản phẩm.
-- Gói dịch vụ doanh thu cao: phân bổ giảm giá trên toàn bộ dòng của từng hóa đơn trong 6 tháng gần nhất, sau đó mới lọc dòng gói, nhóm theo MaGoi và cộng DoanhThuDong sau giảm. Sản phẩm tính doanh thu theo cùng quy tắc; không dùng ThanhTien trước giảm để xếp hạng doanh thu.
-- Tỷ lệ lấp đầy: đọc CheckIn của C theo công thức tại T. Báo cáo theo giờ lấy ảnh chụp tại đầu từng khung (ví dụ 17:00, 18:00), hiển thị rõ thời điểm; không lấy tổng lượt vào trong giờ làm số người đồng thời và không gọi ảnh chụp là trung bình cả giờ.
+1. Lọc theo mã hóa đơn, hội viên, khoảng ngày, chi nhánh hoặc nhân viên lập.
+2. Hệ thống trả thông tin hóa đơn và các dòng, gồm đơn giá lúc bán và thành tiền tính từ `SoLuong × DonGia`.
+3. Kế toán đối chiếu: tạm tính − `GiamGia` phải bằng `TongTien`.
 
-Vào đúng T được tính; ra đúng T không còn được tính. Một hội viên có tối đa một phiên mở nên đếm phiên hợp lệ tương ứng số người. Không có người thì trả 0% khi sức chứa hợp lệ; sức chứa thiếu/0/âm thì báo không tính được do dữ liệu cấu hình, không chia cho 0 hoặc trả 0% giả.
+**Ngoại lệ:** khoảng ngày không hợp lệ → nhập lại. Không tìm thấy → danh sách rỗng. Hóa đơn chỉ xem, không sửa.
 
-Quy ước mô phỏng: giờ hoạt động cùng ngày Asia/Saigon, giờ mở < giờ đóng, giờ hoạt động/sức chứa cố định trong kỳ dữ liệu. C ghi giờ ra ước tính tại giờ đóng cửa cho lượt quên ra và giữ SoHieuCuaRa rỗng. D hiển thị số lượt tự đóng trong kỳ để phân biệt chất lượng dữ liệu. Nếu còn lượt chưa đóng dù mốc đóng cửa của ngày vào đã qua, báo cáo là tạm tính và tính lại sau khi C chạy bù; không âm thầm coi là báo cáo kỳ đã hoàn tất. Không suy ra khách thực sự ở lại đến giờ đóng cửa. Thay đổi sức chứa theo lịch sử hoặc hoạt động qua đêm/24 giờ cần thiết kế bổ sung, không nằm trong bộ giả định này.
+## 9. QT-D6 — Báo cáo doanh thu, bán chạy và tồn kho
 
-Báo cáo không sửa dữ liệu giao dịch. Kỳ không có giao dịch trả kết quả 0/rỗng phù hợp. Báo cáo phải lọc khoảng thời gian rõ ràng để có thể đánh giá ở giai đoạn vật lý.
+**Ai làm:** quản lý chi nhánh (chi nhánh mình), ban giám đốc (toàn hệ thống).
 
-## Quan hệ với module khác
+- **Doanh thu theo ngày/tháng/quý/năm:** cộng `TongTien` theo `NgayLap` và chi nhánh, mỗi hóa đơn đúng một lần. So sánh giữa các chi nhánh ở cấp công ty.
+- **Doanh thu theo hàng mục** (ví dụ gói doanh thu cao nhất 6 tháng gần nhất): cộng `SoLuong × DonGia` của các dòng trong kỳ, nhóm theo `MaHM`, có thể lọc theo loại và chi nhánh. Đây là doanh thu trước giảm giá (quy tắc 11).
+- **Bán chạy nhất:** cộng `SoLuong` theo hàng mục trong kỳ, lọc theo chi nhánh và loại.
+- **Tồn kho:** số lượng hiện có theo chi nhánh và sản phẩm.
+
+Kỳ không có giao dịch trả 0 hoặc danh sách rỗng. Báo cáo chỉ đọc, không sửa dữ liệu.
+
+## 10. QT-D7 — Báo cáo tỷ lệ lấp đầy
+
+**Ai làm:** quản lý chi nhánh, ban giám đốc.
+
+1. Chọn chi nhánh, ngày và các mốc giờ (ví dụ 17:00, 18:00, 19:00).
+2. Tại mỗi mốc T: số người = số `CHECK_IN` tại chi nhánh có `ThoiGianVao <= T` và (`ThoiGianRa` rỗng hoặc `ThoiGianRa > T`). Tỷ lệ = 100 × số người / `SucChua`. Tỷ lệ có thể vượt 100%, không cắt ngọn.
+3. Hiển thị bảng tỷ lệ theo từng mốc giờ, có thể so sánh giữa các chi nhánh.
+
+**Ghi chú:** đây là số người có mặt tại đúng mốc T, không phải tổng lượt vào trong cả giờ. Sức chứa chỉ dùng để tính tỷ lệ, không chặn cổng.
+
+## 11. Quan hệ với module khác
 
 | Module | D cung cấp | D sử dụng |
 |---|---|---|
-| A — Chi nhánh & Nhân sự | Không sở hữu dữ liệu của A | `ChiNhanh(MaCN, SucChua, GioMoCua, GioDongCua)`, `NhanVien(MaNV)` |
-| B — Hội viên & Gói | `HoaDon(MaHD, MaHV, NgayLap, TongTien)`; gọi thủ tục cộng điểm/hạng | `HoiVien(MaHV)`, `GoiDichVu(MaGoi, LoaiGoi, Gia)` |
-| C — Check-in & Lịch PT | Báo cáo đọc dữ liệu C, không ghi vào bảng C | `CheckIn(MaCN, TGVao, TGRa, SoHieuCuaRa)` để tính lấp đầy |
-
-
-GD1-09: D gọi B trong cùng giao dịch thanh toán; B kiểm tra đầu vào với HoaDon, ghi nhận duy nhất theo MaHD và cập nhật tổng/điểm/hạng nguyên tử. Hết 12 tháng chỉ loại tiền khỏi tổng xét hạng, giữ điểm. Hợp đồng tại [thiết kế điểm/hạng B](../b/diem-hang.md).
-
-**GD1-11 — tạo gói từ dòng hóa đơn:** mỗi GoiHoiVien lưu (MaHD,STT,DonVi), FK dòng và UNIQUE bộ ba; dòng gói số lượng n tạo đúng n gói, dòng sản phẩm tạo 0. Xử lý lại cùng MaHD trả gói đã có; không tạo lại gói/cộng điểm/trừ kho. Hóa đơn/gói/điểm/kho phải cùng được ghi nhận đầy đủ hoặc cùng hoàn tác khi lỗi. Thông tin chủ và danh mục đọc qua vGoiHoiVien. Chi tiết tại [thiết kế B](../b/thiet-ke-logic.md).
+| A | — | `CHI_NHANH(MaCN, SucChua)`; `NHAN_VIEN(MaNV, MaCNHienTai)` |
+| B | `HOA_DON(MaHD, MaHV, NgayLap, TongTien)`; `CHI_TIET_HOA_DON(MaHM, SoLuong)` để B tạo gói và cộng điểm trong cùng giao dịch | `HOI_VIEN(MaHV)`; danh mục gói trong `HANG_MUC_CUNG_CAP` |
+| C | — | `CHECK_IN(MaCN, ThoiGianVao, ThoiGianRa)` cho báo cáo lấp đầy |

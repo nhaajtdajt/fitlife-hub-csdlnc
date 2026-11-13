@@ -1,165 +1,173 @@
-# Module B — Mô tả quy trình nghiệp vụ
+# Mô tả quy trình — Module B: Hội viên, gói dịch vụ và điểm/hạng
 
-Phạm vi: hội viên, gói dịch vụ, gói đã mua, hạng và điểm. Hóa đơn thuộc D, check-in và lịch hẹn PT thuộc C; tài liệu này chỉ dùng các cột của họ đã có trong [hợp đồng giao diện](../../phan-cong.md).
+## 1. Mục tiêu và phạm vi
 
-Ký hiệu `#N` là quyết định số N trong [quyet-dinh.md](../../quyet-dinh.md). Quyết định #9 đã chốt gia hạn nối tiếp cho Gym/Yoga theo hạn; PT đã chốt mua thêm dùng ngay, từng lần mua giữ buổi/hạn riêng; bảo lưu vẫn chờ chốt. Quyết định #2, #8, #11 đã cập nhật ngày 08/11/2026. Những điểm cần xác nhận được gom ở [cuối tài liệu](#điểm-cần-xác-nhận).
+Module B quản lý hội viên, danh mục gói dịch vụ, các gói hội viên đã mua và chương trình hội viên thân thiết (điểm, hạng). Vấn đề của đề cần giải: **vấn đề 4 — tính lại hạng quá tải khi thanh toán**.
 
-## QT-B1. Đăng ký và cập nhật hội viên
+Hóa đơn thuộc D; check-in và lịch hẹn PT thuộc C. Dữ liệu theo [lược đồ logic](../luoc-do-logic.png).
+
+## 2. Tác nhân và dữ liệu
+
+| Tác nhân | Trách nhiệm |
+|---|---|
+| Lễ tân | Đăng ký, cập nhật, tra cứu hội viên |
+| Nhân viên bán hàng / lễ tân | Bán gói (cùng lúc lập hóa đơn của D) |
+| Quản lý chi nhánh | Xem hội viên sắp hết hạn, lâu ngày chưa quay lại |
+| Ban giám đốc | Quản lý danh mục gói, xem phân bổ hạng |
+| Hệ thống | Tạo gói khi thanh toán, cộng điểm/hạng, reset hạng đầu năm |
+
+| Bảng | Nội dung chính |
+|---|---|
+| `HOI_VIEN` | Thông tin cá nhân, ngày đăng ký, chi nhánh đăng ký (`MaCN`), tổng chi tiêu trong năm, điểm tích lũy, hạng |
+| `HANG_MUC_CUNG_CAP` | Danh mục chung với D. B quản lý các dòng loại **Gym, Yoga, PT, Spa, Vé lượt**; D quản lý loại **Sản phẩm** |
+| `GOI_HOI_VIEN` | Mỗi gói đã mua: hội viên, hàng mục, ngày kích hoạt, ngày hết hạn, số buổi/lượt còn lại |
+
+## 3. Quy tắc nghiệp vụ chung
+
+1. Mỗi gói đã mua là một dòng `GOI_HOI_VIEN` với mã `MaGHV` riêng. Mã này cũng là **mã QR** hội viên dùng để quét cổng (C). Hội viên có thể có nhiều gói cùng lúc, kể cả nhiều gói cùng loại.
+2. Mọi gói **bắt đầu ngay ngày mua**: `NgayKichHoat` = ngày lập hóa đơn. Không gia hạn nối tiếp. Mua gói mới khi gói cũ còn hạn thì hai gói chạy song song; phần ngày chồng nhau không được bù.
+3. Quyền lợi của từng loại khi tạo gói:
+
+   | Loại | `NgayHetHan` | `SoBuoiConLai` |
+   |---|---|---|
+   | Gym, Yoga | Ngày mua + `ThoiHanThang` tháng − 1 ngày | Rỗng (không giới hạn lượt vào) |
+   | PT | Ngày mua + `ThoiHanThang` tháng − 1 ngày | `SoBuoiBanDau`, ví dụ 24 |
+   | Spa, Vé lượt | Ngày mua + 6 ngày (hạn 7 ngày) | 1 |
+
+   Cộng tháng mà tháng đích không có ngày tương ứng thì lấy ngày cuối tháng đích, rồi mới trừ 1 ngày. Ví dụ mua gói Gym 1 tháng ngày 12/11/2026 thì dùng tới hết 11/12/2026; mua vé lượt ngày 12/11 thì dùng tới hết 18/11.
+4. `NgayHetHan` và `SoBuoiConLai` được **chụp lại lúc mua**. Sửa danh mục về sau không làm đổi gói đã bán.
+5. Trạng thái của gói suy ra từ dữ liệu, không lưu riêng: còn hiệu lực khi `NgayKichHoat <= hôm nay <= NgayHetHan` và (`SoBuoiConLai` rỗng hoặc > 0); quá `NgayHetHan` là hết hạn; `SoBuoiConLai = 0` là đã dùng hết.
+6. **Quyền vào cổng:** gói còn hiệu lực và **không phải loại PT**. Gói PT chỉ dùng để đặt lịch PT. Mua PT **không** bắt buộc phải có hoặc mua kèm thẻ Gym; muốn vào tập thì hội viên dùng thẻ hoặc mua vé như mọi người.
+7. **Điểm:** mỗi hóa đơn được cộng phần nguyên của `TongTien / 100.000` (tổng sau giảm giá). Phần lẻ bỏ, không cộng dồn. Điểm không hết hạn, không reset, chưa hỗ trợ đổi quà.
+8. **Hạng** theo tổng chi tiêu **trong năm dương lịch** (`TongChiTieu`):
+
+   | Hạng | Chi tiêu trong năm |
+   |---|---|
+   | Silver | dưới 20 triệu |
+   | Gold | từ 20 triệu đến dưới 50 triệu |
+   | Platinum | từ 50 triệu |
+
+   Ngưỡng do nhóm quyết định. Trong năm tổng chi tiêu chỉ tăng nên hạng chỉ tăng. Đầu năm mới toàn bộ hội viên về 0 và Silver (QT-B5).
+9. Hóa đơn đã thanh toán không sửa, không xóa, không hoàn tiền; gói đã tạo và điểm đã cộng giữ nguyên.
+10. Bảo lưu gói và chuyển nhượng gói nằm ngoài phạm vi.
+
+## 4. QT-B1 — Đăng ký và cập nhật hội viên
 
 **Ai làm:** lễ tân tại bất kỳ chi nhánh nào.
 
 **Đăng ký:**
 1. Hội viên cung cấp họ tên, SĐT, email, CCCD, giới tính, ngày sinh.
 2. Lễ tân tìm theo CCCD và SĐT để chắc chắn chưa có hồ sơ.
-3. Hệ thống cấp `MaHV`, ghi ngày đăng ký là hôm nay, chi nhánh đăng ký, hạng Silver, điểm 0.
+3. Hệ thống tạo `HOI_VIEN`: `NgayDangKy` = hôm nay, `MaCN` = chi nhánh hiện tại của lễ tân, `TongChiTieu` = 0, `DiemTichLuy` = 0, `Hang` = Silver.
 
-**Cập nhật:** lễ tân tìm hồ sơ theo `MaHV`, SĐT hoặc CCCD rồi sửa thông tin. Hội viên nghỉ tập vẫn giữ hồ sơ vì còn hóa đơn và check-in tham chiếu đến.
+**Cập nhật:** tìm theo mã, SĐT hoặc CCCD rồi sửa thông tin liên hệ. Không sửa trực tiếp tổng chi tiêu, điểm, hạng. Hội viên nghỉ tập vẫn giữ hồ sơ vì còn hóa đơn và gói tham chiếu.
 
-**Khi nào thất bại:**
-- CCCD đã có hồ sơ: không tạo mới, dùng lại hồ sơ cũ (hội viên cũ quay lại).
-- SĐT đã thuộc hồ sơ khác: từ chối, vì SĐT dùng để tra cứu.
-- Thiếu thông tin bắt buộc hoặc sai định dạng (CCCD không đủ 12 số, ngày sinh ở tương lai): yêu cầu nhập lại.
+**Ngoại lệ:**
+- CCCD đã có hồ sơ → không tạo mới, dùng lại hồ sơ cũ.
+- SĐT đã thuộc hồ sơ khác → từ chối, vì SĐT dùng để tra cứu.
+- Thiếu thông tin hoặc sai định dạng (CCCD không đủ 12 số, ngày sinh trong tương lai) → nhập lại.
 
-## QT-B2. Mua hoặc gia hạn gói
+## 5. QT-B2 — Mua gói
 
-**Ai làm:** lễ tân hoặc nhân viên bán hàng, cùng lúc lập hóa đơn (D).
+**Ai làm:** nhân viên bán hàng / lễ tân, trong lúc lập hóa đơn của D (QT-D3).
 
 1. Tìm hội viên; chưa có hồ sơ thì làm QT-B1 trước.
-2. Chọn một hoặc nhiều gói đang bán, dùng ở mọi chi nhánh (#1). Có thể có nhiều bản ghi mua cùng loại Gym/Yoga nhưng các khoảng hiệu lực của gói theo hạn cùng loại không chồng nhau; gói mua trước chờ đến ngày bắt đầu.
-3. B tính và D hiển thị ngày bắt đầu/hết hạn của từng gói trước khi hội viên xác nhận thanh toán. Khi ghi nhận, kiểm tra lại đuôi chuỗi theo hội viên + loại gói và tính lại ngày nối tiếp để hai giao dịch mua đồng thời không tạo khoảng chồng nhau; nếu ngày dự kiến thay đổi, cần xác nhận lại trước khi hoàn tất thanh toán.
-4. Thanh toán thành công thì tạo các dòng `GoiHoiVien` trong cùng giao dịch với hóa đơn. Với Gym/Yoga theo hạn: `NgayBatDau = max(NgayMua, NgayHetHanXaNhatCungLoai + 1 ngày)`; nếu chưa có gói cùng loại thì lấy `NgayMua`. Tính cả gói đang dùng và gói đã mua chờ kích hoạt; nhiều gói cùng loại trên cùng hóa đơn cũng được xếp nối tiếp theo thứ tự dòng/đơn vị. Vé một lượt dùng được từ ngày mua. PT bắt đầu ngày mua, mỗi đơn vị gói tạo một `MaGHV` riêng với số buổi/hạn riêng. Mua thêm không cần chờ gói cũ hết buổi/hết hạn, không chuyển buổi hoặc sửa hạn gói cũ.
+2. Chọn một hay nhiều gói đang kinh doanh (`DangKinhDoanh` = 1). Gói dùng được ở mọi chi nhánh.
+3. Hệ thống hiển thị ngày kích hoạt và ngày hết hạn của từng gói. Nếu hội viên đang có gói cùng loại còn hạn, hiển thị cảnh báo phần ngày sẽ chồng nhau để hội viên cân nhắc.
+4. Khi thanh toán thành công, **trong cùng giao dịch với hóa đơn**: mỗi dòng gói có số lượng n tạo đúng n dòng `GOI_HOI_VIEN` theo quy tắc 3; sau đó cập nhật điểm/hạng theo QT-B4.
 
-   | Loại gói | `NgayHetHan` | `SoBuoiConLai` |
-   |---|---|---|
-   | Gym, Yoga theo hạn | Cộng 1/3/6/12 tháng vào `NgayBatDau`, rồi trừ 1 ngày | Không áp dụng |
-   | Vé vào một lượt Gym/Yoga | Không có | 1 |
-   | PT 1-1 | `NgayBatDau` + thời hạn gói | Số buổi của gói, ví dụ 24 |
-   | Vé Spa lẻ | Không có (vé không hết hạn, #8) | 1 |
+**Ngoại lệ:**
+- Thanh toán thất bại → không có hóa đơn, không có gói, không cộng điểm.
+- Gói đã ngừng kinh doanh → không cho chọn.
+- Tạo gói lỗi → hoàn tác cả hóa đơn.
 
-5. Cập nhật điểm và hạng theo QT-B4.
+**Ví dụ:** gói Gym cũ hết hạn 15/11/2026, ngày 08/11 hội viên mua thêm Gym 1 tháng. Gói mới dùng từ 08/11 đến hết 07/12; từ 08/11 đến 15/11 hai gói chạy song song.
 
-Gia hạn Gym/Yoga theo hạn là mua bản ghi mới nối tiếp, không sửa ngày hoặc ép gói cũ hết hạn. Phạm vi nối tiếp là `(MaHV, LoaiGoi)`: Gym nối Gym, Yoga nối Yoga, dù khác mã gói/thời hạn; không xếp vé một lượt vào chuỗi này.
+## 6. QT-B3 — Sử dụng quyền lợi gói
 
-Gói theo hạn được dùng khi `NgayBatDau <= NgaySuDung <= NgayHetHan`. Với Gym/Yoga, mốc cộng tháng không có ngày tương ứng thì lấy cuối tháng đích, sau đó trừ một ngày để tính ngày hết hạn bao gồm cả ngày cuối. Ví dụ: gói cũ hết 15/11/2026, mua thêm một tháng ngày 08/11 thì gói mới dùng từ 16/11 đến hết 15/12/2026. Mua thêm một tháng nữa trước khi gói này bắt đầu thì nối từ 16/12/2026 đến hết 15/01/2027. Gói chưa đến ngày bắt đầu không cấp quyền vào cổng.
+**Ai làm:** hội viên; hệ thống của C ghi nhận.
 
-Trạng thái chờ/đang hiệu lực/hết hạn có thể suy ra từ ngày, không cần tác vụ kích hoạt để mở quyền. Điểm và chi tiêu ghi nhận khi thanh toán, không đợi ngày gói bắt đầu.
-
-**Khi nào thất bại:**
-- Thanh toán thất bại: không có hóa đơn, không có gói, không cộng điểm. Các việc này nằm trong cùng một giao dịch.
-- Gói đã ngừng bán: không cho chọn.
-- Mua gói PT khi chưa có thẻ dịch vụ cấp quyền vào còn hạn hoặc vé vào còn lượt: yêu cầu mua kèm thẻ/vé (có lựa chọn 1 tháng hoặc một lượt) trên cùng hóa đơn; chưa mua thì chưa hoàn tất mua PT (#8). Quyền này không được giữ riêng cho giờ PT.
-- Hóa đơn đã thanh toán thì không sửa, không xóa, không hoàn tiền (#16): gói đã tạo và điểm đã cộng giữ nguyên. Lập sai chỉ sửa được trước khi thanh toán.
-
-## QT-B3. Sử dụng buổi PT và quyền vào cổng
-
-**Ai làm:** C quản lý lịch và tác vụ đến giờ hẹn; cổng kiểm tra quyền vào và trừ vé một lượt, gồm vé Spa. B quản lý quyền lợi đã mua.
-
-| Chức năng | Điều kiện và tác động |
-|---|---|
-| Vào cổng | Có thẻ dịch vụ cấp quyền vào thỏa `NgayBatDau <= NgaySuDung <= NgayHetHan`, hoặc vé vào đã mua còn lượt. Gói chờ kích hoạt không dùng được. PT không phải thẻ vào cổng. Chỉ trừ vé được dùng cho lượt vào, không trừ PT |
-| Đặt lịch PT | Gói PT còn hạn tại ngày hẹn, còn buổi chưa bị giữ cho lịch khác. Không đòi thẻ Gym/Yoga còn hạn tại ngày hẹn; quyền vào được kiểm tra riêng khi quét |
-| Mua gói PT | Phải có quyền vào hợp lệ hoặc mua kèm thẻ/vé theo QT-B2; vé mua kèm không dành riêng cho lịch PT |
-| Vé Spa tại cổng | Khi vé Spa được chọn làm quyền vào, trừ một lượt cùng giao dịch tạo CheckIn. Không có bước kiểm tra hoặc trừ vé Spa tại quầy |
+**Vào cổng (C thực hiện, B quy định quyền):**
+- Hội viên quét mã QR của một gói. Gói phải còn hiệu lực và không phải PT.
+- Gói Spa hoặc vé lượt: `SoBuoiConLai` giảm từ 1 về 0 trong cùng giao dịch tạo check-in. Ra rồi muốn vào lại cần gói khác còn hiệu lực.
+- Gói Gym/Yoga: không trừ gì.
 
 **Gói PT:**
-1. Chọn HLV và khung giờ; hệ thống chọn `MaGHV` thuộc hội viên, loại PT, đủ hạn tại ngày hẹn và còn buổi chưa giữ. Ưu tiên `NgayHetHan` sớm nhất, cùng hạn thì `MaGHV` tăng dần. Tạo lịch gắn `MaGHV`, giữ một buổi nhưng chưa giảm `SoBuoiConLai`.
-2. Hội viên được hủy khi thời điểm yêu cầu không muộn hơn `NgayGio - 2 giờ` (đúng mốc hai giờ vẫn được hủy). Giải phóng quyền lợi giữ chỗ, không trừ buổi.
-3. Sau mốc đó, từ chối hủy. Tại `NgayGio`, tác vụ tự giảm một buổi của gói đã giữ cho lịch và đặt `DaTruBuoi = 1` trong cùng giao dịch, dù hội viên đã vào, chưa vào hoặc không đến.
-4. Tác vụ chạy lại không trừ lần hai. Khi hoàn thành hoặc xác nhận vắng mặt không trừ thêm; chỉ buổi thực sự hoàn thành mới được tính hoa hồng.
-5. Số buổi khả dụng của một gói = `SoBuoiConLai` trừ số lịch của chính `MaGHV` có `TrangThai = Đã đặt` và `DaTruBuoi = 0` (kể cả lịch quá giờ đang chờ tác vụ xử lý). Không lưu thêm bộ đếm giữ chỗ. Không đổi gói của lịch sau khi tạo; mua mới hoặc hủy lịch khác không làm phân bổ lại lịch đã có.
-6. Đặt/hủy/trừ buổi phải kiểm tra lại quyền lợi và trạng thái tại lúc ghi nhận; đặt lịch phải phù hợp chức vụ/chi nhánh cả giai đoạn chờ (GD1-06). Hai lần đặt đồng thời không được giữ chung buổi cuối. Quy tắc và tình huống kiểm tra tại [thiết kế gói PT](goi-pt.md).
+1. **Đặt lịch:** hệ thống chọn gói PT của hội viên còn hạn tại ngày tập và còn buổi trống. Số buổi trống của một gói = `SoBuoiConLai` − số lịch **Đã đặt** của gói đó. Có nhiều gói phù hợp thì ưu tiên gói hết hạn sớm nhất, cùng hạn thì `MaGHV` nhỏ hơn. Lịch lưu `MaGHV` của gói đã chọn và không đổi gói về sau.
+2. **Hủy:** hội viên hủy được khi còn **ít nhất 2 giờ** trước giờ tập. Lịch chuyển sang **Hủy**, buổi được trả lại, không trừ.
+3. **Đến giờ tập:** job của C chuyển lịch **Đã đặt** sang **Đã hoàn thành** và giảm `SoBuoiConLai` của đúng gói đó đi 1, trong cùng giao dịch. Hội viên không đến cũng bị trừ, vì đã không hủy đúng hạn.
+4. Lịch đã chuyển trạng thái thì job không xử lý nữa, nên mỗi lịch bị trừ đúng một lần.
 
-**Vé vào một lượt:** từ 1 về 0 khi tạo thành công một phiên check-in. Vé có thể dùng trước giờ PT, không được giữ cho lịch. Sau khi ra, muốn vào lại cần vé/lượt mới hoặc thẻ theo hạn còn hiệu lực. Quét lặp trong phiên đang mở không tạo phiên mới hoặc trừ thêm. Vé Gym/Yoga một lượt là lựa chọn bổ sung theo quyết định #8; vé Spa được xử lý tại cổng như vé một lượt. Phạm vi hệ thống chỉ xác thực quyền vào và ghi nhận phiên vào–ra, không theo dõi riêng việc sử dụng Spa bên trong. Nếu dùng thẻ Gym/Yoga còn hiệu lực để vào thì không tự trừ thêm vé Spa.
+**Ngoại lệ:**
+- Không còn gói PT đủ hạn và còn buổi trống → không đặt được.
+- Quét mã gói PT ở cổng → cổng từ chối.
+- Hai lần đặt đồng thời không được cùng lấy buổi trống cuối cùng của một gói; số buổi không bao giờ âm.
 
-**Ví dụ:** mua một buổi PT lúc 18h và vé Gym một lượt; vào 8h rồi ra 9h làm hết vé Gym nhưng chưa trừ PT. Đến 18h, PT tự bị trừ nếu lịch chưa hủy đúng hạn. Muốn vào tập lúc 18h phải mua lượt vào mới nếu không có quyền vào khác.
+## 7. QT-B4 — Cộng điểm và cập nhật hạng khi thanh toán
 
-**Khi nào thất bại:**
-- Không đủ buổi PT chưa giữ chỗ hoặc gói PT không còn hạn tại ngày hẹn: không đặt được.
-- Không có thẻ/vé vào hợp lệ: cổng từ chối; lịch PT vẫn giữ nguyên và đến giờ vẫn trừ buổi.
-- Hủy khi còn dưới hai giờ: từ chối, lịch vẫn `Đã đặt`.
-- Hai thao tác cùng giữ/trừ một quyền lợi: không được vượt số buổi hoặc làm số dư âm.
-- Tác vụ đến giờ lỗi: hoàn tác, ghi nhận để thử lại các lịch đến hạn chưa trừ; không đánh dấu đã trừ khi cập nhật gói thất bại.
+**Ai làm:** hệ thống, trong cùng giao dịch thanh toán của D.
 
-## QT-B4. Cập nhật điểm và xét hạng khi thanh toán
+**Hiện trạng (vấn đề 4 của đề):** mỗi lần thanh toán, hệ thống cộng lại `TongTien` mọi hóa đơn 12 tháng qua của hội viên để xét hạng. Với ~1.400 hóa đơn/ngày trên bảng hóa đơn ~500.000 dòng/năm, việc này làm chậm in hóa đơn.
 
-**Ai làm:** hệ thống, ngay sau khi D lưu hóa đơn.
+**Thiết kế mới:** lưu sẵn `TongChiTieu`, `DiemTichLuy`, `Hang` trên `HOI_VIEN` và chỉ cộng thêm:
+1. Nhận `MaHV`, `TongTien` của hóa đơn vừa lập.
+2. `TongChiTieu` += `TongTien`.
+3. `DiemTichLuy` += phần nguyên `TongTien / 100.000`.
+4. So `TongChiTieu` mới với ngưỡng để cập nhật `Hang`.
+5. Ghi cùng giao dịch với hóa đơn. Chỉ đọc và sửa đúng một dòng hội viên, không quét lại bảng hóa đơn.
 
-**Hiện trạng (vấn đề 4 của đề):**
-1. D lưu hóa đơn.
-2. Hệ thống cộng `TongTien` mọi hóa đơn của hội viên trong 12 tháng qua.
-3. So tổng với ngưỡng để nâng hoặc hạ hạng, rồi tính điểm.
-4. In hóa đơn.
+**Ví dụ:** hội viên đang có 18 triệu trong năm, mua 3 triệu → `TongChiTieu` = 21 triệu, lên Gold ngay trên hóa đơn này; được cộng 30 điểm.
 
-Bước 2 chạy khoảng 1.400 lần/ngày trên bảng `HoaDon` khoảng 500.000 dòng cho 12 tháng, nên nhân viên phải chờ khi hoàn tất thanh toán.
+**Ngoại lệ:** cập nhật lỗi → hoàn tác cả hóa đơn, không để có hóa đơn đã thu tiền mà thiếu điểm.
 
-**Quy tắc nghiệp vụ:**
-- Điểm cộng thêm = phần nguyên của `TongTien` ÷ 100.000, với `TongTien` là số sau giảm giá (#5). Ví dụ 2.350.000đ được 23 điểm; phần lẻ 50.000đ bỏ, không cộng dồn sang hóa đơn sau (tự đặt).
-- Điểm chưa đổi được thành quà và không hết hạn (#5).
-- Mỗi lần cộng ghi một dòng lịch sử điểm: hội viên, hóa đơn, số điểm, thời điểm. GD1-08 không đổi đầu vào: nhận TongTien sau giảm của toàn hóa đơn đúng một lần, không cộng điểm riêng từng dòng phân bổ rồi cộng lại.
-- Hạng theo chi tiêu 12 tháng gần nhất (#4):
+## 8. QT-B5 — Reset hạng đầu năm
 
-  | Hạng | Chi tiêu 12 tháng |
-  |---|---|
-  | Silver | < 20 triệu |
-  | Gold | 20 triệu đến < 50 triệu |
-  | Platinum | ≥ 50 triệu |
+**Ai làm:** job hệ thống, 00:00 ngày 1/1 hằng năm.
 
-- Đồng bộ các khoản quá hạn trước, rồi cộng hóa đơn mới và tính hạng ngay. Khoản mua mới chỉ tăng tổng sau đồng bộ; hạng so với giá trị cũ có thể giảm nếu có khoản vừa hết hạn. Ví dụ đang 18 triệu, mua thêm 3 triệu thành 21 triệu thì lên Gold ngay trên hóa đơn này. Tác vụ QT-B5 hỗ trợ cập nhật nền; đọc/sử dụng hạng vẫn phải đồng bộ tới thời điểm hiện tại.
+1. Với mọi hội viên, đặt `TongChiTieu` = tổng `TongTien` các hóa đơn của hội viên có `NgayLap` từ 1/1 năm mới (bình thường bằng 0).
+2. Tính lại `Hang` theo tổng đó (bình thường về Silver).
+3. Không đổi `DiemTichLuy`.
 
-**Thiết kế GD1-09:** lưu tổng chi tiêu, điểm và hạng trên HoiVien; GhiNhanLoyalty khóa theo MaHD chống cộng/trừ lặp. Đồng bộ khoản quá hạn trước khi dùng hạng hoặc thanh toán. Xem [thiết kế điểm/hạng](diem-hang.md); chỉ mục và thủ tục cụ thể thuộc GĐ2.
+Tính lại từ hóa đơn của năm mới thay vì đặt cứng về 0, để job chạy trễ hoặc chạy lại vẫn đúng: hóa đơn đã thanh toán trong ngày 1/1 trước khi job chạy không bị mất.
 
-**Khi nào thất bại:**
-- Hóa đơn đã được cộng điểm: không cộng lần hai.
-- Cập nhật điểm lỗi: hủy cả giao dịch lập hóa đơn, để không có hóa đơn đã thu tiền mà thiếu điểm.
+**Ngoại lệ:** job lỗi giữa chừng → chạy lại toàn bộ, cho cùng kết quả.
 
-## QT-B5. Xét hạ hạng hằng đêm
-
-**Ai làm:** job hệ thống, mỗi đêm một lần sau giờ đóng cửa (#16).
-
-**Vì sao cần:** chi tiêu tính trên 12 tháng gần nhất nên tự giảm theo thời gian, kể cả khi hội viên không mua gì. Hiện trạng chỉ xét khi có hóa đơn mới, nên người không mua nữa giữ hạng mãi. Ví dụ hội viên chi 55 triệu vào tháng 10/2025 rồi không mua thêm: đến tháng 11/2026 chi tiêu 12 tháng là 0, phải về Silver.
-
-1. Chọn mọi khoản đã đến mốc hết hạn 12 tháng nhưng GhiNhanLoyalty.DaLoaiKhoi12T còn 0, gồm cả phần tồn do tác vụ lỗi.
-2. Khóa hội viên rồi đọc lại, trừ đúng khoản khỏi TongChiTieu12T và bật cờ trong cùng giao dịch; không trừ điểm.
-3. Cập nhật hạng theo tổng mới. Không reset toàn bộ và không xóa lịch sử. Quy tắc biên thời gian/chống lặp ở [thiết kế điểm/hạng](diem-hang.md).
-
-**Khi nào thất bại:** job lỗi giữa chừng thì chạy lại được mà không trừ chi tiêu hai lần cho cùng một hóa đơn.
-
-## QT-B6. Quản lý danh mục gói dịch vụ
+## 9. QT-B6 — Quản lý danh mục gói
 
 **Ai làm:** ban giám đốc.
 
-1. Thêm gói mới với tên, loại, thời hạn, số buổi PT (nếu có), giá.
-2. Sửa giá hoặc đánh dấu ngừng bán. Không xóa gói đã có người mua.
-3. Giá mới chỉ áp dụng cho hóa đơn sau đó. Hóa đơn cũ giữ đơn giá riêng (D), gói đã mua giữ nguyên quyền lợi.
+1. Thêm gói mới vào `HANG_MUC_CUNG_CAP`: tên, loại (Gym, Yoga, PT, Spa, Vé lượt), giá, thời hạn tháng, số buổi ban đầu.
+2. Sửa giá hoặc chuyển ngừng kinh doanh (`DangKinhDoanh` = 0). Không xóa gói đã có người mua.
+3. Giá mới chỉ áp dụng cho hóa đơn sau đó; hóa đơn cũ giữ đơn giá riêng, gói đã bán giữ quyền lợi đã chụp.
 
-**Khi nào thất bại:**
+**Ngoại lệ (kiểm tra miền):**
 - Giá không dương.
-- Thời hạn sai: Gym/Yoga theo hạn cho phép 1/3/6/12 tháng; PT giữ 3/6/12 tháng; vé vào một lượt và vé Spa không có thời hạn.
-- Gói PT thiếu số buổi dương; vé một lượt không có đúng một lượt ban đầu; gói theo hạn lại khai số lượt hữu hạn.
+- Gym/Yoga: phải có `ThoiHanThang` thuộc {1, 3, 6, 12}, `SoBuoiBanDau` rỗng.
+- PT: `ThoiHanThang` thuộc {3, 6, 12} và `SoBuoiBanDau` > 0.
+- Spa, Vé lượt: `ThoiHanThang` rỗng, `SoBuoiBanDau` = 1.
 
-## QT-B7. Theo dõi hội viên
+## 10. QT-B7 — Theo dõi hội viên và phân bổ hạng
 
-**Quản lý chi nhánh**, mỗi ngày một lần, xem danh sách hội viên đăng ký tại chi nhánh mình:
-- Sắp hết hạn: có gói theo hạn đang hiệu lực với `NgayHetHan` trong 7 ngày tới và chưa mua gói nối tiếp cùng loại. Gói đã hết hạn từ trước không được coi là gói nối tiếp; hội viên chỉ có gói chờ chưa được xem là đang có gói hiệu lực.
-- Lâu ngày chưa quay lại: không có `CheckIn.TGVao` trong 30 ngày qua dù còn gói hiệu lực.
+**Quản lý chi nhánh**, mỗi ngày một lần, xem hội viên **đăng ký tại chi nhánh mình** (`HOI_VIEN.MaCN`):
+- **Sắp hết hạn:** có gói Gym/Yoga còn hiệu lực hết hạn trong 7 ngày tới, và không có gói Gym/Yoga nào khác còn hiệu lực sau ngày đó.
+- **Lâu ngày chưa quay lại:** còn gói Gym/Yoga hiệu lực nhưng không có check-in nào trong 30 ngày qua (check-in tìm qua các gói của hội viên).
 
-Hai ngưỡng 7 và 30 ngày do nhóm tự đặt.
+Hai ngưỡng 7 và 30 ngày do nhóm tự đặt. Không có ai thì trả danh sách rỗng.
 
-**Ban giám đốc** xem tỷ lệ phân bổ Silver / Gold / Platinum toàn hệ thống.
+**Ban giám đốc** xem tỷ lệ Silver / Gold / Platinum toàn hệ thống từ cột `Hang`.
 
-Danh sách không có ai thì hiển thị rỗng; không có trường hợp lỗi nghiệp vụ riêng.
+## 11. QT-B8 — Tra cứu hội viên và lịch sử điểm
 
-## Điểm cần xác nhận
+**Ai làm:** lễ tân, hội viên.
 
-| # | Nội dung | Đang dùng | Cần ai xác nhận |
-|---|---|---|---|
-| 1 | GD1-09 đã chốt 12 tháng gần nhất, điểm không hết hạn; còn xác nhận ngưỡng 20/50 triệu với cô (#4) | Thiết kế tại diem-hang.md | Cô xác nhận ngưỡng |
-| 2 | #9 đã chốt Gym/Yoga nối tiếp, PT mua thêm dùng ngay và giữ hạn/buổi riêng; bảo lưu còn chờ | Chưa triển khai bảo lưu | Cả nhóm |
-| 3 | Gia hạn sớm Gym/Yoga theo hạn | Nối sau gói cùng loại có ngày hết hạn xa nhất, kể cả gói chờ; giữ gói cũ | Đã chốt 08/11/2026 |
-| 4 | Vé vào một lượt đã dùng, ra rồi quay lại | Đã chốt: cần mua lượt mới nếu không có quyền vào khác còn hợp lệ, dù có lịch PT | Đã chốt 08/11/2026 |
-| 5 | Liên kết lịch với đúng gói PT và giữ buổi khi đặt | LichHenPT.MaGHV; đếm lịch Đã đặt/chưa trừ trên từng gói, kiểm tra nhất quán khi ghi | Đã chốt và thiết kế GD1-03 |
-| 6 | Kiểm tra đủ hai biên của gói theo hạn: `NgayBatDau <= NgayKiemTra <= NgayHetHan`; vào cổng lấy ngày quét, đặt PT lấy ngày hẹn. Vé một lượt xét đã mua/còn lượt, không so hạn rỗng | B công bố thêm NgayBatDau cho C | Đã đồng bộ B/C; PT mua thêm dùng ngay theo GD1-03 |
-| 7 | Thêm chi nhánh đăng ký vào `HoiVien` để lập danh sách cấp chi nhánh, vì gói không gắn chi nhánh (#1) | Như QT-B1, QT-B7 | Cả nhóm |
-| 8 | Hợp đồng dữ liệu tạo gói theo dòng/đơn vị đã chốt GD1-11 và tích hợp GD1-17; chữ ký thủ tục thuộc GĐ2 | Như QT-B2 | D |
+1. Tìm hội viên theo mã, SĐT hoặc CCCD.
+2. Hiển thị thông tin, hạng, tổng chi tiêu trong năm, điểm tích lũy và các gói còn hiệu lực.
+3. Lịch sử điểm: liệt kê các hóa đơn của hội viên kèm điểm của từng hóa đơn (phần nguyên `TongTien / 100.000`). Không cần bảng lịch sử điểm riêng, vì hóa đơn đã thanh toán không đổi.
 
-**GD1-11 — tạo gói từ dòng hóa đơn:** mỗi GoiHoiVien lưu (MaHD,STT,DonVi), FK dòng và UNIQUE bộ ba; dòng gói số lượng n tạo đúng n gói, dòng sản phẩm tạo 0. Xử lý lại cùng MaHD trả gói đã có; không tạo lại gói/cộng điểm/trừ kho. Hóa đơn/gói/điểm/kho phải cùng được ghi nhận đầy đủ hoặc cùng hoàn tác khi lỗi. Thông tin chủ và danh mục đọc qua vGoiHoiVien. Chi tiết tại [thiết kế B](thiet-ke-logic.md).
+## 12. Quan hệ với module khác
+
+| Module | B cung cấp | B sử dụng |
+|---|---|---|
+| A | — | `CHI_NHANH(MaCN)` cho chi nhánh đăng ký; `NHAN_VIEN(MaCNHienTai)` của lễ tân |
+| C | `GOI_HOI_VIEN(MaGHV, MaHV, MaHM, NgayKichHoat, NgayHetHan, SoBuoiConLai)`; `HANG_MUC_CUNG_CAP(MaHM, LoaiHangMuc)` để kiểm tra quyền vào cổng và đặt lịch PT | C giảm `SoBuoiConLai` khi dùng vé và khi trừ buổi PT |
+| D | Danh mục gói trong `HANG_MUC_CUNG_CAP`; tạo gói và cập nhật điểm/hạng trong giao dịch thanh toán | `HOA_DON(MaHD, MaHV, NgayLap, TongTien)`; `CHI_TIET_HOA_DON(MaHM, SoLuong)` |

@@ -16,4 +16,4 @@ Dùng ERD tổng và các bản `erd.md` hiện hành khi ghép báo cáo. Draw.
 
 Kết luận chuẩn hóa: 19 quan hệ BCNF và HoiVien 2NF do giữ Hang phụ thuộc TongChiTieu12T; toàn lược đồ không được kết luận đạt 3NF/BCNF. Lịch PT đã chốt khung một giờ bắt đầu vào giờ tròn; trừ tại giờ hẹn, không phụ thuộc cổng.
 
-Trước khi nộp: bổ sung tên/MSSV còn thiếu và xác nhận ngưỡng hạng với giảng viên. Các giả định/ngoài phạm vi khác được công bố trong thiết kế tổng. Ghi chú triển khai nằm riêng ở GĐ2; không phải phần đã cài đặt hoặc kiểm thử.
+Trước khi nộp: bổ sung tên/MSSV còn thiếu. Các giả định/ngoài phạm vi khác được công bố trong thiết kế tổng. Ghi chú triển khai nằm riêng ở GĐ2; không phải phần đã cài đặt hoặc kiểm thử.

@@ -1,133 +1,170 @@
-# Module C — Mô tả quy trình nghiệp vụ
+# Mô tả quy trình — Module C: Check-in, lịch hẹn PT và đánh giá HLV
 
-Phạm vi: cửa kiểm soát, phiên vào–ra, lịch hẹn PT và đánh giá HLV. Module C dùng dữ liệu công bố của A (`ChiNhanh`, `NhanVien`, `LichSuCongTac`) và B (`HoiVien`, `GoiDichVu`, `GoiHoiVien`), đồng thời công bố dữ liệu lịch hẹn cho A và check-in cho D theo [hợp đồng giao diện](../../phan-cong.md).
+## 1. Mục tiêu và phạm vi
 
-Số lượng lấy từ [bảng giả định chung](../../quyet-dinh.md#bảng-giả-định-số-liệu-chung). Quyết định #1, #2, #7, #8 và #11 đã chốt; #2, #8, #11 được cập nhật ngày 08/11/2026 để tách lịch PT khỏi quyền vào cổng. GD1-06/#12 đã chốt PT chỉ dạy tại nơi công tác, chặn đổi vị trí khi còn lịch không phù hợp. GD1-07/#15 dùng sức chứa chỉ cho báo cáo và quy ước tự đóng lượt của bộ dữ liệu mô phỏng; QD10 đã chốt khung một giờ bắt đầu vào giờ tròn, không cho chọn phút tùy ý.
+Module C ghi nhận lượt vào/ra phòng tập, quản lý lịch hẹn PT và đánh giá HLV. Vấn đề của đề cần giải:
+- **Vấn đề 1 — nghẽn check-in giờ cao điểm:** tra cứu quyền vào cổng dưới 50 ms.
+- **Vấn đề 2 — xung đột đặt lịch PT:** ngăn tuyệt đối hai lịch trùng một PT cùng khung giờ.
 
-## Tác nhân và dữ liệu
+Dữ liệu theo [lược đồ logic](../luoc-do-logic.png).
+
+## 2. Tác nhân và dữ liệu
 
 | Tác nhân | Trách nhiệm |
 |---|---|
-| Hội viên | Quét mã vào/ra, xem lịch trống, đặt/hủy lịch và đánh giá buổi PT |
-| Lễ tân | Hỗ trợ xử lý lượt quét lỗi, tra cứu người đang có mặt và lịch hẹn |
-| PT | Xem lịch dạy; xác nhận kết quả buổi tập theo quyền được phân công |
-| Quản lý chi nhánh | Quản lý các cửa kiểm soát, theo dõi công suất và xử lý dữ liệu bất thường |
-| Hệ thống | Xác thực quyền vào, ghi log, chống lịch trùng, trừ quyền lợi đúng một lần và tự đóng lượt |
+| Hội viên | Quét mã vào/ra, đặt/hủy lịch PT, đánh giá HLV |
+| Lễ tân | Đặt lịch thay hội viên, tra cứu người đang có mặt và lịch sử tập |
+| PT | Xem lịch dạy |
+| Quản lý chi nhánh | Xem hiệu suất HLV |
+| Hệ thống | Xác thực quyền vào, chống trùng lịch, trừ buổi PT tới giờ, đóng phiên cuối ngày |
 
-| Dữ liệu | Nội dung |
+| Bảng | Nội dung chính |
 |---|---|
-| `CuaKiemSoat` | Chi nhánh, số hiệu cửa, chức năng quét và trạng thái hoạt động; khóa ghép `(MaCN, SoHieuCua)` |
-| `CheckIn` | Hội viên, chi nhánh, số cửa vào/ra và thời gian vào/ra |
-| `LichHenPT` | Gói đã mua MaGHV (suy ra hội viên), PT, chi nhánh, giờ bắt đầu, trạng thái và cờ đã trừ buổi |
-| `DanhGiaHLV` | Một điểm số/nhận xét cho một lịch PT đã hoàn thành |
-| Dữ liệu A | Chi nhánh, chức vụ nhân viên và khoảng công tác để xác nhận PT thuộc đúng chi nhánh tại giờ dạy |
-| Dữ liệu B | Hội viên, loại gói, hạn và số buổi còn lại để xác định quyền vào/đặt lịch |
+| `CHECK_IN` | Gói đã quét (`MaGHV`), chi nhánh, thời gian vào/ra, thiết bị vào/ra |
+| `LICH_HEN_PT` | Gói PT (`MaGHV`), PT (`MaNV`), chi nhánh, ngày tập, giờ bắt đầu, trạng thái |
+| `DANH_GIA_HLV` | Một lịch PT, điểm, nhận xét |
+| Dữ liệu B | `GOI_HOI_VIEN`, `HANG_MUC_CUNG_CAP` để kiểm tra quyền và số buổi |
+| Dữ liệu A | `CHI_NHANH` (giờ mở/đóng cửa), `LICH_SU_CONG_TAC` để kiểm tra PT |
 
-## Quy tắc nghiệp vụ chung
+## 3. Quy tắc nghiệp vụ chung
 
-1. Mỗi hội viên chỉ có tối đa một `CheckIn` chưa có `TGRa` trên toàn hệ thống. `TGRa` phải sau `TGVao`.
-2. Cửa quét phải đang hoạt động, thuộc cùng chi nhánh với lượt check-in và cho phép đúng chiều quét. Dữ liệu lịch sử không bị xóa khi cửa ngừng hoạt động.
-3. Quyền vào cổng là thẻ dịch vụ theo hạn còn hiệu lực hoặc vé vào một lượt còn lượt, dùng ở mọi chi nhánh. Gói PT chỉ dùng đặt lịch, không cấp quyền vào.
-4. Ưu tiên thẻ theo hạn hợp lệ; nếu dùng vé vào một lượt thì trừ đúng một lượt. Vé hết sau lần vào, không gắn với giờ PT; ra rồi vào lại cần quyền vào mới nếu không còn thẻ/vé hợp lệ.
-5. Giao dịch quét vào phải nguyên tử: xác thực quyền vào, trừ vé nếu cần và tạo `CheckIn` cùng thành công hoặc cùng thất bại. Cổng không đọc lịch PT, không thay đổi `DaTruBuoi`.
-6. Lịch PT kéo dài một giờ, bắt đầu vào giờ tròn theo Asia/Saigon (phút/giây bằng 0), không nhận thời điểm bắt đầu tùy ý như 17h30. Một PT không có hai lịch chưa hủy chồng nhau; với khung cố định, cặp `(MaNV, NgayGio)` của lịch chưa hủy là duy nhất.
-7. Nhân viên trong lịch phải có chức vụ PT và có đúng một giai đoạn công tác tại chi nhánh lịch hẹn trong toàn bộ buổi tập.
-8. Khi đặt lịch, hội viên có gói PT còn hạn tại ngày hẹn và đủ buổi chưa bị giữ; không kiểm tra quyền vào tương lai. Mỗi lịch giữ một buổi của gói phù hợp; đến giờ tự trừ đúng buổi đã giữ, không phụ thuộc check-in.
-9. Trạng thái lịch chỉ gồm `Đã đặt`, `Đã hoàn thành`, `Hủy`. Chuyển trạng thái phải theo luồng cho phép; lịch hoàn thành hoặc đã hủy không được đưa lại về `Đã đặt`.
-10. Chỉ cho hội viên hủy trước ít nhất hai giờ, giải phóng buổi giữ mà không trừ; hủy muộn bị từ chối. Đến giờ hẹn lịch chưa hủy tự trừ một buổi kể cả vắng mặt. `DaTruBuoi` ngăn trừ lặp; vắng mặt không tính hoa hồng.
-11. Chỉ lịch `Đã hoàn thành` mới được đánh giá và tính hoa hồng. Mỗi lịch có tối đa một đánh giá, điểm nguyên từ 1 đến 5.
-12. Lượt quên quét ra được tự đóng tại giờ đóng cửa của chi nhánh. Khi đó `TGRa` có giá trị nhưng `SoHieuCuaRa` rỗng, nhờ vậy phân biệt được với lượt quét ra tại cửa mà không cần thêm thuộc tính nguồn đóng. Đây là quy ước mô phỏng #15; thời gian ra tự đóng là ước tính, không phải bằng chứng khách thực sự ở lại đến giờ đó.
+**Check-in**
 
-## QT-C1. Quét vào và xác thực quyền vào cổng
+1. Hội viên quét **mã QR của một gói** (`MaGHV`), không quét mã hội viên. Hội viên chọn gói nào để quét thì hệ thống dùng đúng gói đó.
+2. Gói được vào cổng khi: `NgayKichHoat <= ngày quét <= NgayHetHan`, `SoBuoiConLai` rỗng hoặc > 0, và loại hàng mục **khác PT**. Gói dùng được ở mọi chi nhánh.
+3. Quét vào bằng gói Spa hoặc vé lượt thì trừ 1 lượt trong cùng giao dịch tạo check-in.
+4. Quét vào **không** kiểm tra hội viên có đang có phiên mở hay không, để cổng nhanh nhất.
+5. Quét ra đóng **mọi** phiên đang mở của hội viên. Phiên mới nhất ghi thiết bị ra thật; các phiên cũ hơn để `ThietBiRa` rỗng.
+6. Cuối ngày, phiên còn mở được đóng tại giờ đóng cửa chi nhánh, `ThietBiRa` rỗng.
+7. `ThoiGianRa` có giá trị mà `ThietBiRa` rỗng nghĩa là **phiên bị tự đóng**, giờ ra là ước tính. `ThoiGianRa` luôn sau `ThoiGianVao`.
+8. Cổng không chặn theo sức chứa. Thiết bị cổng chỉ hoạt động trong giờ mở cửa chi nhánh; quét ngoài giờ nằm ngoài phạm vi.
+9. **Ngoài phạm vi:** chống dùng chung mã (cho người khác mượn mã QR); phân khu Gym/Yoga trong chi nhánh. Hệ quả được chấp nhận: hội viên ra không quét rồi vào lại có thể có hai phiên mở cùng lúc, nên báo cáo lấp đầy có thể đếm dư.
 
-**Ai làm:** hội viên tại cửa vào; lễ tân chỉ hỗ trợ khi có lỗi.
+**Lịch hẹn PT**
 
-**Điều kiện trước:** cửa đang hoạt động, có chức năng `Vào` hoặc `Hai chiều`, nhận diện được chi nhánh và mã hội viên.
+10. Mỗi buổi kéo dài một giờ, bắt đầu vào **giờ tròn** (phút và giây bằng 0), và nằm trọn trong giờ mở cửa: `ThoiGianBatDau >= GioMoCua` và `ThoiGianBatDau + 1 giờ <= GioDongCua`.
+11. `TrangThai` không rỗng, gồm: **0 = Đã đặt** (mặc định), **1 = Hủy**, **2 = Đã hoàn thành**. Chỉ có ba đường chuyển: 0 → 1 (hội viên hủy đúng hạn), 0 → 2 (job tới giờ). Không có đường quay lại 0, không chuyển giữa 1 và 2.
+12. **Chống trùng lịch PT:** trong các lịch có `TrangThai <> 1`, bộ `(MaNV, NgayTap, ThoiGianBatDau)` là duy nhất. Ràng buộc này đặt tại CSDL, nên hai giao dịch đặt đồng thời thì chỉ một thành công.
+13. Một hội viên không có hai lịch chưa hủy trùng ngày, trùng giờ bắt đầu, dù khác PT.
+14. PT của lịch phải có giai đoạn công tác với chức vụ PT tại đúng `MaCN` của lịch, bao phủ `NgayTap`. Xét cả giai đoạn đang chờ hiệu lực, vì A có thể đã chấp nhận điều chuyển từ ngày mai.
+15. Gói của lịch phải là gói PT của hội viên, còn hạn tại `NgayTap` và còn buổi trống (quy tắc chọn gói ở QT-B3).
+16. Hủy chỉ được khi còn **ít nhất 2 giờ** trước giờ tập. Hủy thì không trừ buổi.
+17. Tới giờ tập, lịch còn Đã đặt được chuyển sang Đã hoàn thành và trừ 1 buổi, **kể cả hội viên không đến**. PT vẫn được tính hoa hồng buổi đó, vì khung giờ đã bị giữ.
+18. Chỉ lịch Đã hoàn thành được đánh giá; mỗi lịch tối đa một đánh giá; điểm nguyên từ 1 đến 5.
+19. Lịch có `NgayTap` thuộc tháng đã qua không được sửa hoặc xóa, để hoa hồng tháng cũ không đổi.
 
-1. Cửa kiểm soát gửi mã hội viên, `MaCN`, `SoHieuCua` và thời điểm quét.
-2. Hệ thống xác nhận hội viên tồn tại và chưa có lượt check-in đang mở.
-3. Hệ thống chỉ lấy thẻ theo hạn thỏa `NgayBatDau <= NgayQuet <= NgayHetHan` hoặc vé vào đã mua còn lượt. Loại gói chờ kích hoạt và gói PT khỏi quyền vào cổng.
-4. Ưu tiên thẻ theo hạn hợp lệ; nếu không có thì chọn vé vào còn lượt, gồm vé Spa. Không tra lịch PT để chọn quyền vào. Chỉ trừ vé đã chọn; vào bằng thẻ Gym/Yoga không tự trừ thêm Spa. Hệ thống chỉ kiểm tra tại cổng, không có bước xác nhận sử dụng Spa tại quầy.
-5. Nếu dùng vé một lượt, hệ thống xác định đúng vé và kiểm tra lại số lượt; kiểm tra lại phiên đang mở để chống quét lặp.
-6. Trong một giao dịch, giảm lượt của vé nếu cần và tạo `CheckIn` có `TGVao`, chưa có `TGRa`. Không cập nhật gói PT hoặc lịch PT.
-7. Cửa kiểm soát mở cổng và trả kết quả. Không đếm số người hoặc so SucChua để quyết định mở cổng, kể cả khi tỷ lệ lấp đầy đã trên 100%. Đường xử lý mục tiêu dưới 50 ms; báo cáo/tổng hợp không chạy đồng bộ trong giao dịch này.
+## 4. QT-C1 — Quét vào
 
-**Ngoại lệ:** mã không hợp lệ; cửa không tồn tại, ngừng hoạt động hoặc không cho phép chiều vào; đã có phiên đang mở; không có quyền hợp lệ; gói vừa hết lượt do giao dịch khác. Đây không bao gồm điều kiện sức chứa. Mọi lỗi đều không mở cổng, không tạo log và không trừ quyền lợi một phần.
+**Ai làm:** hội viên tại cổng vào.
 
-## QT-C2. Quét ra
+1. Thiết bị gửi `MaGHV` đọc từ mã QR, `MaCN` và tên thiết bị của cổng, thời điểm quét.
+2. Hệ thống đọc gói theo `MaGHV` (tra theo khóa chính) và loại hàng mục của gói.
+3. Kiểm tra gói theo quy tắc 2.
+4. Trong một giao dịch: nếu gói là Spa hoặc vé lượt, giảm `SoBuoiConLai` từ 1 về 0 (chỉ khi vẫn còn 1); tạo `CHECK_IN` với `ThoiGianVao` = thời điểm quét, `ThietBiVao`, `ThoiGianRa` rỗng.
+5. Mở cổng.
 
-**Ai làm:** hội viên tại cửa ra.
+**Ngoại lệ:** mã không tồn tại; gói chưa kích hoạt, hết hạn, hết lượt hoặc là gói PT; vé vừa bị dùng bởi một lần quét khác cùng lúc. Mọi lỗi đều không mở cổng, không tạo check-in, không trừ lượt.
 
-1. Cửa kiểm soát gửi mã hội viên, `MaCN`, `SoHieuCua` và thời điểm quét.
-2. Hệ thống tìm đúng một `CheckIn` đang mở của hội viên.
-3. Hệ thống kiểm tra cửa thuộc cùng chi nhánh, cho phép chiều ra và thời gian ra sau thời gian vào.
-4. Hệ thống cập nhật `TGRa`, `SoHieuCuaRa`, rồi mở cổng.
+**Hiệu năng:** đường xử lý chỉ đọc một gói theo khóa chính và ghi một dòng; báo cáo không chạy trong giao dịch này. Mục tiêu dưới 50 ms sẽ đo ở GĐ2.
 
-**Ngoại lệ:** không có hoặc có nhiều lượt đang mở; cửa sai chi nhánh, ngừng hoạt động hoặc không cho phép chiều ra; thời gian không hợp lệ. Hệ thống không tự chọn một dòng khi dữ liệu mâu thuẫn mà chuyển cho lễ tân xử lý.
+## 5. QT-C2 — Quét ra
 
-## QT-C3. Tự đóng lượt quên quét ra
+**Ai làm:** hội viên tại cổng ra.
 
-**Ai làm:** tác vụ hệ thống theo từng chi nhánh.
+1. Thiết bị gửi mã QR (gói nào của hội viên cũng được, kể cả gói đã hết hạn), tên thiết bị, thời điểm quét.
+2. Hệ thống xác định hội viên từ gói, rồi tìm mọi `CHECK_IN` đang mở (`ThoiGianRa` rỗng) của các gói thuộc hội viên đó.
+3. Trong một giao dịch: ghi `ThoiGianRa` = thời điểm quét cho tất cả các phiên đó; phiên có `ThoiGianVao` mới nhất ghi `ThietBiRa`, các phiên còn lại để `ThietBiRa` rỗng.
+4. Mở cổng.
 
-1. Theo quy ước mô phỏng #15, mỗi chi nhánh mở/đóng trong cùng ngày Asia/Saigon, giờ hoạt động cố định trong kỳ dữ liệu. Tác vụ lấy lượt còn mở có TGVao thuộc ngày đó và trước mốc đóng cửa đã đến; lượt ngoài giờ cấu hình được liệt kê là dữ liệu bất thường, không tự ghi TGRa <= TGVao.
-2. Trong giao dịch, đọc lại lượt và chỉ cập nhật nếu TGRa vẫn rỗng. Hệ thống đặt `TGRa` bằng thời điểm đóng cửa áp dụng cho ngày đó; `SoHieuCuaRa` giữ rỗng vì không phát sinh lượt quét tại cửa ra.
-3. Hệ thống ghi số dòng đã đóng và danh sách bất thường để quản lý đối chiếu.
+**Ngoại lệ:** không có phiên nào đang mở (ví dụ đã bị tự đóng) → vẫn mở cổng ra, không ghi gì. Mã không tồn tại → không ghi, lễ tân hỗ trợ.
 
-Tác vụ phải chạy lặp an toàn: không ghi đè giờ ra thực tế hoặc cập nhật lại dòng đã đóng. Nếu tác vụ thất bại, chạy bù các ngày còn thiếu theo mốc đóng cửa của từng ngày, không dùng thời điểm chạy bù làm giờ ra. Báo cáo có lượt quá hạn chưa đóng được ghi là tạm tính; hoàn tất tác vụ rồi tính lại. Không tự đóng phiên của ngày mới khi chạy bù ngày cũ. Hoạt động qua đêm/24 giờ nằm ngoài giả định mô phỏng hiện tại.
+## 6. QT-C3 — Đóng phiên quên quét ra cuối ngày
 
-## QT-C4. Xem lịch trống và đặt lịch PT
+**Ai làm:** job hệ thống, chạy cho từng chi nhánh sau giờ đóng cửa.
 
-**Ai làm:** hội viên hoặc lễ tân thao tác thay hội viên.
+1. Lấy các `CHECK_IN` tại chi nhánh có `ThoiGianVao` trong ngày và `ThoiGianRa` rỗng.
+2. Ghi `ThoiGianRa` = ngày đó + `GioDongCua` của chi nhánh, `ThietBiRa` rỗng. Chỉ ghi nếu `ThoiGianRa` vẫn còn rỗng lúc ghi.
+3. Ghi lại số phiên đã đóng.
 
-1. Người dùng chọn ngày, chi nhánh và có thể chọn PT.
-2. Hệ thống lấy các PT có chức vụ phù hợp và giai đoạn công tác bao phủ toàn bộ các khung một giờ tại chi nhánh đó.
-3. Hệ thống loại các khung đã có lịch chưa hủy và trả danh sách còn trống.
-4. Hội viên chọn PT/khung giờ. Hệ thống lấy gói thuộc hội viên, loại PT, thỏa `NgayBatDau <= NgayHen <= NgayHetHan` và `SoBuoiConLai - SoLichGiu > 0`; `SoLichGiu` đếm lịch cùng MaGHV ở trạng thái Đã đặt, DaTruBuoi = 0, kể cả lịch quá giờ chưa xử lý. Chọn NgayHetHan sớm nhất, hòa thì MaGHV tăng dần. Quyền vào cổng kiểm tra riêng lúc quét.
-5. Kiểm tra lại lịch sử công tác gồm giai đoạn chờ: toàn bộ buổi hẹn phải có chức vụ PT/đúng chi nhánh. Kiểm tra chủ sở hữu, loại/hạn gói, số buổi khả dụng và khung PT tại lúc ghi nhận. Gói vừa hết khả dụng thì chọn lại ứng viên hợp lệ; không đổi PT/khung. Tạo `LichHenPT` có `MaGHV`, trạng thái `Đã đặt`, `DaTruBuoi = 0`; không lưu MaHV lặp, hội viên suy ra qua gói. Thêm lịch tăng số giữ chỗ, chưa giảm số buổi. Mọi bước lỗi hoàn tác; đặt lịch và đổi vị trí đồng thời không được bỏ sót thay đổi của nhau.
-6. Ràng buộc duy nhất tại CSDL quyết định kết quả cuối cùng khi hai giao dịch cùng chọn một PT/khung. Chỉ một giao dịch thành công; giao dịch còn lại nhận thông báo khung vừa được đặt và phải tải lại lịch.
+**Ngoại lệ:** job lỗi hoặc bỏ lỡ một ngày → chạy bù theo **giờ đóng cửa của chính ngày đó**, không dùng thời điểm chạy bù. Chạy lại không ghi đè phiên đã đóng.
 
-**Ngoại lệ:** PT không còn làm tại chi nhánh vào ngày hẹn; gói không đủ hạn/buổi; số buổi đã bị các lịch khác giữ chỗ; khung đã bị đặt; ngày giờ ở quá khứ. Không tạo lịch một phần hoặc tự đổi PT/khung.
+## 7. QT-C4 — Tra cứu người đang có mặt
 
-## QT-C5. Hủy lịch, tự trừ buổi đến giờ và ghi nhận kết quả
+**Ai làm:** lễ tân, quản lý chi nhánh.
 
-### Hủy lịch
+1. Chọn chi nhánh (mặc định chi nhánh mình) và thời điểm T (mặc định bây giờ).
+2. Hệ thống liệt kê các check-in tại chi nhánh có `ThoiGianVao <= T` và (`ThoiGianRa` rỗng hoặc `ThoiGianRa > T`), kèm hội viên (qua gói) và giờ vào.
+3. Hiển thị số người và so với sức chứa để tham khảo.
 
-1. Hội viên chọn lịch `Đã đặt`; hệ thống lấy MaGHV bất biến của lịch, kiểm tra lại gói và lịch trong cùng giao dịch. Kiểm tra chủ sở hữu qua vGoiHoiVien.MaHV, trạng thái và thời gian hiện tại.
-2. Chỉ chấp nhận nếu thời điểm yêu cầu ≤ `NgayGio - 2 giờ`; chuyển `Hủy`, ghi lý do hủy đúng hạn, giải phóng buổi giữ chỗ và giữ `DaTruBuoi = 0` trong cùng giao dịch.
-3. Khi còn dưới hai giờ, từ chối hủy và giữ nguyên lịch. Check-in trước đó không ảnh hưởng quyền hủy hay số buổi PT.
+**Ghi chú:** theo quy tắc 9, một hội viên có thể xuất hiện hai lần nếu đã ra không quét rồi vào lại. Không có ai thì trả danh sách rỗng.
 
-### Tự trừ tại giờ hẹn
+## 8. QT-C5 — Xem lịch trống và đặt lịch PT
 
-1. Tác vụ hệ thống lấy lịch đã đến `NgayGio`, còn `Đã đặt` và `DaTruBuoi = 0`, kể cả lịch đến hạn bị bỏ lỡ ở lần chạy trước.
-2. Xác định GoiHoiVien theo MaGHV của lịch và kiểm tra lại dữ liệu gói/lịch trong cùng giao dịch. Kiểm tra trạng thái/cờ, số buổi và hạn gói tại NgayGio của lịch (không phải ngày chạy bù). Không đọc CheckIn hoặc yêu cầu hội viên đã vào cổng.
-3. Trong cùng giao dịch, giảm đúng một buổi của gói đã giữ cho lịch, kết thúc giữ chỗ và đặt `DaTruBuoi = 1`. Giữ trạng thái `Đã đặt` để chờ ghi nhận kết quả buổi tập.
-4. Lỗi thì hoàn tác toàn bộ và thử lại; lịch có cờ 1 không trừ lần nữa. Không tự lấy buổi của gói khác nếu liên kết/quyền lợi bị sai.
+**Ai làm:** hội viên, hoặc lễ tân thao tác thay.
 
-### Không đến và hoàn thành
+1. Chọn chi nhánh, ngày tập, có thể chọn PT.
+2. Hệ thống lấy các PT có giai đoạn công tác chức vụ PT tại chi nhánh đó bao phủ ngày tập (quy tắc 14).
+3. Với mỗi PT, liệt kê các khung giờ tròn trong giờ mở cửa (quy tắc 10), bỏ các khung đã có lịch chưa hủy.
+4. Hội viên chọn PT và khung giờ.
+5. Hệ thống chọn gói PT của hội viên theo QT-B3 (còn hạn tại ngày tập, còn buổi trống, hết hạn sớm nhất trước).
+6. Trong một giao dịch, kiểm tra lại trên dữ liệu mới nhất: PT vẫn hợp lệ, gói vẫn còn buổi trống, hội viên chưa có lịch khác cùng giờ (quy tắc 13), giờ tập còn ở tương lai. Tạo `LICH_HEN_PT` với `TrangThai` = 0.
+7. Nếu ràng buộc chống trùng (quy tắc 12) báo khung vừa bị người khác đặt → báo hội viên chọn khung khác.
 
-Sau giờ kết thúc, PT/người có thẩm quyền xác nhận buổi thực sự hoàn thành hoặc vắng mặt; không suy ra tham dự PT chỉ từ check-in hay cờ đã trừ. Lịch hoàn thành chuyển `Đã hoàn thành`; lịch vắng mặt chuyển `Hủy` với `LyDoKetThuc = Không đến`. Cả hai giữ `DaTruBuoi = 1` và không trừ thêm. Chỉ lịch hoàn thành được đánh giá và tính hoa hồng. Nếu tác vụ đến giờ chưa trừ thành công, xử lý lại tác vụ đó trước khi chốt kết quả.
+**Ngoại lệ:** không có gói PT phù hợp; PT không làm tại chi nhánh vào ngày đó; khung đã kín; khung ngoài giờ mở cửa hoặc không phải giờ tròn; giờ tập đã qua; hội viên đã có lịch cùng giờ. Mọi lỗi đều không tạo lịch.
 
-**Ngoại lệ chung:** lịch không tồn tại/sai chủ sở hữu; trạng thái không cho phép; hủy quá hạn; yêu cầu lặp; dữ liệu quyền lợi đã giữ không khớp. Dữ liệu lệch phải được báo đối soát, không trừ âm hoặc trừ hai lần.
+## 9. QT-C6 — Hủy lịch PT
 
-## QT-C6. Đánh giá HLV
+**Ai làm:** hội viên, hoặc lễ tân thao tác thay.
+
+1. Chọn lịch đang ở trạng thái Đã đặt của chính hội viên (xác định qua gói của lịch).
+2. Kiểm tra thời điểm hủy <= ngày giờ tập − 2 giờ (đúng mốc 2 giờ vẫn được hủy).
+3. Chuyển `TrangThai` = 1. Buổi đã giữ được trả lại gói vì không còn tính là lịch Đã đặt.
+
+**Ngoại lệ:** còn dưới 2 giờ → từ chối, lịch giữ nguyên và tới giờ vẫn bị trừ. Lịch đã hủy, đã hoàn thành, hoặc không phải của hội viên → từ chối.
+
+## 10. QT-C7 — Tự hoàn thành lịch và trừ buổi khi tới giờ tập
+
+**Ai làm:** job hệ thống, chạy định kỳ (ví dụ mỗi đầu giờ).
+
+1. Lấy các lịch có `TrangThai` = 0 và ngày giờ tập <= bây giờ, kể cả lịch bị bỏ lỡ ở lần chạy trước.
+2. Với từng lịch, trong một giao dịch: chuyển `TrangThai` = 2 và giảm `SoBuoiConLai` của đúng gói `MaGHV` của lịch đi 1. Chỉ cập nhật nếu lịch vẫn còn trạng thái 0 lúc ghi.
+3. Không đọc check-in: hội viên có đến hay không đều bị trừ (quy tắc 17).
+
+**Ngoại lệ:** lỗi → hoàn tác lịch đó, lần chạy sau xử lý lại. Lịch đã chuyển trạng thái thì không bao giờ bị trừ lần hai. Số buổi của gói không bao giờ âm, vì lịch chỉ được tạo khi còn buổi trống.
+
+## 11. QT-C8 — Tra cứu lịch sử tập và lịch PT
+
+**Ai làm:** hội viên, lễ tân; PT xem lịch dạy của mình.
+
+1. **Hội viên / lễ tân:** chọn hội viên và khoảng ngày. Hệ thống liệt kê các check-in (qua các gói của hội viên) và các lịch PT trong khoảng, kèm chi nhánh, PT, trạng thái.
+2. **PT:** chọn khoảng ngày, xem các lịch của mình kèm hội viên, chi nhánh, trạng thái.
+
+Không có dữ liệu thì trả danh sách rỗng.
+
+## 12. QT-C9 — Đánh giá HLV
 
 **Ai làm:** hội viên của buổi PT.
 
-1. Hội viên chọn lịch đã hoàn thành chưa có đánh giá.
-2. Hội viên nhập điểm nguyên 1–5 và nhận xét tùy chọn.
-3. Hệ thống nối lịch qua MaGHV đến vGoiHoiVien.MaHV để kiểm tra chủ sở hữu, trạng thái `Đã hoàn thành` và chưa được đánh giá.
-4. Hệ thống lưu đánh giá gắn duy nhất với lịch; đánh giá được dùng trong báo cáo hiệu suất HLV.
+1. Chọn một lịch Đã hoàn thành của mình chưa được đánh giá.
+2. Nhập điểm nguyên 1–5 và nhận xét (tùy chọn).
+3. Hệ thống kiểm tra chủ sở hữu (qua gói của lịch), trạng thái và chưa có đánh giá, rồi tạo `DANH_GIA_HLV`.
 
-**Ngoại lệ:** lịch chưa hoàn thành/đã hủy, người gửi không phải hội viên của lịch, điểm ngoài miền hoặc lịch đã có đánh giá.
+**Ngoại lệ:** lịch chưa hoàn thành hoặc đã hủy; không phải lịch của hội viên; điểm ngoài 1–5; lịch đã có đánh giá.
 
-## Quan hệ với module khác
+## 13. QT-C10 — Xem hiệu suất HLV
 
-| Module | C cung cấp | C sử dụng / cần xác nhận |
+**Ai làm:** quản lý chi nhánh, ban giám đốc.
+
+1. Chọn khoảng thời gian, chi nhánh, có thể chọn PT.
+2. Với mỗi PT: số buổi Đã hoàn thành trong khoảng tại chi nhánh, số đánh giá, điểm đánh giá trung bình.
+3. PT chưa có đánh giá thì hiển thị "chưa có đánh giá", không hiển thị điểm 0.
+
+**Ghi chú:** số buổi Đã hoàn thành gồm cả buổi hội viên không đến (quy tắc 17).
+
+## 14. Quan hệ với module khác
+
+| Module | C cung cấp | C sử dụng |
 |---|---|---|
-| A — Chi nhánh & Nhân sự | `LichHenPT(MaLichHen, MaNV, MaCN, NgayGio, TrangThai)` cho tính hoa hồng và kiểm tra lịch vướng khi đổi vị trí | `ChiNhanh(MaCN, SucChua, GioMoCua, GioDongCua)`, `NhanVien(MaNV, ChucVu)`, `LichSuCongTac(MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc)` |
-| B — Hội viên, Gói & Thân thiết | Lịch đến giờ để tự trừ quyền lợi, độc lập kết quả tham dự | `HoiVien(MaHV)`, `GoiDichVu(MaGoi, LoaiGoi)`, `vGoiHoiVien(MaGHV, MaHV, MaGoi, NgayBatDau, NgayHetHan, SoBuoiConLai)`; MaGHV đã chốt, thao tác giữ/hủy/trừ tuân theo giao dịch trong [thiết kế gói PT](../b/goi-pt.md) |
-| D — Hóa đơn & Báo cáo | `CheckIn(MaHV, MaCN, TGVao, TGRa)` cho tỷ lệ lấp đầy | Không ghi bảng D |
-
-**GD1-10 — kỳ hoa hồng:** từ chối thêm/đổi nguồn vào kỳ đã chốt. Không sửa/xóa MaNV, MaCN, NgayGio, TrangThai của buổi đã chốt. Chốt A và ghi nguồn C phải duy trì điều kiện này cả khi diễn ra đồng thời; xem [thiết kế A](../a/thiet-ke-logic.md).
-
-**GD1-11 — nguồn gói đã mua:** MaGHV vẫn là khóa bảng GoiHoiVien và đích FK của LichHenPT. MaHV/MaGoi trong giao diện B công bố được đọc từ vGoiHoiVien (nối dòng hóa đơn/đầu hóa đơn), không lưu lặp trên bảng gói cơ sở. Trừ số dư theo MaGHV vẫn tác động GoiHoiVien; giao diện đọc giữ các cột ngày và số dư đã công bố. Xem [thiết kế B](../b/thiet-ke-logic.md).
+| A | `LICH_HEN_PT(MaLH, MaNV, MaCN, NgayTap, ThoiGianBatDau, TrangThai)` để tính hoa hồng và kiểm tra lịch vướng | `CHI_NHANH(MaCN, GioMoCua, GioDongCua)`; `LICH_SU_CONG_TAC(MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc)` |
+| B | Giảm `SoBuoiConLai` khi dùng vé và khi trừ buổi PT | `GOI_HOI_VIEN(MaGHV, MaHV, MaHM, NgayKichHoat, NgayHetHan, SoBuoiConLai)`; `HANG_MUC_CUNG_CAP(MaHM, LoaiHangMuc)` |
+| D | `CHECK_IN(MaCN, ThoiGianVao, ThoiGianRa)` cho báo cáo lấp đầy | — |

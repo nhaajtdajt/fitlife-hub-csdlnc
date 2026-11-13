@@ -17,7 +17,7 @@ ERD không vẽ khóa ngoại; khóa ngoại xuất hiện khi chuyển sang [l�
 |---|---|---|---|
 | áp dụng | CHI NHÁNH – LỊCH SỬ HOA HỒNG | 1 – 1..n | Mỗi chi nhánh có các khoảng mức hoa hồng theo thời gian |
 | thuộc / công tác | CHI NHÁNH – CÔNG TÁC – NHÂN VIÊN | 1 – 0..n; 1 – 1..n | Lịch sử công tác của nhân viên tại các chi nhánh |
-| (chuyên biệt hóa) | NHÂN VIÊN → HUẤN LUYỆN VIÊN (PT), LỄ TÂN, QUẢN LÝ CHI NHÁNH, NV BÁN HÀNG | d, toàn phần | Theo chức vụ; ở mức logic ánh xạ thành thuộc tính `ChucVu` |
+| (chuyên biệt hóa) | NHÂN VIÊN → HUẤN LUYỆN VIÊN (PT), LỄ TÂN, QUẢN LÝ CHI NHÁNH, NV BÁN HÀNG | d, toàn phần | Theo chức vụ, cố định từ lúc tiếp nhận; ở mức logic ánh xạ thành thuộc tính `ChucVu` |
 | đăng ký tại | CHI NHÁNH – HỘI VIÊN | 1 – 0..n | Chi nhánh nơi hội viên đăng ký |
 | (chuyên biệt hóa) | HẠNG MỤC CUNG CẤP → GÓI DỊCH VỤ, SẢN PHẨM | d, toàn phần | Gói và sản phẩm dùng chung danh mục; ở mức logic gộp một bảng, phân biệt bằng `LoaiHangMuc` |
 | sở hữu / thuộc loại | HỘI VIÊN – GÓI HỘI VIÊN – GÓI DỊCH VỤ | 1 – 0..n; 1 – 0..n | Mỗi lần mua gói là một gói hội viên, có mã QR riêng |
@@ -35,7 +35,7 @@ Các điều kiện đặc tả có nhưng hình không vẽ được. Mức log
 **Chi nhánh và nhân sự**
 1. Giờ mở cửa trước giờ đóng cửa trong cùng ngày; sức chứa là số nguyên dương.
 2. Các giai đoạn CÔNG TÁC của cùng một nhân viên không chồng nhau về ngày; ngày kết thúc (nếu có) không trước ngày bắt đầu. Thay đổi gửi trong ngày D có hiệu lực từ D+1.
-3. [Chức vụ hiện tại], [Chi nhánh hiện tại] của NHÂN VIÊN lấy từ giai đoạn công tác bao phủ hôm nay; không có giai đoạn nào thì nhân viên đã nghỉ việc.
+3. Chức vụ của NHÂN VIÊN được gán lúc tiếp nhận và không đổi (đổi chức vụ ngoài phạm vi). [Chi nhánh hiện tại] lấy từ giai đoạn công tác bao phủ hôm nay; không có giai đoạn nào thì nhân viên đã nghỉ việc.
 4. Các khoảng LỊCH SỬ HOA HỒNG của một chi nhánh không chồng nhau; mức hoa hồng không âm; mức mới chỉ có hiệu lực từ ngày mai.
 
 **Hội viên, gói, điểm/hạng**
@@ -48,7 +48,7 @@ Các điều kiện đặc tả có nhưng hình không vẽ được. Mức log
 9. Chỉ quét vào được bằng gói còn hiệu lực, còn lượt (nếu có giới hạn) và không phải gói PT; vé lượt bị trừ 1 lượt khi vào. Thời gian ra (nếu có) sau thời gian vào.
 10. LỊCH HẸN PT dài một giờ, bắt đầu vào giờ tròn, nằm trong giờ mở cửa chi nhánh; trạng thái ∈ {Đã đặt, Hủy, Đã hoàn thành}.
 11. Một PT không có hai lịch chưa hủy cùng ngày, cùng giờ; một hội viên cũng vậy.
-12. PT của lịch phải đang công tác với chức vụ PT tại đúng chi nhánh của lịch vào ngày tập.
+12. Nhân viên của lịch phải có chức vụ PT và đang công tác tại đúng chi nhánh của lịch vào ngày tập.
 13. Gói của lịch là gói PT của hội viên, còn hạn tại ngày tập; số lịch Đã đặt của một gói không vượt số buổi còn lại.
 14. Chỉ hủy khi còn ít nhất 2 giờ; tới giờ tập, lịch Đã đặt chuyển Đã hoàn thành và trừ 1 buổi (kể cả hội viên không đến). Lịch của tháng đã qua không được sửa.
 15. Chỉ lịch Đã hoàn thành được đánh giá; điểm từ 1 đến 5.

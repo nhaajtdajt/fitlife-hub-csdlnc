@@ -10,7 +10,7 @@ Ký hiệu: <u>gạch chân</u> = khóa chính (PK); *nghiêng* = khóa ngoại 
 |---|---|---|
 | 1 | CHI_NHANH(<u>MaCN</u>, TenCN, DiaChi, SDT, GioMoCua, GioDongCua, SucChua) | A |
 | 2 | NHAN_VIEN(<u>MaNV</u>, HoTen, SDT, ChucVu, *MaCNHienTai*, LuongCoBan) | A |
-| 3 | LICH_SU_CONG_TAC(<u>MaLSCT</u>, *MaNV*, *MaCN*, ChucVu, NgayBatDau, NgayKetThuc) | A |
+| 3 | LICH_SU_CONG_TAC(<u>MaLSCT</u>, *MaNV*, *MaCN*, NgayBatDau, NgayKetThuc) | A |
 | 4 | HOA_HONG_CHI_NHANH(<u>MaHHCN</u>, *MaCN*, NgayBatDau, NgayKetThuc, MucHoaHongMoiBuoi) | A |
 | 5 | HOI_VIEN(<u>MaHV</u>, HoTen, SDT, Email, CCCD, GioiTinh, NgaySinh, NgayDangKy, *MaCN*, TongChiTieu, DiemTichLuy, Hang) | B |
 | 6 | HANG_MUC_CUNG_CAP(<u>MaHM</u>, TenHangMuc, LoaiHangMuc, Gia, ThoiHanThang, SoBuoiBanDau, DangKinhDoanh) | B (gói), D (sản phẩm) |
@@ -29,8 +29,8 @@ Chỉ liệt kê phụ thuộc hàm (PTH) không hiển nhiên. Các giá trị 
 | Quan hệ | Khóa | Tập PTH | Dạng chuẩn | Giải thích |
 |---|---|---|---|---|
 | CHI_NHANH | MaCN | MaCN → TenCN, DiaChi, SDT, GioMoCua, GioDongCua, SucChua | BCNF | Mọi vế trái là khóa |
-| NHAN_VIEN | MaNV | MaNV → HoTen, SDT, ChucVu, MaCNHienTai, LuongCoBan | BCNF | `MaCNHienTai`, `ChucVu` được suy từ quan hệ **khác** (LICH_SU_CONG_TAC), không có PTH giữa các thuộc tính trong quan hệ này. Đây là dư thừa giữa các quan hệ, giữ khớp bằng R07 |
-| LICH_SU_CONG_TAC | MaLSCT; AK (MaNV, NgayBatDau) | MaLSCT → MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc; (MaNV, NgayBatDau) → MaLSCT, MaCN, ChucVu, NgayKetThuc | BCNF | Các giai đoạn của một nhân viên không chồng nhau nên (MaNV, NgayBatDau) là khóa |
+| NHAN_VIEN | MaNV | MaNV → HoTen, SDT, ChucVu, MaCNHienTai, LuongCoBan | BCNF | `MaCNHienTai` được suy từ quan hệ **khác** (LICH_SU_CONG_TAC), không có PTH giữa các thuộc tính trong quan hệ này. Đây là dư thừa giữa các quan hệ, giữ khớp bằng R07. `ChucVu` là thuộc tính gốc, cố định |
+| LICH_SU_CONG_TAC | MaLSCT; AK (MaNV, NgayBatDau) | MaLSCT → MaNV, MaCN, NgayBatDau, NgayKetThuc; (MaNV, NgayBatDau) → MaLSCT, MaCN, NgayKetThuc | BCNF | Các giai đoạn của một nhân viên không chồng nhau nên (MaNV, NgayBatDau) là khóa |
 | HOA_HONG_CHI_NHANH | MaHHCN; AK (MaCN, NgayBatDau) | MaHHCN → MaCN, NgayBatDau, NgayKetThuc, MucHoaHongMoiBuoi; (MaCN, NgayBatDau) → phần còn lại | BCNF | Tương tự, các khoảng của một chi nhánh không chồng nhau |
 | HOI_VIEN | MaHV; AK CCCD; AK SDT | MaHV → mọi thuộc tính; CCCD → mọi thuộc tính; SDT → mọi thuộc tính; **TongChiTieu → Hang** | **2NF** | Hạng được xác định từ tổng chi tiêu theo ngưỡng. `TongChiTieu` không phải khóa, nên MaHV → TongChiTieu → Hang là phụ thuộc bắc cầu, vi phạm 3NF. Đạt 2NF vì mọi khóa chỉ có một thuộc tính. **Cố ý giữ** `Hang` để giải vấn đề 4 |
 | HANG_MUC_CUNG_CAP | MaHM | MaHM → TenHangMuc, LoaiHangMuc, Gia, ThoiHanThang, SoBuoiBanDau, DangKinhDoanh | BCNF | `LoaiHangMuc` không xác định giá hay thời hạn (nhiều gói cùng loại) |
@@ -68,7 +68,7 @@ Kiểu ở mức logic: *Mã* (chuỗi/số định danh), *Chuỗi*, *Số nguy
 |---|---|---|---|
 | MaNV | Mã | Không | Mã nhân viên |
 | HoTen, SDT | Chuỗi | Không | Họ tên, số điện thoại |
-| ChucVu | Chuỗi | Không | Chức vụ hiện tại ∈ {PT, Lễ tân, Quản lý chi nhánh, Nhân viên bán hàng}; đồng bộ từ lịch sử mỗi ngày |
+| ChucVu | Chuỗi | Không | ∈ {PT, Lễ tân, Quản lý chi nhánh, Nhân viên bán hàng}; gán lúc tiếp nhận, không đổi |
 | MaCNHienTai | Mã | Có | Chi nhánh hiện tại, đồng bộ từ lịch sử mỗi ngày; rỗng = đã nghỉ việc |
 | LuongCoBan | Tiền | Không | Lương hiện tại ≥ 0; không lưu lịch sử lương |
 
@@ -78,7 +78,6 @@ Kiểu ở mức logic: *Mã* (chuỗi/số định danh), *Chuỗi*, *Số nguy
 |---|---|---|---|
 | MaLSCT | Mã | Không | Mã giai đoạn |
 | MaNV, MaCN | Mã | Không | Nhân viên, chi nhánh trong giai đoạn |
-| ChucVu | Chuỗi | Không | Chức vụ trong giai đoạn, cùng miền với NHAN_VIEN.ChucVu |
 | NgayBatDau | Ngày | Không | Ngày bắt đầu, tính cả ngày này |
 | NgayKetThuc | Ngày | Có | Ngày kết thúc, tính cả ngày này; rỗng = chưa xác định; nếu có thì ≥ NgayBatDau |
 
@@ -233,12 +232,12 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 |---|---|---|---|
 | CHI_NHANH | + | − | + (GioMoCua, GioDongCua, SucChua) |
 
-**R02** — Bối cảnh: NHAN_VIEN, LICH_SU_CONG_TAC. Nội dung: ChucVu ∈ {PT, Lễ tân, Quản lý chi nhánh, Nhân viên bán hàng}; NHAN_VIEN.LuongCoBan ≥ 0; LICH_SU_CONG_TAC.NgayKetThuc rỗng hoặc ≥ NgayBatDau.
+**R02** — Bối cảnh: NHAN_VIEN, LICH_SU_CONG_TAC. Nội dung: NHAN_VIEN.ChucVu ∈ {PT, Lễ tân, Quản lý chi nhánh, Nhân viên bán hàng} và không đổi sau khi tạo; NHAN_VIEN.LuongCoBan ≥ 0; LICH_SU_CONG_TAC.NgayKetThuc rỗng hoặc ≥ NgayBatDau.
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | NHAN_VIEN | + | − | + (ChucVu, LuongCoBan) |
-| LICH_SU_CONG_TAC | + | − | + (ChucVu, NgayBatDau, NgayKetThuc) |
+| LICH_SU_CONG_TAC | + | − | + (NgayBatDau, NgayKetThuc) |
 
 **R03** — Bối cảnh: HOA_HONG_CHI_NHANH. Nội dung: MucHoaHongMoiBuoi ≥ 0; NgayKetThuc rỗng hoặc ≥ NgayBatDau.
 
@@ -271,12 +270,12 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 
 ### 6.2. Ràng buộc liên thuộc tính, liên bộ và liên quan hệ — Module A
 
-**R07** — Bối cảnh: NHAN_VIEN, LICH_SU_CONG_TAC. Nội dung: sau khi đồng bộ đầu ngày, với mỗi nhân viên: nếu có giai đoạn g bao phủ hôm nay thì NHAN_VIEN.MaCNHienTai = g.MaCN và NHAN_VIEN.ChucVu = g.ChucVu; nếu không có thì MaCNHienTai rỗng.
+**R07** — Bối cảnh: NHAN_VIEN, LICH_SU_CONG_TAC. Nội dung: sau khi đồng bộ đầu ngày, với mỗi nhân viên: nếu có giai đoạn g bao phủ hôm nay thì NHAN_VIEN.MaCNHienTai = g.MaCN; nếu không có thì MaCNHienTai rỗng.
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
-| NHAN_VIEN | + | − | + (MaCNHienTai, ChucVu) |
-| LICH_SU_CONG_TAC | + | + | + (MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc) |
+| NHAN_VIEN | + | − | + (MaCNHienTai) |
+| LICH_SU_CONG_TAC | + | + | + (MaNV, MaCN, NgayBatDau, NgayKetThuc) |
 
 **R08** — Bối cảnh: LICH_SU_CONG_TAC. Nội dung: hai giai đoạn khác nhau của cùng một nhân viên không có ngày chung (khoảng `[NgayBatDau, NgayKetThuc]` không giao nhau, NgayKetThuc rỗng coi là vô hạn).
 
@@ -351,12 +350,13 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 | LICH_HEN_PT | + | − | + (MaGHV, NgayTap, ThoiGianBatDau, TrangThai) |
 | GOI_HOI_VIEN | − | − | + (MaHV) |
 
-**R18** — Bối cảnh: LICH_HEN_PT, LICH_SU_CONG_TAC. Nội dung: với mỗi lịch, tồn tại đúng một giai đoạn của MaNV bao phủ NgayTap, có ChucVu = PT và MaCN = LICH_HEN_PT.MaCN.
+**R18** — Bối cảnh: LICH_HEN_PT, NHAN_VIEN, LICH_SU_CONG_TAC. Nội dung: với mỗi lịch, NHAN_VIEN.ChucVu của MaNV = PT, và tồn tại đúng một giai đoạn của MaNV bao phủ NgayTap có MaCN = LICH_HEN_PT.MaCN.
 
 | | Thêm | Xóa | Sửa |
 |---|---|---|---|
 | LICH_HEN_PT | + | − | + (MaNV, MaCN, NgayTap) |
-| LICH_SU_CONG_TAC | + | + | + (MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc) |
+| NHAN_VIEN | − | − | + (ChucVu) |
+| LICH_SU_CONG_TAC | + | + | + (MaNV, MaCN, NgayBatDau, NgayKetThuc) |
 
 **R19** — Bối cảnh: LICH_HEN_PT, GOI_HOI_VIEN, HANG_MUC_CUNG_CAP. Nội dung: gói của lịch có loại PT và NgayKichHoat ≤ NgayTap ≤ NgayHetHan; với mỗi gói PT, số lịch có TrangThai = 0 ≤ SoBuoiConLai.
 
@@ -427,6 +427,6 @@ Mỗi ràng buộc gồm **bối cảnh** (các quan hệ liên quan), **nội d
 Một số điều kiện chỉ đúng **tại lúc thao tác** chứ không phải mọi lúc, nên không viết thành ràng buộc trạng thái ở trên mà được kiểm tra trong thủ tục ở GĐ2:
 - Gói còn hiệu lực khi quét vào (R14) — gói hết hạn về sau không làm phiên cũ sai.
 - Hàng mục đang kinh doanh khi lập hóa đơn — ngừng bán về sau không làm hóa đơn cũ sai.
-- Đổi vị trí/nghỉ việc chỉ được chấp nhận khi không làm lịch Đã đặt từ ngày hiệu lực vi phạm R18 (QT-A03).
+- Điều chuyển/nghỉ việc chỉ được chấp nhận khi không làm lịch Đã đặt từ ngày hiệu lực vi phạm R18 (QT-A03).
 - Mức hoa hồng mới chỉ bắt đầu từ ngày mai (QT-A07).
 - Ba thao tác ghi gộp trong một giao dịch: thanh toán (R11, R13, R23, R27), quét vào (R14), job tới giờ (R20).

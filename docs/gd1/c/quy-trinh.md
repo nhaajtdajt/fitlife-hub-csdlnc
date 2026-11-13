@@ -46,7 +46,7 @@ Dữ liệu theo [lược đồ logic](../luoc-do-logic.png).
 11. `TrangThai` không rỗng, gồm: **0 = Đã đặt** (mặc định), **1 = Hủy**, **2 = Đã hoàn thành**. Chỉ có ba đường chuyển: 0 → 1 (hội viên hủy đúng hạn), 0 → 2 (job tới giờ). Không có đường quay lại 0, không chuyển giữa 1 và 2.
 12. **Chống trùng lịch PT:** trong các lịch có `TrangThai <> 1`, bộ `(MaNV, NgayTap, ThoiGianBatDau)` là duy nhất. Ràng buộc này đặt tại CSDL, nên hai giao dịch đặt đồng thời thì chỉ một thành công.
 13. Một hội viên không có hai lịch chưa hủy trùng ngày, trùng giờ bắt đầu, dù khác PT.
-14. PT của lịch phải có giai đoạn công tác với chức vụ PT tại đúng `MaCN` của lịch, bao phủ `NgayTap`. Xét cả giai đoạn đang chờ hiệu lực, vì A có thể đã chấp nhận điều chuyển từ ngày mai.
+14. Nhân viên của lịch phải có chức vụ PT (`NHAN_VIEN.ChucVu`, cố định) và có giai đoạn công tác tại đúng `MaCN` của lịch, bao phủ `NgayTap`. Xét cả giai đoạn đang chờ hiệu lực, vì A có thể đã chấp nhận điều chuyển từ ngày mai.
 15. Gói của lịch phải là gói PT của hội viên, còn hạn tại `NgayTap` và còn buổi trống (quy tắc chọn gói ở QT-B3).
 16. Hủy chỉ được khi còn **ít nhất 2 giờ** trước giờ tập. Hủy thì không trừ buổi.
 17. Tới giờ tập, lịch còn Đã đặt được chuyển sang Đã hoàn thành và trừ 1 buổi, **kể cả hội viên không đến**. PT vẫn được tính hoa hồng buổi đó, vì khung giờ đã bị giữ.
@@ -103,7 +103,7 @@ Dữ liệu theo [lược đồ logic](../luoc-do-logic.png).
 **Ai làm:** hội viên, hoặc lễ tân thao tác thay.
 
 1. Chọn chi nhánh, ngày tập, có thể chọn PT.
-2. Hệ thống lấy các PT có giai đoạn công tác chức vụ PT tại chi nhánh đó bao phủ ngày tập (quy tắc 14).
+2. Hệ thống lấy các PT (nhân viên có chức vụ PT) có giai đoạn công tác tại chi nhánh đó bao phủ ngày tập (quy tắc 14).
 3. Với mỗi PT, liệt kê các khung giờ tròn trong giờ mở cửa (quy tắc 10), bỏ các khung đã có lịch chưa hủy.
 4. Hội viên chọn PT và khung giờ.
 5. Hệ thống chọn gói PT của hội viên theo QT-B3 (còn hạn tại ngày tập, còn buổi trống, hết hạn sớm nhất trước).
@@ -165,6 +165,6 @@ Không có dữ liệu thì trả danh sách rỗng.
 
 | Module | C cung cấp | C sử dụng |
 |---|---|---|
-| A | `LICH_HEN_PT(MaLH, MaNV, MaCN, NgayTap, ThoiGianBatDau, TrangThai)` để tính hoa hồng và kiểm tra lịch vướng | `CHI_NHANH(MaCN, GioMoCua, GioDongCua)`; `LICH_SU_CONG_TAC(MaNV, MaCN, ChucVu, NgayBatDau, NgayKetThuc)` |
+| A | `LICH_HEN_PT(MaLH, MaNV, MaCN, NgayTap, ThoiGianBatDau, TrangThai)` để tính hoa hồng và kiểm tra lịch vướng | `CHI_NHANH(MaCN, GioMoCua, GioDongCua)`; `NHAN_VIEN(MaNV, ChucVu)`; `LICH_SU_CONG_TAC(MaNV, MaCN, NgayBatDau, NgayKetThuc)` |
 | B | Giảm `SoBuoiConLai` khi dùng vé và khi trừ buổi PT | `GOI_HOI_VIEN(MaGHV, MaHV, MaHM, NgayKichHoat, NgayHetHan, SoBuoiConLai)`; `HANG_MUC_CUNG_CAP(MaHM, LoaiHangMuc)` |
 | D | `CHECK_IN(MaCN, ThoiGianVao, ThoiGianRa)` cho báo cáo lấp đầy | — |
